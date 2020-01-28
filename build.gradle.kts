@@ -8,6 +8,10 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version "1.3.61"
 }
 
+defaultTasks("publishToMavenLocal")
+description = "Gradle Common Plugin"
+group = "com.cognifide.gradle"
+
 repositories {
     jcenter()
 }
