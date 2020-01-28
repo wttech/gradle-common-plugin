@@ -6,6 +6,7 @@ import com.mitchellbosecke.pebble.lexer.Syntax
 import com.mitchellbosecke.pebble.loader.StringLoader
 import org.apache.commons.text.StringSubstitutor
 import org.gradle.api.Project
+import org.gradle.api.Task
 import java.io.File
 import java.io.IOException
 import java.io.StringWriter
@@ -111,6 +112,9 @@ class PropertyParser(private val project: Project) {
                 "project.artifactId" to project.name,
                 "project.build.finalName" to "${project.name}-${project.version}"
         )
+
+    val forceProp: Boolean
+        get() = flag(FORCE_PROP)
 
     companion object {
 

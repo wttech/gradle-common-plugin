@@ -20,7 +20,7 @@ class NotifierFacade private constructor(val common: CommonExtension) {
     /**
      * Project specific image at path relative to root project.
      */
-    var image: File = (prop.string("notifier.image") ?: "src/main/common/notifier/icon.png").let {
+    var image: File = (prop.string("notifier.image") ?: "src/common/notifier/icon.png").let {
         common.project.rootProject.file(it)
     }
 

@@ -11,6 +11,7 @@ import com.cognifide.gradle.common.notifier.NotifierFacade
 import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.utils.Patterns
 import com.cognifide.gradle.common.build.*
+import com.cognifide.gradle.common.tasks.TaskFacade
 import org.gradle.api.Project
 import org.gradle.api.internal.tasks.userinput.UserInputHandler
 import java.io.File
@@ -43,6 +44,15 @@ open class CommonExtension(val project: Project) {
 
     fun notifier(configurer: NotifierFacade.() -> Unit) {
         notifier.apply(configurer)
+    }
+
+    val tasks = TaskFacade(project)
+
+    /**
+     * Allows to register tasks with hooks working nicely with task configuration avoidance.
+     */
+    fun tasks(configurer: TaskFacade.() -> Unit) {
+        tasks.apply(configurer)
     }
 
     /**
@@ -186,3 +196,5 @@ open class CommonExtension(val project: Project) {
         }
     }
 }
+
+val Project.common get() = CommonExtension.of(project)
