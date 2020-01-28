@@ -43,7 +43,7 @@ open class CommonDefaultTask : DefaultTask(), CommonTask {
     fun checkForce() {
         taskGraphReady { graph ->
             if (graph.hasTask(this)) {
-                if (!common.prop.forceProp) {
+                if (!common.prop.force) {
                     throw CommonException("Unable to run unsafe task '$path' without param '-P${PropertyParser.FORCE_PROP}'!")
                 }
             }

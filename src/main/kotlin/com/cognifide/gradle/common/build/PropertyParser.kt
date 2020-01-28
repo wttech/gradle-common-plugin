@@ -113,7 +113,7 @@ class PropertyParser(private val project: Project) {
                 "project.build.finalName" to "${project.name}-${project.version}"
         )
 
-    val forceProp: Boolean
+    val force: Boolean
         get() = flag(FORCE_PROP)
 
     companion object {

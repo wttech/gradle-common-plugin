@@ -13,8 +13,10 @@ import org.gradle.util.GradleVersion
 import org.jsoup.Jsoup
 import java.io.File
 import java.io.InputStream
+import java.math.BigInteger
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
@@ -114,7 +116,17 @@ object Formats {
 
     // Encoding
 
+    fun toPassword(value: String) = "*".repeat(value.length)
+
     fun toBase64(value: String): String = Base64.getEncoder().encodeToString(value.toByteArray())
+
+    fun toMd5(text: String): String {
+        val messageDigest = MessageDigest.getInstance("MD5")
+        val data = text.toByteArray()
+        messageDigest.update(data, 0, data.size)
+        val result = BigInteger(1, messageDigest.digest())
+        return String.format("%1$032x", result)
+    }
 
     // Math & numbers and convertions
 
@@ -147,11 +159,7 @@ object Formats {
 
     // Date & time
 
-    fun timestamp(): String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())
-
-    fun dateTime(timestamp: Long, zoneId: ZoneId): LocalDateTime {
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), zoneId)
-    }
+    fun date(date: Date = Date()): String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date)
 
     fun dateFileName(date: Date = Date()): String = SimpleDateFormat("yyyyMMddHHmmss").format(date)
 
@@ -161,10 +169,14 @@ object Formats {
 
     fun durationFit(thenMillis: Long, thenZoneId: ZoneId, durationMillis: Long): Boolean {
         val nowTimestamp = LocalDateTime.now().atZone(ZoneId.systemDefault())
-        val thenTimestamp = dateTime(thenMillis, thenZoneId)
+        val thenTimestamp = dateAt(thenMillis, thenZoneId)
         val diffMillis = ChronoUnit.MILLIS.between(thenTimestamp, nowTimestamp)
 
         return diffMillis < durationMillis
+    }
+
+    private fun dateAt(timestamp: Long, zoneId: ZoneId): LocalDateTime {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), zoneId)
     }
 
     // Files & structure

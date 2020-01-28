@@ -3,12 +3,12 @@ package com.cognifide.gradle.common.build
 import org.gradle.api.Project
 import kotlin.reflect.KClass
 
-open class InternalApi(val project: Project) {
+open class ServiceAccessor(val project: Project) {
 
     val serviceFactory: Any get() = invoke(project, "getServices")
 
     @Suppress("unchecked_cast")
-    fun <T : Any> service(clazz: KClass<T>): T = invoke(serviceFactory, "get", clazz.java) as T
+    fun <T : Any> get(clazz: KClass<T>): T = invoke(serviceFactory, "get", clazz.java) as T
 
     @Suppress("SpreadOperator")
     operator fun invoke(obj: Any, method: String, vararg args: Any): Any {

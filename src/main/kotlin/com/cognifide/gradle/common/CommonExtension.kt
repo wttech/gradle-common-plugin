@@ -82,7 +82,7 @@ open class CommonExtension(val project: Project) {
     /**
      * Grab user input interactively.
      */
-    val userInput by lazy { InternalApi(project).service(UserInputHandler::class) }
+    val userInput by lazy { ServiceAccessor(project).get(UserInputHandler::class) }
 
     /**
      * Wait some time after performing asynchronous operation.
