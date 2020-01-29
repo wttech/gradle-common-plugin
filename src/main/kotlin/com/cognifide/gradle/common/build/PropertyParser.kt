@@ -6,7 +6,6 @@ import com.mitchellbosecke.pebble.lexer.Syntax
 import com.mitchellbosecke.pebble.loader.StringLoader
 import org.apache.commons.text.StringSubstitutor
 import org.gradle.api.Project
-import org.gradle.api.Task
 import java.io.File
 import java.io.IOException
 import java.io.StringWriter
@@ -62,6 +61,12 @@ class PropertyParser(private val project: Project) {
     fun int(name: String) = prop(name)?.toInt()
 
     fun string(name: String) = prop(name)
+
+    fun file(name: String, projectRelative: Project): File? = string(name)?.let { projectRelative.file(it) }
+
+    fun file(name: String, projectRootFallback: Boolean = true): File? = string(name)?.let {
+        project.file(it) ?: if (projectRootFallback) project.rootProject.file(it) else null
+    }
 
     fun expand(file: File, props: Map<String, Any?>) {
         file.writeText(expand(file.readText(), props, file.toString()))
