@@ -37,12 +37,12 @@ class DorkboxNotifier(val facade: NotifierFacade, val configurer: Notify.() -> U
         when (level) {
             LogLevel.WARN -> typedImage("error.png")
             LogLevel.ERROR -> typedImage("error.png")
-            else -> if (!projectSpecificImage()) typedImage("success.png")
+            else -> if (!projectSpecificImage()) typedImage("info.png")
         }
     }
 
     private fun Notify.typedImage(type: String) {
-        image(ImageIO.read(javaClass.getResource("/com/cognifide/gradle/aem/common/notifier/$type").toURI().toURL()))
+        image(ImageIO.read(javaClass.getResource("/notifier/$type").toURI().toURL()))
     }
 
     private fun Notify.projectSpecificImage(): Boolean {
