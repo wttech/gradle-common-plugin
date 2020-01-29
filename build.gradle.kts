@@ -48,7 +48,7 @@ dependencies {
 
 gradlePlugin {
     val greeting by plugins.creating {
-        id = "com.cognifide.gradle.common"
+        id = "com.cognifide.common"
         implementationClass = "com.cognifide.gradle.common.CommonPlugin"
     }
 }

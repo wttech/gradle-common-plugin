@@ -184,7 +184,7 @@ open class CommonExtension(val project: Project) {
 
     companion object {
 
-        const val NAME = "$"
+        const val NAME = "common"
 
         const val TEMPORARY_DIR = "tmp"
 
