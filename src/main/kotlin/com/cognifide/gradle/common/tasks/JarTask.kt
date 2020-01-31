@@ -6,16 +6,16 @@ import com.cognifide.gradle.common.build.ProgressIndicator
 import com.cognifide.gradle.common.utils.Formats
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.bundling.Zip
+import org.gradle.api.tasks.bundling.Jar
 
-open class ZipTask : Zip(), CommonTask {
+open class JarTask : Jar(), CommonTask {
 
     @Internal
     final override val common = CommonExtension.of(project)
 
     @Internal
     var copyProgress: ProgressIndicator.() -> Unit = {
-        update("Creating ZIP file: ${archiveFileName.get()} (${Formats.fileSize(archiveFile.get().asFile)})")
+        update("Creating JAR file: ${archiveFileName.get()} (${Formats.fileSize(archiveFile.get().asFile)})")
     }
 
     init {
@@ -27,7 +27,7 @@ open class ZipTask : Zip(), CommonTask {
         common.progressIndicator {
             updater(copyProgress)
             super.copy()
-            logger.info("ZIP file created: ${archiveFile.get().asFile}")
+            logger.info("JAR file created: ${archiveFile.get().asFile}")
         }
     }
 }

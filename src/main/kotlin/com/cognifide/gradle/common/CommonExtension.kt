@@ -25,13 +25,21 @@ open class CommonExtension(val project: Project) {
      */
     val prop = PropertyParser(project)
 
-    val fileTransfer = FileTransferManager(this)
+    /**
+     * Reduces boilerplate related to lazy configuration API
+     */
+    val obj = ObjectFactory(project)
 
     /**
      * Define settings for file transfer facade which allows to perform basic file operations on remote servers
      * like uploading and downloading files.
      *
      * Supports multiple protocols: HTTP, SFTP, SMB and other supported by JVM.
+     */
+    val fileTransfer = FileTransferManager(this)
+
+    /**
+     * Configures file transfer facade.
      */
     fun fileTransfer(options: FileTransferManager.() -> Unit) {
         fileTransfer.apply(options)

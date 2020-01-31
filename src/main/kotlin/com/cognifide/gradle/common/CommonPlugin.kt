@@ -15,6 +15,6 @@ class CommonPlugin : Plugin<Project> {
     }
 
     companion object {
-        const val ID = "com.cognifide.aem.common"
+        const val ID = "com.cognifide.common"
     }
 }
