@@ -12,71 +12,60 @@ import java.io.File
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.gradle.api.InvalidUserDataException
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Internal
 
 /**
  * File downloader with groups supporting files from multiple sources: local and remote (SFTP, SMB, HTTP).
  */
-abstract class Resolver<G : FileGroup>(
-    @get:Internal
-    val common: CommonExtension,
+abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
 
-    @get:Internal
-    val downloadDir: File
-) {
+    val downloadDir = common.obj.buildDir(DOWNLOAD_DIR_DEFAULT)
+
     private val project = common.project
 
-    private val groupDefault = createGroup(GROUP_DEFAULT)
+    private val groupList = mutableListOf<G>()
+
+    private val groupDefault get() = groupNamed(GROUP_DEFAULT)
 
     private var groupCurrent = groupDefault
-
-    private val groupsDefined = mutableListOf<G>().apply { add(groupDefault) }
 
     /**
      * Controls count of groups resolved in parallel.
      */
-    @Internal
-    var parallelLevel = common.prop.int("resolver.parallelLevel") ?: 3
+    val parallelLevel = common.obj.int {
+        convention(3)
+        common.prop.int("resolver.parallelLevel")?.let { set(it) }
+    }
 
     /**
      * Files respected when searching for recent local files.
      */
-    @Input
-    var localFilePatterns = common.prop.list("resolver.localFilePatterns") ?: listOf("**/*.zip", "**/*.jar")
-
-    @get:Internal
-    val groups: List<G>
-        get() = groupsDefined.filter { it.resolutions.isNotEmpty() }
-
-    @get:Internal
-    val outputDirs: List<File>
-        get() = outputDirs { true }
-
-    fun outputDirs(filter: G.() -> Boolean): List<File> {
-        return groups.filter(filter).flatMap { it.dirs }
+    val localFilePatterns = common.obj.strings {
+        convention(listOf("**/*.zip", "**/*.jar"))
+        common.prop.list("resolver.localFilePatterns")?.let { set(it) }
     }
 
-    @get:Internal
-    val allFiles: List<File>
-        get() = allFiles { true }
+    val groups: List<G> get() = groupList.filter { it.resolutions.isNotEmpty() }
 
-    fun allFiles(filter: G.() -> Boolean): List<File> {
-        return allGroups(filter).flatMap { it.files }
-    }
+    val outputDirs: List<File> get() = outputDirs { true }
+
+    fun outputDirs(filter: G.() -> Boolean): List<File> = groups.filter(filter).flatMap { it.dirs }
+
+    val allFiles: List<File> get() = allFiles { true }
+
+    fun allFiles(filter: G.() -> Boolean): List<File> = allGroups(filter).flatMap { it.files }
 
     fun allGroups(filter: G.() -> Boolean): List<G> = groups.filter(filter).apply {
         common.progress {
             step = "Resolving files"
             total = size.toLong()
 
-            if (parallelLevel <= 1) {
+            if (parallelLevel.get() <= 1) {
                 forEach { group ->
                     increment("Group '${group.name}'") { group.resolve() }
                 }
             } else {
                 val (parallel, sequential) = partition { it.parallelable }
-                common.parallel.poolEach(parallelLevel, "resolver", parallel) { group ->
+                common.parallel.poolEach(parallelLevel.get(), "resolver", parallel) { group ->
                     increment("Group '${group.name}'") { group.resolve() }
                 }
                 sequential.forEach { group ->
@@ -87,7 +76,7 @@ abstract class Resolver<G : FileGroup>(
     }
 
     fun group(name: String): G {
-        return groupsDefined.find { it.name == name }
+        return groupList.find { it.name == name }
                 ?: throw FileException("File group '$name' is not defined.")
     }
 
@@ -200,7 +189,7 @@ abstract class Resolver<G : FileGroup>(
     /**
      * Use local file from directory or file when not found any.
      */
-    fun useLocalBy(dir: Any, selector: (Iterable<File>).() -> File?) = useLocalBy(dir, localFilePatterns, selector)
+    fun useLocalBy(dir: Any, selector: (Iterable<File>).() -> File?) = useLocalBy(dir, localFilePatterns.get(), selector)
 
     /**
      * Use local file with name being highest version located in directory or fail when not found any.
@@ -226,8 +215,13 @@ abstract class Resolver<G : FileGroup>(
     }
 
     @Synchronized
+    private fun groupNamed(name: String): G {
+        return groupList.find { it.name == name } ?: createGroup(name).apply { groupList.add(this) }
+    }
+
+    @Synchronized
     fun group(name: String, configurer: Resolver<G>.() -> Unit) {
-        groupCurrent = groupsDefined.find { it.name == name } ?: createGroup(name).apply { groupsDefined.add(this) }
+        groupCurrent = groupNamed(name)
         this.apply(configurer)
         groupCurrent = groupDefault
     }
@@ -267,5 +261,7 @@ abstract class Resolver<G : FileGroup>(
 
     companion object {
         const val GROUP_DEFAULT = "default"
+
+        const val DOWNLOAD_DIR_DEFAULT = "download"
     }
 }

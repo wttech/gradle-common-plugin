@@ -1,9 +1,8 @@
 package com.cognifide.gradle.common.file.resolver
 
-import com.cognifide.gradle.common.CommonExtension
 import java.io.File
 
-open class FileGroup(val common: CommonExtension, val downloadDir: File, val name: String) {
+open class FileGroup(val resolver: Resolver<FileGroup>, val name: String) {
 
     private val _resolutions = mutableListOf<FileResolution>()
 

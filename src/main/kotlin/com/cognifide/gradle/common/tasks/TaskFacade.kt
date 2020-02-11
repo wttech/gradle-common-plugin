@@ -105,6 +105,7 @@ class TaskFacade(val project: Project) : Serializable {
     inline fun <reified T : Task> get(path: String) = get(path, T::class.java)
 
     @Suppress("unchecked_cast")
+    @Synchronized
     fun <T : Task> get(path: String, type: Class<T>): T {
         val task = if (path.contains(":")) {
             project.tasks.findByPath(path)

@@ -5,9 +5,9 @@ import org.gradle.api.file.FileTree
 
 open class FileResolution(val group: FileGroup, val id: String, private val resolver: (FileResolution) -> File) {
 
-    private val common = group.common
+    private val common = group.resolver.common
 
-    val dir = File("${group.downloadDir}/$id")
+    val dir get() = group.resolver.downloadDir.get().asFile.resolve(id)
 
     val file: File by lazy { thenOperations.fold(resolver(this)) { f, o -> o(f) } }
 

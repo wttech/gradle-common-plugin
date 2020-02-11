@@ -1,50 +1,61 @@
 package com.cognifide.gradle.common.build
 
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
+import org.gradle.api.provider.Property
 
 /**
  * Provides factory methods for property objects for most common cases.
  */
 class ObjectFactory(private val project: Project) {
 
-    private val layout = project.layout
+    val layout = project.layout
 
-    private val factory = project.objects
+    val factory = project.objects
 
-    // Defaults
+    fun <T> provider(value: () -> T) = project.provider(value)
 
-    fun projectFile(path: String) = factory.fileProperty().convention(layout.projectDirectory.file(path))
+    // Generics
 
-    fun projectFileConvention(path: String) = factory.fileProperty().convention(layout.projectDirectory.file(path))
+    inline fun <reified T> typed(options: Property<T>.() -> Unit = {}) = factory.property(T::class.java).apply(options)
 
-    fun projectDirConvention(path: String) = factory.directoryProperty().convention(layout.projectDirectory.dir(path))
+    inline fun <reified T> list(options: ListProperty<T>.() -> Unit = {}) = factory.listProperty(T::class.java).apply(options)
 
-    fun projectDir(path: String) = factory.directoryProperty().convention(layout.projectDirectory.dir(path))
+    inline fun <reified K, reified V> map(options: MapProperty<K, V>.() -> Unit = {}) = factory.mapProperty(K::class.java, V::class.java).apply(options)
 
-    fun buildFile(path: String) = factory.fileProperty().convention(layout.buildDirectory.file(path))
+    // Base types
 
-    fun buildFileConvention(path: String) = factory.fileProperty().convention(layout.buildDirectory.file(path))
+    fun file(options: RegularFileProperty.() -> Unit = {}) = factory.fileProperty().apply(options)
 
-    fun buildDir(path: String) = factory.directoryProperty().convention(layout.buildDirectory.dir(path))
+    fun files(options: ConfigurableFileCollection.() -> Unit = {}) = factory.fileCollection().apply(options)
 
-    fun buildDirConvention(path: String) = factory.directoryProperty().convention(layout.buildDirectory.dir(path))
+    fun dir(options: DirectoryProperty.() -> Unit = {}) = factory.directoryProperty().apply(options)
 
-    // Relatives
+    fun string(options: Property<String>.() -> Unit = {}) = factory.property(String::class.java).apply(options)
 
-    fun relativeDir(dir: DirectoryProperty, relativePath: String) = project.objects.directoryProperty().set(dir.map { it.dir(relativePath) })
+    fun strings(options: ListProperty<String>.() -> Unit = {}) = factory.listProperty(String::class.java).apply(options)
 
-    fun relativeDir(dir: DirectoryProperty, relativePathProvider: () -> String) = project.objects.directoryProperty().set(dir.map { it.dir(relativePathProvider()) })
+    fun int(options: Property<Int>.() -> Unit = {}) = factory.property(Int::class.java).apply(options)
 
-    fun relativeDirConvention(dir: DirectoryProperty, relativePath: String) = project.objects.directoryProperty().convention(dir.map { it.dir(relativePath) })
+    fun long(options: Property<Long>.() -> Unit = {}) = factory.property(Long::class.java).apply(options)
 
-    fun relativeDirConvention(dir: DirectoryProperty, relativePathProvider: () -> String) = project.objects.directoryProperty().convention(dir.map { it.dir(relativePathProvider()) })
+    fun boolean(options: Property<Boolean>.() -> Unit = {}) = factory.property(Boolean::class.java).apply(options)
 
-    fun relativeFile(dir: DirectoryProperty, relativePath: String) = project.objects.fileProperty().set(dir.map { it.file(relativePath) })
+    // Shorthand conventions
 
-    fun relativeFile(dir: DirectoryProperty, relativePathProvider: () -> String) = project.objects.fileProperty().set(dir.map { it.file(relativePathProvider()) })
+    fun projectFile(path: String) = file().convention(layout.projectDirectory.file(path))
 
-    fun relativeFileConvention(dir: DirectoryProperty, relativePath: String) = project.objects.fileProperty().convention(dir.map { it.file(relativePath) })
+    fun projectDir(path: String) = dir().convention(layout.projectDirectory.dir(path))
 
-    fun relativeFileConvention(dir: DirectoryProperty, relativePathProvider: () -> String) = project.objects.fileProperty().convention(dir.map { it.file(relativePathProvider()) })
+    fun buildFile(path: String) = file().convention(layout.buildDirectory.file(path))
+
+    fun buildDir(path: String) = dir().convention(layout.buildDirectory.dir(path))
+
+    fun relativeDir(dir: DirectoryProperty, path: String) = dir().convention(dir.map { it.dir(path) })
+
+    fun relativeFile(dir: DirectoryProperty, path: String) = file().convention(dir.map { it.file(path) })
 }

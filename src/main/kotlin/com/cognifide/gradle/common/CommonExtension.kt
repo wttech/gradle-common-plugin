@@ -151,13 +151,8 @@ open class CommonExtension(val project: Project) {
     /**
      * Resolve files from defined repositories or by using defined file transfers.
      */
-    fun resolveFiles(options: FileResolver.() -> Unit) = resolveFiles(temporaryDir, options)
-
-    /**
-     * Resolve files from defined repositories or by using defined file transfers.
-     */
-    fun resolveFiles(downloadDir: File, options: FileResolver.() -> Unit): List<File> {
-        return FileResolver(this, downloadDir).apply(options).allFiles
+    fun resolveFiles(options: FileResolver.() -> Unit): List<File> {
+        return FileResolver(this).apply(options).allFiles
     }
 
     /**

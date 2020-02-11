@@ -106,18 +106,6 @@ class PropertyParser(private val project: Project) {
         }
     }
 
-    val projectProps: Map<String, Any>
-        get() = mapOf(
-                // Gradle objects
-                "rootProject" to project.rootProject,
-                "project" to project,
-
-                // Maven fallbacks
-                "project.groupId" to project.group,
-                "project.artifactId" to project.name,
-                "project.build.finalName" to "${project.name}-${project.version}"
-        )
-
     val force: Boolean
         get() = flag(FORCE_PROP)
 
