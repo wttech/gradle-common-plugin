@@ -1,14 +1,19 @@
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
-    `java-gradle-plugin`
-    `maven-publish`
+    id("java-gradle-plugin")
+    id("maven-publish")
     id("org.jetbrains.kotlin.jvm") version "1.3.61"
+    id("org.jetbrains.dokka") version "0.10.1"
+    id("com.gradle.plugin-publish") version "0.10.1"
+    id("io.gitlab.arturbosch.detekt") version "1.2.2"
+    id("com.jfrog.bintray") version "1.8.4"
+    id("net.researchgate.release") version "2.8.1"
+    id("com.github.breadmoirai.github-release") version "2.2.10"
 }
 
-defaultTasks("clean", "publishToMavenLocal")
+defaultTasks("publishToMavenLocal")
 description = "Gradle Common Plugin"
 group = "com.cognifide.gradle"
 
@@ -27,8 +32,6 @@ dependencies {
     implementation("commons-io:commons-io:2.6")
     implementation("org.reflections:reflections:0.9.9")
     implementation("org.samba.jcifs:jcifs:1.3.18-kohsuke-1")
-//    implementation("org.zeroturnaround:zt-zip:1.13")
-//    implementation("net.lingala.zip4j:zip4j:1.3.3")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1")
     implementation("org.jsoup:jsoup:1.12.1")
@@ -46,15 +49,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 }
 
-gradlePlugin {
-    val greeting by plugins.creating {
-        id = "com.cognifide.common"
-        implementationClass = "com.cognifide.gradle.common.CommonPlugin"
-    }
-}
-
 val functionalTestSourceSet = sourceSets.create("functionalTest") {}
-
 gradlePlugin.testSourceSets(functionalTestSourceSet)
 configurations.getByName("functionalTestImplementation").extendsFrom(configurations.getByName("testImplementation"))
 
@@ -67,9 +62,146 @@ val check by tasks.getting(Task::class) {
     dependsOn(functionalTest)
 }
 
-tasks.withType<KotlinCompile>().configureEach {
+tasks {
+    register<Jar>("sourcesJar") {
+        archiveClassifier.set("sources")
+        dependsOn("classes")
+        from(sourceSets["main"].allSource)
+    }
+
+    register<DokkaTask>("dokkaJavadoc") {
+        outputFormat = "html"
+        outputDirectory = "$buildDir/javadoc"
+    }
+
+    register<Jar>("javadocJar") {
+        archiveClassifier.set("javadoc")
+        dependsOn("dokkaJavadoc")
+        from("$buildDir/javadoc")
+    }
+
+    withType<JavaCompile>().configureEach{
+        sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+        targetCompatibility = JavaVersion.VERSION_1_8.toString()
+    }
+
+    withType<Test>().configureEach {
+        testLogging.showStandardStreams = true
+        useJUnitPlatform()
+    }
+
+    withType<KotlinCompile>().configureEach {
         kotlinOptions {
             jvmTarget = JavaVersion.VERSION_1_8.toString()
             freeCompilerArgs = freeCompilerArgs + "-Xuse-experimental=kotlin.Experimental"
         }
     }
+
+    named<Task>("build") {
+        dependsOn("sourcesJar", "javadocJar")
+    }
+
+    named<Task>("publishToMavenLocal") {
+        dependsOn("sourcesJar", "javadocJar")
+    }
+
+    named("afterReleaseBuild") {
+        dependsOn("bintrayUpload", "publishPlugins")
+    }
+
+    named("githubRelease") {
+        dependsOn("release")
+    }
+
+    register("fullRelease") {
+        dependsOn("release", "githubRelease")
+    }
+}
+
+
+detekt {
+    config.from(file("detekt.yml"))
+    parallel = true
+    autoCorrect = true
+    failFast = true
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            artifact(tasks["sourcesJar"])
+            artifact(tasks["javadocJar"])
+        }
+    }
+}
+
+gradlePlugin {
+    plugins {
+        create("common") {
+            id = "com.cognifide.common"
+            implementationClass = "com.cognifide.gradle.common.CommonPlugin"
+            displayName = "Common Plugin"
+            description = "Provides generic purpose Gradle utilities like: file transfer (upload/download)" +
+                    " via SMB/SFTP/HTTP, file watcher, async progress logger, GUI notification service."
+        }
+    }
+}
+
+val pluginTags = listOf("sftp", "smb", "ssh", "progress", "file watcher", "file download", "file upload",
+        "gui notification", "gradle-plugin", "gradle plugin development")
+
+pluginBundle {
+    website = "https://github.com/Cognifide/gradle-common-plugin"
+    vcsUrl = "https://github.com/Cognifide/gradle-common-plugin.git"
+    description = "Gradle Common Plugin"
+    tags = pluginTags
+}
+
+bintray {
+    user = (project.findProperty("bintray.user") ?: System.getenv("BINTRAY_USER"))?.toString()
+    key = (project.findProperty("bintray.key") ?: System.getenv("BINTRAY_KEY"))?.toString()
+    setPublications("mavenJava")
+    with(pkg) {
+        repo = "maven-public"
+        name = "gradle-common-plugin"
+        userOrg = "cognifide"
+        setLicenses("Apache-2.0")
+        vcsUrl = "https://github.com/Cognifide/gradle-common-plugin.git"
+        setLabels(*pluginTags.toTypedArray())
+        with(version) {
+            name = project.version.toString()
+            desc = "${project.description} ${project.version}"
+            vcsTag = project.version.toString()
+        }
+    }
+    publish = (project.findProperty("bintray.publish") ?: "true").toString().toBoolean()
+    override = (project.findProperty("bintray.override") ?: "false").toString().toBoolean()
+}
+
+githubRelease {
+    owner("Cognifide")
+    repo("gradle-common-plugin")
+    token((project.findProperty("github.token") ?: "").toString())
+    tagName(project.version.toString())
+    releaseName(project.version.toString())
+    releaseAssets(tasks["jar"], tasks["sourcesJar"], tasks["javadocJar"])
+    draft((project.findProperty("github.draft") ?: "false").toString().toBoolean())
+    prerelease((project.findProperty("github.prerelease") ?: "false").toString().toBoolean())
+    overwrite((project.findProperty("github.override") ?: "true").toString().toBoolean())
+
+    body { """
+    |# What's new
+    |
+    |TBD
+    |
+    |# Upgrade notes
+    |
+    |Nothing to do.
+    |
+    |# Contributions
+    |
+    |None.
+    """.trimMargin()
+    }
+}
