@@ -16,6 +16,7 @@ import org.gradle.api.InvalidUserDataException
 /**
  * File downloader with groups supporting files from multiple sources: local and remote (SFTP, SMB, HTTP).
  */
+@Suppress("TooManyFunctions")
 abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
 
     val downloadDir = common.obj.buildDir(DOWNLOAD_DIR_DEFAULT)
