@@ -7,6 +7,11 @@
 
 # Gradle Common Plugin
 
+  * [About](#about)
+  * [Setup](#setup)
+  * [Configuration](#configuration)
+  * [License](#license)
+
 ## About
 
 Provides generic purpose Gradle utilities like: 
@@ -18,10 +23,40 @@ Provides generic purpose Gradle utilities like:
 
 All above exposed as `common` [extension](src/main/kotlin/com/cognifide/gradle/common/CommonExtension.kt) to your build scripts to be consumed by your own Gradle tasks.
 
-
 ## Setup
 
 As of plugin is published at official Gradle Plugin Portal, see instructions from [there](https://plugins.gradle.org/plugin/com.cognifide.common).
+
+## Configuration
+
+Illustrative example:
+
+```kotlin
+common {
+   fileTransfer { // config for resolving CRX packages, AEM Quickstart files and backups using HTTP/SFTP/SMB
+        sftp {
+            user = prop.string("fileTransfer.sftp.user")
+            password = prop.string("fileTransfer.sftp.password")
+        }
+        smb {
+            user = prop.string("fileTransfer.smb.user")
+            password = prop.string("fileTransfer.smb.password")
+            domain = prop.string("fileTransfer.smb.domain")
+        }
+        http {
+            client {
+                basicUser = prop.string("fileTransfer.http.user")
+                basicPassword = prop.string("fileTransfer.http.password")
+            }
+        }
+        credentials( // shorthand method for setting at once all user / password pairs and domain above
+            prop.string("fileTransfer.user"), 
+            prop.string("fileTransfer.password"),
+            prop.string("fileTransfer.domain")
+        ) 
+    }
+}
+```
 
 ## License
 
