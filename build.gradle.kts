@@ -145,6 +145,12 @@ gradlePlugin {
             description = "Provides generic purpose Gradle utilities like: file transfer (upload/download)" +
                     " via SMB/SFTP/HTTP, file watcher, async progress logger, GUI notification service."
         }
+        create("runtime") {
+            id = "com.cognifide.common.runtime"
+            implementationClass = "com.cognifide.gradle.common.RuntimePlugin"
+            displayName = "Runtime Plugin"
+            description = "Introduces base lifecycle tasks (like 'up', 'down') for controlling runtimes (servers, applications)"
+        }
     }
 }
 
