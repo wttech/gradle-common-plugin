@@ -13,7 +13,7 @@ plugins {
     id("com.github.breadmoirai.github-release") version "2.2.10"
 }
 
-defaultTasks("publishToMavenLocal")
+defaultTasks("publish", "publishToMavenLocal")
 description = "Gradle Common Plugin"
 group = "com.cognifide.gradle"
 
@@ -119,7 +119,6 @@ tasks {
         dependsOn("release", "githubRelease")
     }
 }
-
 
 detekt {
     config.from(file("detekt.yml"))
