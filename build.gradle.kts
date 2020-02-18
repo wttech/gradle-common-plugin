@@ -13,7 +13,7 @@ plugins {
     id("com.github.breadmoirai.github-release") version "2.2.10"
 }
 
-defaultTasks("publish", "publishToMavenLocal")
+defaultTasks("build", "publishToMavenLocal")
 description = "Gradle Common Plugin"
 group = "com.cognifide.gradle"
 
