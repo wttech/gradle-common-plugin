@@ -47,6 +47,8 @@ dependencies {
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+
+    "detektPlugins"("io.gitlab.arturbosch.detekt:detekt-formatting:1.2.2")
 }
 
 val functionalTestSourceSet = sourceSets.create("functionalTest") {}
