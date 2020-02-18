@@ -6,8 +6,8 @@ import org.gradle.api.Project
 
 class CommonPlugin : Plugin<Project> {
 
-    override fun apply(project: Project) = using(project) {
-        registerExtension()
+    override fun apply(project: Project) = project.using {
+        registerExtension().run {  }
     }
 
     private fun Project.registerExtension() {
