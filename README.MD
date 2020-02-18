@@ -1,8 +1,7 @@
 [![Cognifide logo](docs/cognifide-logo.png)](http://cognifide.com)
 
 [![Download](https://api.bintray.com/packages/cognifide/maven-public/gradle-common-plugin/images/download.svg) ](https://bintray.com/cognifide/maven-public/gradle-common-plugin/_latestVersion)
-[![Build Status](https://dev.azure.com/gradle-aem/gradle-common-plugin/_apis/build/status/Continuous%20Check?branchName=master)](https://dev.azure.com/gradle-aem/gradle-common-plugin/_build/latest?definitionId=6&branchName=master)
-[![Gradle Status](https://gradleupdate.appspot.com/Cognifide/gradle-common-plugin/status.svg?random=123)](https://gradleupdate.appspot.com/Cognifide/gradle-common-plugin/status)
+[![Build Status](https://dev.azure.com/gradle-aem/gradle-common-plugin/_apis/build/status/Cognifide.gradle-common-plugin?branchName=master)](https://dev.azure.com/gradle-aem/gradle-common-plugin/_build/latest?definitionId=8&branchName=master)[![Gradle Status](https://gradleupdate.appspot.com/Cognifide/gradle-common-plugin/status.svg?random=123)](https://gradleupdate.appspot.com/Cognifide/gradle-common-plugin/status)
 [![Apache License, Version 2.0, January 2004](docs/apache-license-badge.svg)](http://www.apache.org/licenses/)
 
 # Gradle Common Plugin
