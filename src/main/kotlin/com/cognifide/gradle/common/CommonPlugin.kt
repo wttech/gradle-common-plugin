@@ -7,7 +7,7 @@ import org.gradle.api.Project
 class CommonPlugin : Plugin<Project> {
 
     override fun apply(project: Project) = project.using {
-        registerExtension().run {  }
+        registerExtension().run { }
     }
 
     private fun Project.registerExtension() {
