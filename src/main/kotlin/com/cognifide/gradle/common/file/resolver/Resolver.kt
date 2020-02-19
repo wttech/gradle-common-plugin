@@ -1,7 +1,6 @@
 package com.cognifide.gradle.common.file.resolver
 
 import com.cognifide.gradle.common.CommonExtension
-import com.cognifide.gradle.common.build.DependencyOptions
 import com.cognifide.gradle.common.file.FileException
 import com.cognifide.gradle.common.file.transfer.http.HttpFileTransfer
 import com.cognifide.gradle.common.file.transfer.resolve.ResolveFileTransfer
@@ -109,12 +108,7 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
     /**
      * Resolve file by dependency notation using defined Gradle repositories (Maven, Ivy etc).
      */
-    fun resolve(dependencyNotation: String): FileResolution = get(dependencyNotation as Any)
-
-    /**
-     * Resolve file using defined Gradle repositories (Maven, Ivy etc).
-     */
-    fun resolve(dependencyOptions: DependencyOptions.() -> Unit) = resolve(DependencyOptions().apply(dependencyOptions).notation)
+    fun resolve(dependencyNotation: Any): FileResolution = get(dependencyNotation)
 
     /**
      * Download files from same URL using automatically determined file transfer (HTTP, SFTP, SMB, URL, local file system).
