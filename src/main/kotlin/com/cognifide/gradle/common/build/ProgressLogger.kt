@@ -24,7 +24,7 @@ open class ProgressLogger private constructor(private val project: Project) {
     private lateinit var stopWatch: StopWatch
 
     private fun create(): BaseLogger = ServiceAccessor(project)
-            .get(ProgressLoggerFactory::class)
+            .get<ProgressLoggerFactory>()
             .newOperation(javaClass, baseParents.peek())
 
     fun <T> launch(block: ProgressLogger.() -> T): T {

@@ -1,14 +1,12 @@
 package com.cognifide.gradle.common.build
 
 import org.gradle.api.Project
-import kotlin.reflect.KClass
 
 open class ServiceAccessor(val project: Project) {
 
     val serviceFactory: Any get() = invoke(project, "getServices")
 
-    @Suppress("unchecked_cast")
-    fun <T : Any> get(clazz: KClass<T>): T = invoke(serviceFactory, "get", clazz.java) as T
+    inline fun <reified T : Any> get(): T = invoke(serviceFactory, "get", T::class.java) as T
 
     @Suppress("SpreadOperator")
     operator fun invoke(obj: Any, method: String, vararg args: Any): Any {
@@ -16,17 +14,17 @@ open class ServiceAccessor(val project: Project) {
         for (i in args.indices) {
             argumentTypes[i] = args[i].javaClass
         }
-        val m = obj.javaClass.getMethod(method, *argumentTypes)
-        m.isAccessible = true
-
-        return m.invoke(obj, *args)
+        return obj.javaClass.getMethod(method, *argumentTypes).run {
+            isAccessible = true
+            invoke(obj, *args)
+        }
     }
 
     @Suppress("SpreadOperator")
     fun invoke(obj: Any, method: String, args: List<Any?>, argTypes: List<Class<out Any>>): Any {
-        val m = obj.javaClass.getMethod(method, *argTypes.toTypedArray())
-        m.isAccessible = true
-
-        return m.invoke(obj, *args.toTypedArray())
+        return obj.javaClass.getMethod(method, *argTypes.toTypedArray()).run {
+            isAccessible = true
+            invoke(obj, *args.toTypedArray())
+        }
     }
 }
