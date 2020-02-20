@@ -31,6 +31,11 @@ open class CommonExtension(val project: Project) {
     val obj = ObjectFactory(project)
 
     /**
+     * Accessor for internal Gradle services.
+     */
+    val services = ServiceAccessor(project)
+
+    /**
      * Define settings for file transfer facade which allows to perform basic file operations on remote servers
      * like uploading and downloading files.
      *

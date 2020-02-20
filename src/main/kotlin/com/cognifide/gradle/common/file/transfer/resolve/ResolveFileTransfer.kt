@@ -25,7 +25,7 @@ class ResolveFileTransfer(aem: CommonExtension) : ProtocolFileTransfer(aem) {
 
     @Suppress("TooGenericExceptionCaught")
     fun resolve(value: Any) = try {
-        DependencyOptions.resolve(common.project, when (value) {
+        DependencyOptions.resolveFile(common.project, when (value) {
             is String -> value.substringAfter("://")
             else -> value
         })
