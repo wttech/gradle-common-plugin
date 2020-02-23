@@ -26,7 +26,13 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
 
     private val groupDefault get() = groupNamed(GROUP_DEFAULT)
 
-    private var groupCurrent = groupDefault
+    private var _groupCurrent: G? = null
+
+    private var groupCurrent
+        get() = _groupCurrent ?: groupDefault
+        set(group) {
+            _groupCurrent = group
+        }
 
     /**
      * Controls count of groups resolved in parallel.
