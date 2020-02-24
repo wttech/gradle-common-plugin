@@ -3,8 +3,9 @@ package com.cognifide.gradle.common.notifier
 import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.build.BuildScope
 import dorkbox.notify.Notify
+import org.apache.commons.lang3.exception.ExceptionUtils
+import org.gradle.api.BuildCancelledException
 import org.gradle.api.logging.LogLevel
-import java.io.File
 
 class NotifierFacade private constructor(val common: CommonExtension) {
 
@@ -15,13 +16,17 @@ class NotifierFacade private constructor(val common: CommonExtension) {
     /**
      * Turn on/off default system notifications.
      */
-    var enabled: Boolean = prop.flag("notifier.enabled")
+    val enabled = common.obj.boolean {
+        convention(true)
+        prop.boolean("notifier.enabled")?.let { set(it) }
+    }
 
     /**
      * Project specific image at path relative to root project.
      */
-    var image: File = (prop.string("notifier.image") ?: "src/common/notifier/icon.png").let {
-        common.project.rootProject.file(it)
+    val image = common.obj.file {
+        convention(common.obj.projectFile("src/common/notifier/icon.png"))
+        prop.file("notifier.image")?.let { set(it) }
     }
 
     /**
@@ -58,11 +63,11 @@ class NotifierFacade private constructor(val common: CommonExtension) {
     fun notify(title: String, text: String, level: LogLevel, onClick: (Notify) -> Unit = {}) {
         log(title, text, level)
 
-        if (enabled) {
+        if (enabled.get()) {
             try {
                 notifier.notify(title, text, level, onClick)
             } catch (e: Exception) {
-                logger.debug("AEM notifier is not available.", e)
+                logger.debug("Notifier is not available!", e)
             }
         }
     }
@@ -111,8 +116,12 @@ class NotifierFacade private constructor(val common: CommonExtension) {
                 if (graph.allTasks.isNotEmpty()) {
                     common.project.gradle.buildFinished { result ->
                         if (result.failure != null) {
-                            val message = result.failure?.message ?: "no error message"
+                            val rootCause = ExceptionUtils.getRootCause(result.failure)
+                            if (rootCause is BuildCancelledException) {
+                                return@buildFinished // do not show notification
+                            }
 
+                            val message = result.failure?.message ?: "no error message"
                             notifier.notify("Build failure", message, LogLevel.ERROR)
                         }
                     }

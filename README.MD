@@ -32,7 +32,7 @@ Illustrative example:
 
 ```kotlin
 common {
-   fileTransfer { // config for resolving CRX packages, AEM Quickstart files and backups using HTTP/SFTP/SMB
+   fileTransfer { // config for files over protocols HTTP/SFTP/SMB
         sftp {
             user = prop.string("fileTransfer.sftp.user")
             password = prop.string("fileTransfer.sftp.password")

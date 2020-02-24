@@ -5,7 +5,7 @@ import com.cognifide.gradle.common.build.DependencyFile
 import com.cognifide.gradle.common.file.transfer.ProtocolFileTransfer
 import java.io.File
 
-class ResolveFileTransfer(aem: CommonExtension) : ProtocolFileTransfer(aem) {
+class ResolveFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
 
     override val parallelable = false
 

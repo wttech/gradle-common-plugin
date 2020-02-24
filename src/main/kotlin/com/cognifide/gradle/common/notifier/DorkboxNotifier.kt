@@ -47,11 +47,11 @@ class DorkboxNotifier(val facade: NotifierFacade, val configurer: Notify.() -> U
 
     private fun Notify.projectSpecificImage(): Boolean {
         val image = facade.image
-        if (!image.exists()) {
+        if (!image.get().asFile.exists()) {
             return false
         }
 
-        image(ImageIO.read(image.toURI().toURL()))
+        image(ImageIO.read(image.get().asFile.toURI().toURL()))
 
         return true
     }
