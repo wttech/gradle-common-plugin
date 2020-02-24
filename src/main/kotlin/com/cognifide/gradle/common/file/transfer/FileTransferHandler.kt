@@ -1,5 +1,8 @@
 package com.cognifide.gradle.common.file.transfer
 
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
+
 interface FileTransferHandler : FileTransfer {
 
     /**
@@ -10,10 +13,10 @@ interface FileTransferHandler : FileTransfer {
     /**
      * When enabled, transfer will be considered when finding transfer handling particular URL.
      */
-    val enabled: Boolean
+    val enabled: Property<Boolean>
 
     /**
      * Determines if operations using this transfer could be done in parallel.
      */
-    val parallelable: Boolean
+    val parallelable: Provider<Boolean>
 }

@@ -30,27 +30,22 @@ class PropertyParser(private val project: Project) {
         return null
     }
 
-    private fun prop(name: String): String? {
-        return find(name)?.ifBlank { null }
-    }
+    private fun prop(name: String): String? = find(name)?.ifBlank { null }
 
     fun flag(vararg names: String) = names.any { flag(it) }
 
     fun flag(name: String): Boolean {
         val value = find(name) ?: return false
-
         return if (!value.isBlank()) value.toBoolean() else true
     }
 
     fun list(name: String, delimiter: String = ","): List<String>? {
         val value = prop(name) ?: return null
-
         return Formats.toList(value, delimiter)
     }
 
     fun map(name: String, valueDelimiter: String = ",", keyDelimiter: String = "="): Map<String, String>? {
         val value = prop(name) ?: return null
-
         return Formats.toMap(value, valueDelimiter, keyDelimiter)
     }
 
@@ -96,9 +91,7 @@ class PropertyParser(private val project: Project) {
         }
     }
 
-    val envProps by lazy {
-        System.getenv()
-    }
+    val envProps by lazy { System.getenv() }
 
     val systemProps: Map<String, String> by lazy {
         System.getProperties().entries.fold(mutableMapOf<String, String>()) { props, prop ->
@@ -106,8 +99,7 @@ class PropertyParser(private val project: Project) {
         }
     }
 
-    val force: Boolean
-        get() = flag(FORCE_PROP)
+    val force: Boolean get() = flag(FORCE_PROP)
 
     companion object {
 

@@ -7,15 +7,13 @@ import java.io.File
 
 class ResolveFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
 
-    override val parallelable = false
-
     override val name = NAME
 
     override val protocols = listOf("$NAME://*")
 
-    override fun handles(fileUrl: String): Boolean {
-        return super.handles(fileUrl) || DependencyFile.isNotation(fileUrl)
-    }
+    override val parallelable = common.obj.provider { false }
+
+    override fun handles(fileUrl: String): Boolean = super.handles(fileUrl) || DependencyFile.isNotation(fileUrl)
 
     override fun downloadFrom(dirUrl: String, fileName: String, target: File) {
         resolve(dirUrl).apply {

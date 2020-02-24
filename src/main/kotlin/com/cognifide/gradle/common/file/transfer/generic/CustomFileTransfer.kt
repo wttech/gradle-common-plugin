@@ -3,7 +3,6 @@ package com.cognifide.gradle.common.file.transfer.generic
 import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.file.transfer.FileEntry
 import com.cognifide.gradle.common.file.transfer.ProtocolFileTransfer
-import com.fasterxml.jackson.annotation.JsonIgnore
 import java.io.File
 
 /**
@@ -18,20 +17,7 @@ class CustomFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common)
 
     override lateinit var protocols: List<String>
 
-    @get:JsonIgnore
-    override var parallelable = true
-
-    private var downloader: ((dirUrl: String, fileName: String, target: File) -> Unit)? = null
-
-    private var uploader: ((dirUrl: String, fileName: String, target: File) -> Unit)? = null
-
-    private var lister: ((dirUrl: String) -> List<FileEntry>)? = null
-
-    private var deleter: ((dirUrl: String, fileName: String) -> Unit)? = null
-
-    private var truncater: ((dirUrl: String) -> Unit)? = null
-
-    private var exister: ((dirUrl: String, fileName: String) -> Boolean)? = null
+    override val parallelable = common.obj.provider { true }
 
     /**
      * Register callback responsible for downloading file.
@@ -40,12 +26,16 @@ class CustomFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common)
         this.downloader = callback
     }
 
+    private var downloader: ((dirUrl: String, fileName: String, target: File) -> Unit)? = null
+
     /**
      * Register callback responsible for uploading file.
      */
     fun upload(callback: (dirUrl: String, fileName: String, target: File) -> Unit) {
         this.uploader = callback
     }
+
+    private var uploader: ((dirUrl: String, fileName: String, target: File) -> Unit)? = null
 
     /**
      * Register callback responsible for listing files.
@@ -54,12 +44,16 @@ class CustomFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common)
         this.lister = callback
     }
 
+    private var lister: ((dirUrl: String) -> List<FileEntry>)? = null
+
     /**
      * Register callback responsible for deleting file.
      */
     fun delete(callback: (dirUrl: String, fileName: String) -> Unit) {
         this.deleter = callback
     }
+
+    private var deleter: ((dirUrl: String, fileName: String) -> Unit)? = null
 
     /**
      * Register callback responsible for deleting files.
@@ -68,12 +62,16 @@ class CustomFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common)
         this.truncater = callback
     }
 
+    private var truncater: ((dirUrl: String) -> Unit)? = null
+
     /**
      * Register callback responsible for checking file existence.
      */
     fun exists(callback: (dirUrl: String, fileName: String) -> Boolean) {
         this.exister = callback
     }
+
+    private var exister: ((dirUrl: String, fileName: String) -> Boolean)? = null
 
     // Below delegating lambdas to interface, nothing interesting :)
 

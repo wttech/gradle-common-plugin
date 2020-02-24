@@ -9,6 +9,7 @@ import com.cognifide.gradle.common.file.transfer.http.HttpFileTransfer
 import com.cognifide.gradle.common.file.transfer.resolve.ResolveFileTransfer
 import com.cognifide.gradle.common.file.transfer.sftp.SftpFileTransfer
 import com.cognifide.gradle.common.file.transfer.smb.SmbFileTransfer
+import com.cognifide.gradle.common.utils.using
 import java.io.File
 import org.apache.commons.io.FilenameUtils
 
@@ -23,47 +24,85 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
 
     private val logger = common.project.logger
 
+    val user = common.obj.string {
+        common.prop.string("fileTransfer.user")?.let { set(it) }
+    }
+
+    val password = common.obj.string {
+        common.prop.string("fileTransfer.password")?.let { set(it) }
+    }
+
+    val domain = common.obj.string {
+        common.prop.string("fileTransfer.domain")?.let { set(it) }
+    }
+
+    val credentials: Pair<String, String> get() = when {
+        user.isPresent && password.isPresent -> (user.get() to password.get())
+        else -> throw FileTransferException("File transfer credentials are missing!")
+    }
+
+    val credentialsString get() = credentials.run { "$first:$second" }
+
+    /**
+     * Shorthand method to enforce credentials for all protocols requiring it.
+     *
+     * Useful only in specific cases, when e.g company storage offers accessing files via multiple protocols
+     * using same AD credentials.
+     */
+    fun credentials(user: String?, password: String?, domain: String? = null) {
+        this.user.set(user)
+        this.password.set(password)
+        this.domain.set(domain)
+
+        http.client.basicUser.set(user)
+        http.client.basicPassword.set(password)
+
+        sftp.user.set(user)
+        sftp.password.set(password)
+
+        smb.user.set(user)
+        smb.password.set(password)
+        smb.domain.set(domain)
+    }
+
     val factory = FileTransferFactory(common)
 
-    val http = HttpFileTransfer(common)
-
-    fun http(options: HttpFileTransfer.() -> Unit) {
-        http.apply(options)
+    val http = HttpFileTransfer(common).apply {
+        client.basicUser.convention(user)
     }
 
-    val sftp = SftpFileTransfer(common)
+    fun http(options: HttpFileTransfer.() -> Unit) = http.using(options)
 
-    fun sftp(options: SftpFileTransfer.() -> Unit) {
-        sftp.apply(options)
+    val sftp = SftpFileTransfer(common).apply {
+        user.convention(this@FileTransferManager.user)
+        password.convention(this@FileTransferManager.password)
     }
 
-    val smb = SmbFileTransfer(common)
+    fun sftp(options: SftpFileTransfer.() -> Unit) = sftp.using(options)
 
-    fun smb(options: SmbFileTransfer.() -> Unit) {
-        smb.apply(options)
+    val smb = SmbFileTransfer(common).apply {
+        user.convention(this@FileTransferManager.user)
+        password.convention(this@FileTransferManager.password)
+        domain.convention(this@FileTransferManager.domain)
     }
+
+    fun smb(options: SmbFileTransfer.() -> Unit) = smb.using(options)
 
     val resolve = ResolveFileTransfer(common)
 
-    fun resolve(options: ResolveFileTransfer.() -> Unit) {
-        resolve.apply(options)
-    }
+    fun resolve(options: ResolveFileTransfer.() -> Unit) = resolve.using(options)
 
     val url = UrlFileTransfer(common)
 
-    fun url(options: UrlFileTransfer.() -> Unit) {
-        url.apply(options)
-    }
+    fun url(options: UrlFileTransfer.() -> Unit) = url.using(options)
 
     val path = PathFileTransfer(common)
 
-    fun path(options: PathFileTransfer.() -> Unit) {
-        path.apply(options)
-    }
+    fun path(options: PathFileTransfer.() -> Unit) = path.using(options)
 
     private val custom = mutableListOf<CustomFileTransfer>()
 
-    private val all get() = (custom + arrayOf(http, sftp, smb, resolve, url, path)).filter { it.enabled }
+    private val all get() = (custom + arrayOf(http, sftp, smb, resolve, url, path)).filter { it.enabled.get() }
 
     /**
      * Downloads file from specified URL to temporary directory with preserving file name.
@@ -181,53 +220,8 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
     /**
      * Get custom (or built-in) file transfer by name.
      */
-    fun named(name: String): FileTransfer {
-        return all.find { it.name == name } ?: throw FileException("File transfer named '$name' not found!")
-    }
-
-    var user: String? = null
-
-    var password: String? = null
-
-    var domain: String? = null
-
-    val credentials: Pair<String, String> get() = when {
-        user != null && password != null -> (user!! to password!!)
-        else -> throw FileTransferException("File transfer credentials are missing!")
-    }
-
-    val credentialsString get() = credentials.run { "$first:$second" }
-
-    /**
-     * Shorthand method to set same credentials for all protocols requiring it.
-     *
-     * Useful only in specific cases, when e.g company storage offers accessing files via multiple protocols
-     * using same AD credentials.
-     */
-    fun credentials(user: String?, password: String?, domain: String? = null) {
-        this.user = user
-        this.password = password
-        this.domain = domain
-
-        http.client.basicUser = user
-        http.client.basicPassword = password
-
-        sftp.user = user
-        sftp.password = password
-
-        smb.user = user
-        smb.password = password
-        smb.domain = domain
-    }
-
-    init {
-        // override specific credentials if common specified
-        credentials(
-                common.prop.string("fileTransfer.user"),
-                common.prop.string("fileTransfer.password"),
-                common.prop.string("fileTransfer.domain")
-        )
-    }
+    fun named(name: String): FileTransfer = all.find { it.name == name }
+            ?: throw FileException("File transfer named '$name' not found!")
 
     companion object {
         const val NAME = "manager"

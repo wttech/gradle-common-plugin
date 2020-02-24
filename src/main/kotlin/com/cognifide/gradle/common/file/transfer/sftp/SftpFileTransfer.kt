@@ -15,29 +15,34 @@ import org.apache.sshd.common.subsystem.sftp.SftpException
 
 class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
 
-    var user: String? = common.prop.string("fileTransfer.sftp.user")
+    val user = common.obj.string {
+        common.prop.string("fileTransfer.sftp.user")?.let { set(it) }
+    }
 
-    var password: String? = common.prop.string("fileTransfer.sftp.password")
+    val password = common.obj.string {
+        common.prop.string("fileTransfer.sftp.password")?.let { set(it) }
+    }
 
-    var timeout: Long = common.prop.long("fileTransfer.sftp.timeout") ?: 60000L
+    val timeout = common.obj.long {
+        convention(60000L)
+        common.prop.long("fileTransfer.sftp.timeout")?.let { set(it) }
+    }
 
-    var clientOptions: SshClient.() -> Unit = {}
+    private var clientOptions: SshClient.() -> Unit = {}
 
     fun client(options: SshClient.() -> Unit) {
         this.clientOptions = options
     }
 
-    var sessionOptions: ClientSession.() -> Unit = {}
+    private var sessionOptions: ClientSession.() -> Unit = {}
 
     fun session(options: ClientSession.() -> Unit) {
         this.sessionOptions = options
     }
 
-    override val name: String
-        get() = NAME
+    override val name: String get() = NAME
 
-    override val protocols: List<String>
-        get() = listOf("sftp://*")
+    override val protocols: List<String> get() = listOf("sftp://*")
 
     override fun downloadFrom(dirUrl: String, fileName: String, target: File) {
         val fileUrl = "$dirUrl/$fileName"
@@ -122,8 +127,8 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
     fun <T> connect(url: String, callback: SftpClient.(String) -> T): T {
         val urlConfig = URIBuilder(url)
         val userInfo = urlConfig.userInfo?.split(":") ?: listOf()
-        val user = userInfo.takeIf { it.isNotEmpty() }?.get(0) ?: user
-        val password = userInfo.takeIf { it.size == 2 }?.get(1) ?: password
+        val user = userInfo.takeIf { it.isNotEmpty() }?.get(0) ?: user.orNull
+        val password = userInfo.takeIf { it.size == 2 }?.get(1) ?: password.orNull
         val port = if (urlConfig.port >= 0) urlConfig.port else PORT_DEFAULT
         val host = urlConfig.host
 
@@ -131,12 +136,12 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
             SshClient.setUpDefaultClient().use { client ->
                 client.apply(clientOptions)
                 client.start()
-                client.connect(user, host, port).apply { await(timeout) }.session.use { session ->
+                client.connect(user, host, port).apply { await(timeout.get()) }.session.use { session ->
                     session.apply(sessionOptions)
                     if (!password.isNullOrBlank()) {
                         session.addPasswordIdentity(password)
                     }
-                    session.auth().await(timeout)
+                    session.auth().await(timeout.get())
 
                     SftpClientFactory.instance().createSftpClient(session).use { sftp ->
                         return callback(sftp, urlConfig.path).also { client.stop() }

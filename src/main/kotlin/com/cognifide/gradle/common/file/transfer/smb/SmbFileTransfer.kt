@@ -13,17 +13,21 @@ class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
 
     private val logger = common.logger
 
-    var domain: String? = common.prop.string("fileTransfer.smb.domain")
+    val domain = common.obj.string {
+        common.prop.string("fileTransfer.smb.domain")?.let { set(it) }
+    }
 
-    var user: String? = common.prop.string("fileTransfer.smb.user")
+    val user = common.obj.string {
+        common.prop.string("fileTransfer.smb.user")?.let { set(it) }
+    }
 
-    var password: String? = common.prop.string("fileTransfer.smb.password")
+    val password = common.obj.string {
+        common.prop.string("fileTransfer.smb.password")?.let { set(it) }
+    }
 
-    override val name: String
-        get() = NAME
+    override val name: String get() = NAME
 
-    override val protocols: List<String>
-        get() = listOf("smb://*")
+    override val protocols: List<String> get() = listOf("smb://*")
 
     override fun downloadFrom(dirUrl: String, fileName: String, target: File) {
         val fileUrl = "$dirUrl/$fileName"
@@ -98,24 +102,20 @@ class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
     fun file(dirUrl: String, fileName: String): SmbFile {
         val dirUrlNormalized = StringUtils.appendIfMissing(dirUrl, "/")
 
-        return if (!user.isNullOrBlank() && !password.isNullOrBlank()) {
-            SmbFile(dirUrlNormalized, fileName, NtlmPasswordAuthentication(domain, user, password))
+        return if (!user.orNull.isNullOrBlank() && !password.orNull.isNullOrBlank()) {
+            SmbFile(dirUrlNormalized, fileName, NtlmPasswordAuthentication(domain.orNull, user.get(), password.get()))
         } else {
             SmbFile(dirUrlNormalized, fileName)
-        }.apply {
-            useCaches = false
-        }
+        }.apply { useCaches = false }
     }
 
-    fun dir(dirUrl: String): SmbFile {
-        return file(dirUrl, "").apply {
-            try {
-                if (!isDirectory) {
-                    throw SmbFileException("Path at URL '$dirUrl' is not a directory.")
-                }
-            } catch (e: IOException) {
-                throw SmbFileException("Directory at URL '$dirUrl' does not exist or not accessible: '${e.message}'!", e)
+    fun dir(dirUrl: String): SmbFile = file(dirUrl, "").apply {
+        try {
+            if (!isDirectory) {
+                throw SmbFileException("Path at URL '$dirUrl' is not a directory.")
             }
+        } catch (e: IOException) {
+            throw SmbFileException("Directory at URL '$dirUrl' does not exist or not accessible: '${e.message}'!", e)
         }
     }
 

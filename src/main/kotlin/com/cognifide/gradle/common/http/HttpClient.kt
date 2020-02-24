@@ -34,79 +34,101 @@ open class HttpClient(private val common: CommonExtension) {
 
     private val logger = common.logger
 
-    var connectionTimeout = 30000
+    val connectionTimeout = common.obj.int { convention(30000) }
 
-    var connectionIgnoreSsl = true
+    val connectionIgnoreSsl = common.obj.boolean { convention(true) }
 
-    var connectionRetries = true
+    val connectionRetries = common.obj.boolean { convention(true) }
 
-    var authorizationPreemptive = false
+    val authorizationPreemptive = common.obj.boolean { convention(false) }
 
-    var baseUrl = ""
+    val baseUrl = common.obj.string()
 
-    var basicUser: String? = null
+    val basicUser = common.obj.string()
 
-    var basicPassword: String? = null
+    val basicPassword = common.obj.string()
 
     var basicCredentials: Pair<String?, String?>
-        get() = basicUser to basicPassword
+        get() = when {
+            basicUser.isPresent && basicPassword.isPresent -> (basicUser.get() to basicPassword.get())
+            else -> throw HttpException("HTTP client basic credentials are missing!")
+        }
         set(value) {
-            basicUser = value.first
-            basicPassword = value.second
+            basicUser.set(value.first)
+            basicPassword.set(value.second)
         }
 
-    var proxyHost: String? = null
+    val proxyHost = common.obj.string()
 
-    var proxyPort: Int? = null
+    val proxyPort = common.obj.int()
 
-    var proxyScheme: String? = null
+    val proxyScheme = common.obj.string()
 
-    var requestConfigurer: HttpRequestBase.() -> Unit = { }
+    fun requestConfigurer(configurer: HttpRequestBase.() -> Unit) {
+        this.requestConfigurer = configurer
+    }
 
-    var clientBuilder: HttpClientBuilder.() -> Unit = {
+    private var requestConfigurer: HttpRequestBase.() -> Unit = {}
+
+    fun clientBuilder(builder: HttpClientBuilder.() -> Unit) {
+        this.clientBuilder = builder
+    }
+
+    private var clientBuilder: HttpClientBuilder.() -> Unit = {
         useSystemProperties()
+        useDefaults()
+    }
 
-        if (authorizationPreemptive) {
+    fun HttpClientBuilder.useDefaults() {
+        if (authorizationPreemptive.get()) {
             addInterceptorFirst(PreemptiveAuthInterceptor())
         }
 
         setDefaultRequestConfig(RequestConfig.custom().apply {
             setCookieSpec(CookieSpecs.STANDARD)
 
-            if (!connectionRetries) {
-                setSocketTimeout(connectionTimeout)
+            if (!connectionRetries.get()) {
+                setSocketTimeout(connectionTimeout.get())
             }
-            setConnectTimeout(connectionTimeout)
-            setConnectionRequestTimeout(connectionTimeout)
+            setConnectTimeout(connectionTimeout.get())
+            setConnectionRequestTimeout(connectionTimeout.get())
         }.build())
 
-        if (!proxyHost.isNullOrBlank() && proxyPort != null) {
-            setProxy(HttpHost(proxyHost, proxyPort!!, proxyScheme))
+        if (!proxyHost.orNull.isNullOrBlank() && proxyPort.isPresent) {
+            setProxy(HttpHost(proxyHost.get(), proxyPort.get(), proxyScheme.get()))
         }
 
-        if (!basicUser.isNullOrBlank() && !basicPassword.isNullOrBlank()) {
+        if (!basicUser.orNull.isNullOrBlank() && !basicPassword.orNull.isNullOrBlank()) {
             setDefaultCredentialsProvider(BasicCredentialsProvider().apply {
-                setCredentials(AuthScope.ANY, UsernamePasswordCredentials(basicUser, basicPassword))
+                setCredentials(AuthScope.ANY, UsernamePasswordCredentials(basicUser.get(), basicPassword.get()))
             })
         }
 
-        if (connectionIgnoreSsl) {
+        if (connectionIgnoreSsl.get()) {
             setSSLSocketFactory(SSLConnectionSocketFactory(SSLContextBuilder()
                     .loadTrustMaterial(null) { _, _ -> true }
                     .build(), NoopHostnameVerifier.INSTANCE))
         }
-        if (!connectionRetries) {
+        if (!connectionRetries.get()) {
             disableAutomaticRetries()
         }
     }
 
     val client by lazy { HttpClientBuilder.create().apply(clientBuilder).build() }
 
-    var responseHandler: (HttpResponse) -> Unit = { }
+    fun responseHandler(handler: (HttpResponse) -> Unit) {
+        this.responseHandler = handler
+    }
 
-    var responseChecks: Boolean = true
+    private var responseHandler: (HttpResponse) -> Unit = {}
 
-    var responseChecker: (HttpResponse) -> Unit = { checkStatus(it) }
+    val responseChecks = common.obj.boolean { convention(true) }
+
+    fun responseChecker(checker: (HttpResponse) -> Unit) {
+        this.responseChecker = checker
+    }
+
+    private var responseChecker: (HttpResponse) -> Unit = { checkStatus(it) }
 
     fun <T> request(method: String, uri: String, handler: HttpClient.(HttpResponse) -> T) = when (method.toLowerCase()) {
         "get" -> get(uri, handler)
@@ -183,7 +205,7 @@ open class HttpClient(private val common: CommonExtension) {
     }
 
     fun asStream(response: HttpResponse): InputStream {
-        if (responseChecks) {
+        if (responseChecks.get()) {
             responseChecker(response)
         }
 
@@ -248,7 +270,7 @@ open class HttpClient(private val common: CommonExtension) {
      * https://stackoverflow.com/questions/13652681/httpclient-invalid-uri-escaped-absolute-path-not-valid
      */
     open fun baseUrl(uri: String): String {
-        return "$baseUrl${uri.replace(" ", "%20")}"
+        return "${baseUrl.orNull ?: ""}${uri.replace(" ", "%20")}"
     }
 
     @Suppress("TooGenericExceptionCaught")

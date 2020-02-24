@@ -99,9 +99,9 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
             if (value is String) {
                 handling(value).run {
                     if (this is ResolveFileTransfer) { // support for special protocol 'resolve'
-                        resolveFile(value, parallelable) { resolve.resolve(value) }
+                        resolveFile(value, parallelable.get()) { resolve.resolve(value) }
                     } else { // other protocols like 'http', 'sftp', 'smb'
-                        resolveFileUrl(value, parallelable) { downloadUsing(this, value, it) }
+                        resolveFileUrl(value, parallelable.get()) { downloadUsing(this, value, it) }
                     }
                 }
             } else {

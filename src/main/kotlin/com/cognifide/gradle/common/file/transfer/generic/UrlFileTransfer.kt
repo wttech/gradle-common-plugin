@@ -9,11 +9,9 @@ import java.net.URL
 
 class UrlFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
 
-    override val name: String
-        get() = NAME
+    override val name: String get() = NAME
 
-    override val protocols: List<String>
-        get() = listOf(PROTOCOL)
+    override val protocols: List<String> get() = listOf(PROTOCOL)
 
     override fun downloadFrom(dirUrl: String, fileName: String, target: File) {
         val fileUrl = "$dirUrl/$fileName"

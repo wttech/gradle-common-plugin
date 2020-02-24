@@ -12,8 +12,7 @@ import java.io.IOException
  */
 class PathFileTransfer(common: CommonExtension) : AbstractFileTransfer(common) {
 
-    override val name: String
-        get() = NAME
+    override val name: String get() = NAME
 
     override fun handles(fileUrl: String): Boolean = true
 

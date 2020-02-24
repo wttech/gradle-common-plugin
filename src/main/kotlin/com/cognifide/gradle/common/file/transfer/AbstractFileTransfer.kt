@@ -8,9 +8,9 @@ import java.io.Serializable
 
 abstract class AbstractFileTransfer(protected val common: CommonExtension) : FileTransferHandler, Serializable {
 
-    override var enabled: Boolean = true
+    override val enabled = common.obj.boolean { convention(true) }
 
-    override val parallelable = true
+    override val parallelable = common.obj.provider { true }
 
     override fun download(fileUrl: String) = download(fileUrl, common.temporaryFile(FilenameUtils.getName(fileUrl)))
 
