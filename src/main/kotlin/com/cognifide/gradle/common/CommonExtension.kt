@@ -156,9 +156,7 @@ open class CommonExtension(val project: Project) {
     /**
      * Resolve files from defined repositories or by using defined file transfers.
      */
-    fun resolveFiles(options: FileResolver.() -> Unit): List<File> {
-        return FileResolver(this).apply(options).allFiles
-    }
+    fun resolveFiles(options: FileResolver.() -> Unit): List<File> = FileResolver(this).apply(options).files
 
     /**
      * Perform any HTTP requests to external endpoints.

@@ -6,6 +6,7 @@ import com.cognifide.gradle.common.file.transfer.http.HttpFileTransfer
 import com.cognifide.gradle.common.file.transfer.resolve.ResolveFileTransfer
 import com.cognifide.gradle.common.file.transfer.sftp.SftpFileTransfer
 import com.cognifide.gradle.common.file.transfer.smb.SmbFileTransfer
+import com.cognifide.gradle.common.utils.Patterns
 import com.google.common.hash.HashCode
 import java.io.File
 import org.apache.commons.io.FilenameUtils
@@ -50,17 +51,9 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
         common.prop.list("resolver.localFilePatterns")?.let { set(it) }
     }
 
-    val groups: List<G> get() = groupList.filter { it.resolutions.isNotEmpty() }
+    val groups get() = groupList.filter { it.resolutions.isNotEmpty() }
 
-    val outputDirs: List<File> get() = outputDirs { true }
-
-    fun outputDirs(filter: G.() -> Boolean): List<File> = groups.filter(filter).flatMap { it.dirs }
-
-    val allFiles: List<File> get() = allFiles { true }
-
-    fun allFiles(filter: G.() -> Boolean): List<File> = allGroups(filter).flatMap { it.files }
-
-    fun allGroups(filter: G.() -> Boolean): List<G> = groups.filter(filter).apply {
+    fun resolveGroups(groupName: String) = groups.filter { Patterns.wildcard(it.name, groupName) }.apply {
         common.progress {
             step = "Resolving files"
             total = size.toLong()
@@ -81,10 +74,12 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
         }
     }
 
-    fun group(name: String): G {
-        return groupList.find { it.name == name }
-                ?: throw FileException("File group '$name' is not defined.")
-    }
+    fun groupFiles(name: String) = resolveGroups(name).flatMap { it.files }
+
+    val files get() = groupFiles(Patterns.WILDCARD)
+
+    fun group(name: String) = groupList.find { it.name == name }
+            ?: throw FileException("File group '$name' is not defined.")
 
     /**
      * Resolve file in case of various type of specified value: file, url to file, dependency notation, project dependency.
