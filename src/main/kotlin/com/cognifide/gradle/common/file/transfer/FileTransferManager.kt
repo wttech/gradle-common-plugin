@@ -127,7 +127,7 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
      */
     fun downloadUsing(transfer: FileTransfer, dirUrl: String, fileName: String, target: File) {
         if (target.exists()) {
-            common.logger.info("Downloading file from URL '$dirUrl/$fileName' to '$target' skipped as of it already exists.")
+            common.logger.info("Skipping downloading file from URL '$dirUrl/$fileName' to '$target' as of it already exists.")
             return
         }
 
@@ -163,7 +163,7 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
 
         try {
             if (stat(dirUrl, fileName) != null) { // 'stat' may be unsupported
-                logger.info("Uploading file to URL '$fileUrl' skipped as of it already exists on server.")
+                logger.info("Skipping uploading file to URL '$fileUrl' as of it already exists on server.")
                 return
             }
         } catch (e: FileException) {
