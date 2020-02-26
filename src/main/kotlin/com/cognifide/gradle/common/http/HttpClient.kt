@@ -227,7 +227,7 @@ open class HttpClient(private val common: CommonExtension) {
     fun <T> asObjectFromJson(response: HttpResponse, clazz: Class<T>): T = try {
         Formats.fromJson(asStream(response), clazz)
     } catch (e: IOException) {
-        throw ResponseException("Cannot parse / malformed response: $response", e)
+        throw ResponseException("Cannot parse response because it is probably malformed. Cause: ${e.message}\n$response", e)
     }
 
     fun checkStatus(response: HttpResponse, statusCodes: IntRange = STATUS_CODE_VALID) {
@@ -245,7 +245,7 @@ open class HttpClient(private val common: CommonExtension) {
     }
 
     open fun throwStatusException(response: HttpResponse) {
-        throw ResponseException("Unexpected response detected: ${response.statusLine}")
+        throw ResponseException("Unexpected response status detected: ${response.statusLine}")
     }
 
     fun checkText(response: HttpResponse, containedText: String, ignoreCase: Boolean = true) {
@@ -282,7 +282,7 @@ open class HttpClient(private val common: CommonExtension) {
 
             return handler.invoke(this, response)
         } catch (e: Exception) {
-            throw RequestException("Failed request to $method: ${e.message}", e)
+            throw RequestException("Failed request to $method! Cause: ${e.message}", e)
         } finally {
             method.releaseConnection()
         }
