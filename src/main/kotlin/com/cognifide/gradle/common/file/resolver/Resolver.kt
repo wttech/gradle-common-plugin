@@ -222,13 +222,17 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
         groupCurrent = groupDefault
     }
 
-    operator fun String.invoke(value: Any) = group(this) { get(value) }
+    operator fun String.invoke(value: Any, options: G.() -> Unit = {}) = group(this) {
+        get(value)
+        config(options)
+    }
 
-    operator fun String.invoke(url: String, vararg fileNames: String) = group(this) {
+    operator fun String.invoke(url: String, vararg fileNames: String, options: G.() -> Unit = {}) = group(this) {
         when {
             fileNames.isEmpty() -> download(url)
             else -> download(url, fileNames.asIterable())
         }
+        config(options)
     }
 
     operator fun String.invoke(configurer: Resolver<G>.() -> Unit) = group(this, configurer)
