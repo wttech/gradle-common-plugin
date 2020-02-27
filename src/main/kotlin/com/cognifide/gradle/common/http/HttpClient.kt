@@ -4,6 +4,7 @@ import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.file.transfer.http.HttpFileTransfer
 import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.utils.Utils
+import com.google.common.net.UrlEscapers
 import com.jayway.jsonpath.DocumentContext
 import java.io.File
 import java.io.IOException
@@ -270,7 +271,7 @@ open class HttpClient(private val common: CommonExtension) {
      * https://stackoverflow.com/questions/13652681/httpclient-invalid-uri-escaped-absolute-path-not-valid
      */
     open fun baseUrl(uri: String): String {
-        return "${baseUrl.orNull ?: ""}${uri.replace(" ", "%20")}"
+        return "${baseUrl.orNull ?: ""}${UrlEscapers.urlFragmentEscaper().escape(uri)}"
     }
 
     @Suppress("TooGenericExceptionCaught")
