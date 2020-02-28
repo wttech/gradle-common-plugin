@@ -204,3 +204,9 @@ open class CommonExtension(val project: Project) {
 }
 
 val Project.common get() = CommonExtension.of(project)
+
+@Synchronized
+fun Project.pluginProject(id: String): Project? = when {
+    plugins.hasPlugin(id) -> this
+    else -> rootProject.allprojects.firstOrNull { it.plugins.hasPlugin(id) }
+}
