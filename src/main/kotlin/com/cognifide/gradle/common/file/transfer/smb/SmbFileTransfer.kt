@@ -115,7 +115,7 @@ class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                 throw SmbFileException("Path at URL '$dirUrl' is not a directory.")
             }
         } catch (e: Exception) {
-            throw SmbFileException("Directory at URL '$dirUrl' does not exist or not accessible: '${e.message}'!", e)
+            throw SmbFileException("Directory at URL '$dirUrl' does not exist or not accessible. Cause: '${e.message}'", e)
         }
     }
 

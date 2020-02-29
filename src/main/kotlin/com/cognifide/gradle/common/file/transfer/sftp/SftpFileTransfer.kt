@@ -149,7 +149,8 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                 }
             }
         } catch (e: Exception) {
-            throw SftpFileException("SFTP file transfer error (check credentials, network / VPN etc)", e)
+            throw SftpFileException("SFTP file transfer error (check credentials, network / VPN etc)." +
+                    " Cause: ${e.message ?: e.javaClass.name}", e)
         }
     }
 
@@ -160,7 +161,8 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                     throw SftpFileException("Path at URL '$dirUrl' is not a directory.")
                 }
             } catch (e: Exception) {
-                throw SftpFileException("Directory at URL '$dirUrl' does not exist or not accessible: '${e.message}'!", e)
+                throw SftpFileException("Directory at URL '$dirUrl' does not exist or not accessible: '${e.message}'." +
+                        " Cause: ${e.message ?: e.javaClass.name}", e)
             }
 
             callback(dirPath)
