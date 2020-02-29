@@ -5,6 +5,7 @@ import com.cognifide.gradle.common.build.DependencyFile
 import com.cognifide.gradle.common.file.transfer.ProtocolFileTransfer
 import java.io.File
 
+@Suppress("TooGenericExceptionCaught")
 class ResolveFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
 
     override val name = NAME
@@ -21,7 +22,6 @@ class ResolveFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common
         }
     }
 
-    @Suppress("TooGenericExceptionCaught")
     fun resolve(value: Any) = try {
         DependencyFile(common.project, when (value) {
             is String -> value.substringAfter("://")

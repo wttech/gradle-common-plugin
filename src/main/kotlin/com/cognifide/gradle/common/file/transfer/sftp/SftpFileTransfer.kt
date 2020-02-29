@@ -4,7 +4,6 @@ import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.file.transfer.FileEntry
 import com.cognifide.gradle.common.file.transfer.ProtocolFileTransfer
 import java.io.File
-import java.io.IOException
 import org.apache.http.client.utils.URIBuilder
 import org.apache.sshd.client.SshClient
 import org.apache.sshd.client.session.ClientSession
@@ -13,6 +12,7 @@ import org.apache.sshd.client.subsystem.sftp.SftpClientFactory
 import org.apache.sshd.common.subsystem.sftp.SftpConstants
 import org.apache.sshd.common.subsystem.sftp.SftpException
 
+@Suppress("TooGenericExceptionCaught")
 class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
 
     val user = common.obj.string {
@@ -52,7 +52,7 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                 common.logger.info("Downloading file from URL '$fileUrl'")
                 val filePath = "$dirPath/$fileName"
                 downloader().download(stat(filePath).size, read(filePath), target)
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 throw SftpFileException("Cannot download file from URL '$fileUrl'. Cause: '${e.message}")
             }
         }
@@ -66,7 +66,7 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                 common.logger.info("Uploading file to URL '$fileUrl'")
                 val filePath = "$dirPath/$fileName"
                 uploader().upload(source, write(filePath))
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 throw SftpFileException("Cannot upload file '$source' to URL '$fileUrl'. Cause: '${e.message}", e)
             }
         }
@@ -77,7 +77,7 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
             try {
                 val filePath = "$dirPath/$fileName"
                 remove(filePath)
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 throw SftpFileException("Cannot delete file at URL '$dirUrl/$fileName'. Cause: '${e.message}", e)
             }
         }
@@ -88,7 +88,7 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
             try {
                 common.logger.info("Listing files at URL '$dirUrl'")
                 dirFiles(dirPath).map { FileEntry(it.filename, it.attributes.size, it.attributes.modifyTime.toMillis()) }
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 throw SftpFileException("Cannot list files in directory at URL '$dirUrl'. Cause: '${e.message}", e)
             }
         }
@@ -99,7 +99,7 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
             try {
                 common.logger.info("Truncating files at URL '$dirUrl'")
                 dirFiles(dirPath).forEach { remove("$dirPath/${it.filename}") }
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 throw SftpFileException("Cannot truncate directory at URL '$dirUrl'. Cause: '${e.message}", e)
             }
         }
@@ -114,7 +114,7 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                 stat("$dirPath/$fileName").takeIf { it.isRegularFile }?.run {
                     FileEntry(fileName, size, modifyTime.toMillis())
                 }
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 when {
                     e is SftpException && STATUS_NOT_EXISTS.contains(e.status) -> null
                     else -> throw SftpFileException("Cannot check file status at URL '$fileUrl'. Cause: '${e.message}", e)
@@ -148,7 +148,7 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                     }
                 }
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw SftpFileException("SFTP file transfer error (check credentials, network / VPN etc)", e)
         }
     }
@@ -159,7 +159,7 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                 if (!lstat(dirPath).isDirectory) {
                     throw SftpFileException("Path at URL '$dirUrl' is not a directory.")
                 }
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 throw SftpFileException("Directory at URL '$dirUrl' does not exist or not accessible: '${e.message}'!", e)
             }
 

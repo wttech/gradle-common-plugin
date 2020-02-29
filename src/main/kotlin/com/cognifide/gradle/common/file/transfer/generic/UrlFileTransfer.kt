@@ -4,9 +4,9 @@ import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.file.FileException
 import com.cognifide.gradle.common.file.transfer.ProtocolFileTransfer
 import java.io.File
-import java.io.IOException
 import java.net.URL
 
+@Suppress("TooGenericExceptionCaught")
 class UrlFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
 
     override val name: String get() = NAME
@@ -23,7 +23,7 @@ class UrlFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                 useCaches = false
                 inputStream.use { downloader().download(contentLengthLong, it, target) }
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw FileException("Cannot download URL '$fileUrl' to file '$target'. Cause: '${e.message}'", e)
         }
     }

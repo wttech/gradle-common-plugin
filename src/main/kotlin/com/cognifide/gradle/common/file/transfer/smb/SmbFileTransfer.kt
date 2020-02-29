@@ -4,11 +4,11 @@ import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.file.transfer.FileEntry
 import com.cognifide.gradle.common.file.transfer.ProtocolFileTransfer
 import java.io.File
-import java.io.IOException
 import jcifs.smb.NtlmPasswordAuthentication
 import jcifs.smb.SmbFile
 import org.apache.commons.lang3.StringUtils
 
+@Suppress("TooGenericExceptionCaught")
 class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
 
     private val logger = common.logger
@@ -36,7 +36,7 @@ class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                 logger.info("Downloading file from URL '$fileUrl'")
                 downloader().download(length(), inputStream, target)
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw SmbFileException("Cannot download file from URL '$fileUrl' . Cause: '${e.message}")
         }
     }
@@ -49,7 +49,7 @@ class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                 logger.info("Uploading file to URL '$fileUrl'")
                 uploader().upload(source, outputStream)
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw SmbFileException("Cannot upload file '$source' to URL '$fileUrl'. Cause: '${e.message}", e)
         }
     }
@@ -61,7 +61,7 @@ class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
             try {
                 logger.info("Deleting file at URL '$fileUrl'")
                 delete()
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 throw SmbFileException("Cannot delete file at URL '$fileUrl'. Cause: '${e.message}", e)
             }
         }
@@ -71,7 +71,7 @@ class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
         try {
             logger.info("Listing files at URL '$dirUrl'")
             dirFiles().map { FileEntry(it.name, it.length(), it.lastModified()) }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw SmbFileException("Cannot list files in directory at URL '$dirUrl'. Cause: '${e.message}", e)
         }
     }
@@ -81,7 +81,7 @@ class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
             try {
                 logger.info("Truncating files at URL '$dirUrl'")
                 dirFiles().forEach { it.delete() }
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 throw SmbFileException("Cannot truncate directory at URL '$dirUrl'. Cause: '${e.message}", e)
             }
         }
@@ -94,7 +94,7 @@ class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
             return file(dirUrl, fileName)
                     .takeIf { it.isFile }
                     ?.run { FileEntry(fileName, length(), lastModified()) }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw SmbFileException("Cannot check file status at URL '$fileUrl'. Cause: '${e.message}", e)
         }
     }
@@ -114,7 +114,7 @@ class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
             if (!isDirectory) {
                 throw SmbFileException("Path at URL '$dirUrl' is not a directory.")
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw SmbFileException("Directory at URL '$dirUrl' does not exist or not accessible: '${e.message}'!", e)
         }
     }

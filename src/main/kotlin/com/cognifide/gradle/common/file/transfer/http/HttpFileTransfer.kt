@@ -1,13 +1,12 @@
 package com.cognifide.gradle.common.file.transfer.http
 
-import com.cognifide.gradle.common.CommonException
 import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.file.transfer.ProtocolFileTransfer
 import com.cognifide.gradle.common.http.HttpClient
 import com.cognifide.gradle.common.utils.using
 import java.io.File
-import java.io.IOException
 
+@Suppress("TooGenericExceptionCaught")
 class HttpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
 
     internal var client = HttpClient(common)
@@ -26,9 +25,7 @@ class HttpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                 common.logger.info("Downloading: $sourceUrl -> $target")
                 downloader().download(response.entity.contentLength, asStream(response), target)
             }
-        } catch (e: CommonException) {
-            throw HttpFileException("Cannot download URL '$sourceUrl' to file '$target' using HTTP(s). Cause: ${e.message}", e)
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw HttpFileException("Cannot download URL '$sourceUrl' to file '$target' using HTTP(s). Cause: ${e.message}", e)
         }
     }

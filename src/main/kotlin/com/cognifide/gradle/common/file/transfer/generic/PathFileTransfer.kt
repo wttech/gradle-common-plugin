@@ -10,6 +10,7 @@ import java.io.IOException
 /**
  * File transfer which is copying files instead of using them directly.
  */
+@Suppress("TooGenericExceptionCaught")
 class PathFileTransfer(common: CommonExtension) : AbstractFileTransfer(common) {
 
     override val name: String get() = NAME
@@ -33,21 +34,21 @@ class PathFileTransfer(common: CommonExtension) : AbstractFileTransfer(common) {
             val target = file(dirUrl, fileName)
             target.parentFile.mkdirs()
             target.outputStream().use { uploader().upload(source, it) }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw FileException("Cannot upload file '$source' to URL '$fileUrl'. Cause: '${e.message}", e)
         }
     }
 
     override fun list(dirUrl: String): List<FileEntry> = try {
         dirFiles(dirUrl).map { FileEntry.of(it) }
-    } catch (e: IOException) {
+    } catch (e: Exception) {
         throw FileException("Cannot list files in directory at URL '$dirUrl'. Cause: '${e.message}'", e)
     }
 
     override fun deleteFrom(dirUrl: String, fileName: String) {
         try {
             file(dirUrl, fileName).delete()
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw FileException("Cannot delete file at URL '$dirUrl/$fileName. Cause: '${e.message}'", e)
         }
     }
@@ -55,7 +56,7 @@ class PathFileTransfer(common: CommonExtension) : AbstractFileTransfer(common) {
     override fun truncate(dirUrl: String) {
         try {
             dirFiles(dirUrl).forEach { it.delete() }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw FileException("Cannot truncate directory at URL '$dirUrl'. Cause: '${e.message}", e)
         }
     }
@@ -67,7 +68,7 @@ class PathFileTransfer(common: CommonExtension) : AbstractFileTransfer(common) {
             file(dirUrl, fileName)
                     .takeIf { it.isFile }
                     ?.run { FileEntry(fileName, length(), lastModified()) }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw FileException("Cannot check file status at URL '$fileUrl'. Cause: '${e.message}", e)
         }
     }
