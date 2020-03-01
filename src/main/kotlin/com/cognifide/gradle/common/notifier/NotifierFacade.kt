@@ -35,7 +35,11 @@ class NotifierFacade private constructor(val common: CommonExtension) {
      * To customize notification use one of concrete provider methods: 'dorkbox' or 'jcgay' (and optionally pass configuration lambda(s)).
      * Also it is possible to implement own notifier directly in build script by using provider method 'custom'.
      */
-    var config: (NotifierFacade.() -> Notifier) = { dorkbox() }
+    fun config(config: NotifierFacade.() -> Notifier) {
+        this.config = config
+    }
+
+    private var config: (NotifierFacade.() -> Notifier) = { dorkbox() }
 
     private val notifier: Notifier by lazy { config(this@NotifierFacade) }
 
