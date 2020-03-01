@@ -2,7 +2,9 @@ package com.cognifide.gradle.common
 
 import java.io.File
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class CommonPluginFunctionalTest {
 
@@ -19,12 +21,17 @@ class CommonPluginFunctionalTest {
         """)
 
         // Run the build
-        val runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        runner.withArguments("tasks")
-        runner.withProjectDir(projectDir)
-        val result = runner.build()
+        val result = GradleRunner.create().run {
+            forwardOutput()
+            withPluginClasspath()
+            withArguments("tasks")
+            withProjectDir(projectDir)
+            build()
+        }
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":tasks")?.outcome)
+
+        // val result = runner.build()
 
         // Verify the result
         // assertTrue(result.output.contains("Hello from plugin 'com.cognifide.gradle.common'"))

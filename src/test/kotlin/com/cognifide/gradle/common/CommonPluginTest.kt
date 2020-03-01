@@ -2,7 +2,6 @@ package com.cognifide.gradle.common
 
 import org.gradle.testfixtures.ProjectBuilder
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 class CommonPluginTest {
     @Test fun `plugin could be set up`() {
@@ -11,6 +10,6 @@ class CommonPluginTest {
         project.plugins.apply("com.cognifide.gradle.common")
 
         // Verify the result
-        //assertNotNull(project.tasks.findByName("greeting"))
+        // assertNotNull(project.tasks.findByName("greeting"))
     }
 }
