@@ -5,6 +5,7 @@ import dorkbox.notify.Theme
 import org.apache.commons.lang3.StringUtils
 import org.gradle.api.logging.LogLevel
 import java.awt.Color
+import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.imageio.ImageIO
 
@@ -35,9 +36,22 @@ class DorkboxNotifier(val facade: NotifierFacade, val configurer: Notify.() -> U
 
     private fun Notify.assignImage(level: LogLevel) {
         when (level) {
-            LogLevel.WARN -> typedImage("error.png")
-            LogLevel.ERROR -> typedImage("error.png")
-            else -> if (!projectSpecificImage()) typedImage("info.png")
+            LogLevel.WARN, LogLevel.ERROR -> {
+                val customIconFailure = facade.iconFailure.get().asFile
+                if (customIconFailure.exists()) {
+                    customImage(customIconFailure)
+                } else {
+                    typedImage("error.png")
+                }
+            }
+            else -> {
+                val customIconSuccess = facade.iconSuccess.get().asFile
+                if (customIconSuccess.exists()) {
+                    customImage(customIconSuccess)
+                } else {
+                    typedImage("info.png")
+                }
+            }
         }
     }
 
@@ -45,15 +59,8 @@ class DorkboxNotifier(val facade: NotifierFacade, val configurer: Notify.() -> U
         image(ImageIO.read(javaClass.getResource("/notifier/$type").toURI().toURL()))
     }
 
-    private fun Notify.projectSpecificImage(): Boolean {
-        val image = facade.image
-        if (!image.get().asFile.exists()) {
-            return false
-        }
-
-        image(ImageIO.read(image.get().asFile.toURI().toURL()))
-
-        return true
+    private fun Notify.customImage(file: File) {
+        image(ImageIO.read(file.toURI().toURL()))
     }
 
     companion object {

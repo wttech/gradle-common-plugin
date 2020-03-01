@@ -22,11 +22,19 @@ class NotifierFacade private constructor(val common: CommonExtension) {
     }
 
     /**
-     * Project specific image at path relative to root project.
+     * Project specific build success image at path relative to root project.
      */
-    val image = common.obj.file {
-        convention(common.obj.projectFile("src/common/notifier/icon.png"))
-        prop.file("notifier.image")?.let { set(it) }
+    val iconSuccess = common.obj.file {
+        convention(common.obj.projectFile("src/common/notifier/icon-success.png"))
+        prop.string("notifier.icon.success")?.let { common.project.rootProject.file(it) }
+    }
+
+    /**
+     * Project specific build failure image at path relative to root project.
+     */
+    val iconFailure = common.obj.file {
+        convention(common.obj.projectFile("src/common/notifier/icon-failure.png"))
+        prop.string("notifier.icon.failure")?.let { common.project.rootProject.file(it) }
     }
 
     /**
