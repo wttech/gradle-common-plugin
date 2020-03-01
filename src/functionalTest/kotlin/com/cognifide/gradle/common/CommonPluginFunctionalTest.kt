@@ -3,7 +3,6 @@ package com.cognifide.gradle.common
 import java.io.File
 import org.gradle.testkit.runner.GradleRunner
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
 class CommonPluginFunctionalTest {
 
@@ -25,9 +24,9 @@ class CommonPluginFunctionalTest {
         runner.withPluginClasspath()
         runner.withArguments("tasks")
         runner.withProjectDir(projectDir)
-        val result = runner.build();
+        val result = runner.build()
 
         // Verify the result
-        //assertTrue(result.output.contains("Hello from plugin 'com.cognifide.gradle.common'"))
+        // assertTrue(result.output.contains("Hello from plugin 'com.cognifide.gradle.common'"))
     }
 }
