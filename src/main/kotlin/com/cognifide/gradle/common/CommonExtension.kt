@@ -151,7 +151,17 @@ open class CommonExtension(val project: Project) {
      * Resolve single file from defined repositories or by using defined file transfers.
      */
     fun resolveFile(options: FileResolver.() -> Unit) = resolveFiles(options).firstOrNull()
-            ?: throw CommonException("There is no files resolved!")
+            ?: throw CommonException("File not resolved!")
+
+    /**
+     * Resolve files from defined repositories or by using defined file transfers.
+     */
+    fun resolveFiles(vararg values: Any): List<File> = resolveFiles(values.asIterable())
+
+    /**
+     * Resolve files from defined repositories or by using defined file transfers.
+     */
+    fun resolveFiles(values: Iterable<Any>): List<File> = resolveFiles { values.forEach { get(it) } }
 
     /**
      * Resolve files from defined repositories or by using defined file transfers.

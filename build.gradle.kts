@@ -7,7 +7,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version "1.3.61"
     id("org.jetbrains.dokka") version "0.10.1"
     id("com.gradle.plugin-publish") version "0.10.1"
-    id("io.gitlab.arturbosch.detekt") version "1.2.2"
+    id("io.gitlab.arturbosch.detekt") version "1.6.0"
     id("com.jfrog.bintray") version "1.8.4"
     id("net.researchgate.release") version "2.8.1"
     id("com.github.breadmoirai.github-release") version "2.2.10"
@@ -26,7 +26,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
     implementation("org.apache.commons:commons-lang3:3.9")
     implementation("org.apache.commons:commons-text:1.8")
     implementation("commons-io:commons-io:2.6")
@@ -48,16 +48,17 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 
-    "detektPlugins"("io.gitlab.arturbosch.detekt:detekt-formatting:1.2.2")
+    "detektPlugins"("io.gitlab.arturbosch.detekt:detekt-formatting:1.6.0")
 }
 
-val functionalTestSourceSet = sourceSets.create("functionalTest") {}
+val functionalTestSourceSet = sourceSets.create("functionalTest")
 gradlePlugin.testSourceSets(functionalTestSourceSet)
 configurations.getByName("functionalTestImplementation").extendsFrom(configurations.getByName("testImplementation"))
 
 val functionalTest by tasks.creating(Test::class) {
     testClassesDirs = functionalTestSourceSet.output.classesDirs
     classpath = functionalTestSourceSet.runtimeClasspath
+    dependsOn("detektFunctionalTest")
 }
 
 val check by tasks.getting(Task::class) {
@@ -97,6 +98,10 @@ tasks {
             jvmTarget = JavaVersion.VERSION_1_8.toString()
             freeCompilerArgs = freeCompilerArgs + "-Xuse-experimental=kotlin.Experimental"
         }
+    }
+
+    named<Test>("test") {
+        dependsOn("detektTest")
     }
 
     named<Task>("build") {
