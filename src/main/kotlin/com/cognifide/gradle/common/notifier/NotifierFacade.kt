@@ -25,7 +25,7 @@ class NotifierFacade private constructor(val common: CommonExtension) {
      * Project specific build success image at path relative to root project.
      */
     val iconSuccess = common.obj.file {
-        convention(common.obj.projectFile("src/common/notifier/icon-success.png"))
+        convention(common.obj.projectFile("gradle/notifier/icon-success.png"))
         prop.string("notifier.icon.success")?.let { common.project.rootProject.file(it) }
     }
 
@@ -33,7 +33,7 @@ class NotifierFacade private constructor(val common: CommonExtension) {
      * Project specific build failure image at path relative to root project.
      */
     val iconFailure = common.obj.file {
-        convention(common.obj.projectFile("src/common/notifier/icon-failure.png"))
+        convention(common.obj.projectFile("gradle/notifier/icon-failure.png"))
         prop.string("notifier.icon.failure")?.let { common.project.rootProject.file(it) }
     }
 
