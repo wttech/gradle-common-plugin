@@ -81,7 +81,6 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
     fun group(name: String) = groupList.find { it.name == name }
             ?: throw FileException("File group '$name' is not defined.")
 
-
     /**
      * Resolve files in case of various type of specified value: file, url to file, dependency notation, project dependency.
      */
