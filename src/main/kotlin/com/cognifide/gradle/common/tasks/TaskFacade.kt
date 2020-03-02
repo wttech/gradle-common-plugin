@@ -136,3 +136,5 @@ class TaskFacade(val project: Project) : Serializable {
         }
     }
 }
+
+fun <T : Task> TaskProvider<T>.configureApply(action: T.() -> Unit) = configure(action)
