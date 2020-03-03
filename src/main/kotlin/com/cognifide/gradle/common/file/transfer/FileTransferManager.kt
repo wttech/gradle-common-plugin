@@ -69,6 +69,7 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
 
     val http = HttpFileTransfer(common).apply {
         client.basicUser.convention(user)
+        client.basicPassword.convention(password)
     }
 
     fun http(options: HttpFileTransfer.() -> Unit) = http.using(options)
