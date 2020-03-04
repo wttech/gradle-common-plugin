@@ -4,7 +4,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 plugins {
     id("java-gradle-plugin")
     id("maven-publish")
-    id("org.jetbrains.kotlin.jvm") version "1.3.61"
+    id("org.jetbrains.kotlin.jvm") version "1.3.70"
     id("org.jetbrains.dokka") version "0.10.1"
     id("com.gradle.plugin-publish") version "0.10.1"
     id("io.gitlab.arturbosch.detekt") version "1.6.0"

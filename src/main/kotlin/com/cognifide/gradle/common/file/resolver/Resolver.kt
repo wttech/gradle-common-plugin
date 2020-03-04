@@ -232,20 +232,14 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
         groupCurrent = groupDefault
     }
 
-    operator fun String.invoke(value: Any, options: G.() -> Unit = {}) = group(this) {
-        get(value)
-        config(options)
-    }
+    operator fun String.invoke(groupDefiner: Resolver<G>.() -> Unit) = group(this, groupDefiner)
 
-    operator fun String.invoke(url: String, vararg fileNames: String, options: G.() -> Unit = {}) = group(this) {
-        when {
-            fileNames.isEmpty() -> download(url)
-            else -> download(url, fileNames.asIterable())
-        }
-        config(options)
-    }
+    operator fun String.invoke(vararg values: Any, groupOptions: G.() -> Unit = {}) = invoke(values.asIterable(), groupOptions)
 
-    operator fun String.invoke(configurer: Resolver<G>.() -> Unit) = group(this, configurer)
+    operator fun String.invoke(values: Iterable<Any>, groupOptions: G.() -> Unit = {}) = group(this) {
+        getAll(values)
+        config(groupOptions)
+    }
 
     /**
      * Shorthand for creating named group with single file only to be downloaded.
