@@ -159,9 +159,11 @@ object Formats {
 
     // Date & time
 
+    fun localDateTimeAt(timestamp: Long, zoneId: ZoneId): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), zoneId)
+
     fun date(date: Date = Date()): String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date)
 
-    fun dateAt(timestamp: Long, zoneId: ZoneId): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), zoneId)
+    fun dateAt(timestamp: Long, zoneId: ZoneId): Date = Date.from(localDateTimeAt(timestamp, zoneId).atZone(ZoneId.systemDefault()).toInstant())
 
     fun dateFileName(date: Date = Date()): String = SimpleDateFormat("yyyyMMddHHmmss").format(date)
 
@@ -171,7 +173,7 @@ object Formats {
 
     fun durationFit(thenMillis: Long, thenZoneId: ZoneId, durationMillis: Long): Boolean {
         val nowTimestamp = LocalDateTime.now().atZone(ZoneId.systemDefault())
-        val thenTimestamp = dateAt(thenMillis, thenZoneId)
+        val thenTimestamp = localDateTimeAt(thenMillis, thenZoneId)
         val diffMillis = ChronoUnit.MILLIS.between(thenTimestamp, nowTimestamp)
 
         return diffMillis < durationMillis
