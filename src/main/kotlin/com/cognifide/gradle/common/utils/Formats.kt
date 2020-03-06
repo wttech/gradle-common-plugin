@@ -161,6 +161,8 @@ object Formats {
 
     fun date(date: Date = Date()): String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date)
 
+    fun dateAt(timestamp: Long, zoneId: ZoneId): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), zoneId)
+
     fun dateFileName(date: Date = Date()): String = SimpleDateFormat("yyyyMMddHHmmss").format(date)
 
     fun duration(millis: Long): String = DurationFormatUtils.formatDuration(millis.coerceAtLeast(0L), "mm:ss")
@@ -173,10 +175,6 @@ object Formats {
         val diffMillis = ChronoUnit.MILLIS.between(thenTimestamp, nowTimestamp)
 
         return diffMillis < durationMillis
-    }
-
-    private fun dateAt(timestamp: Long, zoneId: ZoneId): LocalDateTime {
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), zoneId)
     }
 
     // Files & structure
