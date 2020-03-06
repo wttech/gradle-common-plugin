@@ -31,6 +31,6 @@ class HttpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
     }
 
     companion object {
-        const val NAME = "httpd"
+        const val NAME = "http"
     }
 }
