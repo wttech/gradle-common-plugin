@@ -34,8 +34,8 @@ class DependencyFile(private val project: Project, notation: Any) {
 
         fun isNotation(text: String) = Patterns.wildcard(text, NOTATION_PATTERNS)
 
-        fun hintNotation(notation: Any, extensionHint: String): Any = when (notation) {
-            is String -> StringUtils.appendIfMissing(notation, "@$extensionHint")
+        fun hintNotation(notation: Any, extensionHint: String): Any = when {
+            notation is String && isNotation(notation) -> "${notation.substringBeforeLast("@")}@$extensionHint"
             else -> notation
         }
     }
