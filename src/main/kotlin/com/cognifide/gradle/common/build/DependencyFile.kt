@@ -2,7 +2,6 @@ package com.cognifide.gradle.common.build
 
 import com.cognifide.gradle.common.CommonException
 import com.cognifide.gradle.common.utils.Patterns
-import org.apache.commons.lang3.StringUtils
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.internal.typeconversion.UnsupportedNotationException
