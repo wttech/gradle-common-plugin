@@ -26,7 +26,7 @@ interface FileTransfer {
     /**
      * Downloads file from specified URL to temporary directory with preserving file name.
      */
-    fun download(fileUrl: String)
+    fun download(fileUrl: String): File
 
     /**
      * Downloads file from specified URL to specified directory with preserving file name.

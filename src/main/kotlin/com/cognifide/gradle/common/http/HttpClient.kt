@@ -316,7 +316,13 @@ open class HttpClient(private val common: CommonExtension) {
         }
     }
 
-    fun <T> fileTransfer(operation: HttpFileTransfer.() -> T): T = common.httpFile { client = this@HttpClient; operation() }
+    fun download(fileUrl: String) = fileTransfer { download(fileUrl) }
+
+    fun download(fileUrl: String, target: File) = fileTransfer { download(fileUrl, target) }
+
+    fun downloadTo(fileUrl: String, dir: File) = fileTransfer { downloadTo(fileUrl, dir) }
+
+    private fun <T> fileTransfer(operation: HttpFileTransfer.() -> T): T = common.httpFile { client = this@HttpClient; operation() }
 
     companion object {
         val STATUS_CODE_VALID = 200 until 300

@@ -108,7 +108,7 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
     /**
      * Downloads file from specified URL to temporary directory with preserving file name.
      */
-    override fun download(fileUrl: String) = download(fileUrl, common.temporaryFile(FilenameUtils.getName(fileUrl)))
+    override fun download(fileUrl: String): File = common.temporaryFile(FilenameUtils.getName(fileUrl)).also { download(fileUrl, it) }
 
     /**
      * Downloads file of given name from directory at specified URL.
