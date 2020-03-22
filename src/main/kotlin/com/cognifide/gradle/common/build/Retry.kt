@@ -3,11 +3,16 @@ package com.cognifide.gradle.common.build
 import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.utils.Formats
 
-class Retry private constructor(val common: CommonExtension) {
+class Retry(val common: CommonExtension) {
 
     var times = 0L
 
     var delay: (Long) -> Long = { 0L }
+
+    fun never() {
+        times = 0L
+        delay = { 0L }
+    }
 
     fun after(times: Long, delay: (Long) -> Long) {
         this.delay = delay

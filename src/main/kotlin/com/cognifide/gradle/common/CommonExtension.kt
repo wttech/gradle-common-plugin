@@ -120,20 +120,12 @@ open class CommonExtension(val project: Project) {
     /**
      * Predefined temporary directory.
      */
-    val temporaryDir: File
-        get() = temporaryFile(TEMPORARY_DIR)
+    val temporaryDir: File get() = temporaryFile(TEMPORARY_DIR)
 
     /**
      * Factory method for configuration object determining how operation should be retried.
      */
-    fun retry(configurer: Retry.() -> Unit): Retry {
-        return retry().apply(configurer)
-    }
-
-    /**
-     * Factory method for configuration object determining that operation should not be retried.
-     */
-    fun retry(): Retry = Retry.none(this)
+    fun retry(options: Retry.() -> Unit = {}) = Retry(this).apply(options)
 
     /**
      * React on file changes under configured directories.
