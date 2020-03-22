@@ -38,7 +38,7 @@ abstract class AbstractFileTransfer(protected val common: CommonExtension) : Fil
         throw FileException("File transfer '$name' does not support 'stat' operation.")
     }
 
-    fun downloader() = FileDownloader(common)
+    fun downloader(options: FileDownloader.() -> Unit = {}) = FileDownloader(common).apply(options)
 
-    fun uploader() = FileUploader(common)
+    fun uploader(options: FileUploader.() -> Unit = {}) = FileUploader(common).apply(options)
 }

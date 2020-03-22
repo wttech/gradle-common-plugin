@@ -18,7 +18,7 @@ class ResolveFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common
 
     override fun downloadFrom(dirUrl: String, fileName: String, target: File) {
         resolve(dirUrl).apply {
-            inputStream().use { downloader().download(length(), it, target) }
+            inputStream().use { downloader { size = length() }.download(it, target) }
         }
     }
 

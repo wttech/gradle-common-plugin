@@ -21,7 +21,7 @@ class UrlFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
 
             URL(fileUrl).openConnection().apply {
                 useCaches = false
-                inputStream.use { downloader().download(contentLengthLong, it, target) }
+                inputStream.use { downloader { size = contentLengthLong }.download(it, target) }
             }
         } catch (e: Exception) {
             throw FileException("Cannot download URL '$fileUrl' to file '$target'. Cause: '${e.message}'", e)

@@ -34,7 +34,7 @@ class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
         try {
             file(dirUrl, fileName).apply {
                 logger.info("Downloading file from URL '$fileUrl'")
-                downloader().download(length(), inputStream, target)
+                downloader { size = length() }.download(inputStream, target)
             }
         } catch (e: Exception) {
             throw SmbFileException("Cannot download file from URL '$fileUrl' . Cause: '${e.message}")

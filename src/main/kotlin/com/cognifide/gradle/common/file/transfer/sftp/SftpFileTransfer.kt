@@ -51,7 +51,7 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
             try {
                 common.logger.info("Downloading file from URL '$fileUrl'")
                 val filePath = "$dirPath/$fileName"
-                downloader().download(stat(filePath).size, read(filePath), target)
+                downloader { size = stat(filePath).size }.download(read(filePath), target)
             } catch (e: Exception) {
                 throw SftpFileException("Cannot download file from URL '$fileUrl'. Cause: '${e.message}")
             }

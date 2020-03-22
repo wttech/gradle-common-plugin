@@ -13,47 +13,18 @@ class FileDownloader(private val common: CommonExtension) {
 
     private var loggedKb: Long = 0
 
-    fun remainingDownloadTime(startDownloadTime: Long, fullLength: Long): Long {
-        val elapsedDownloadTime = System.currentTimeMillis() - startDownloadTime
-        val allDownloadTime = (elapsedDownloadTime * fullLength / processedBytes)
+    private var startTime: Long = -1
 
-        return (allDownloadTime - elapsedDownloadTime).coerceAtLeast(0L)
-    }
+    var size: Long = 0
 
-    fun ProgressLogger.logProgress(
-        operation: String,
-        readLength: Long,
-        fullLength: Long,
-        file: File,
-        startDownloadTime: Long
-    ) {
-        processedBytes += readLength
-
-        val processedKb = processedBytes / KILOBYTE
-        if (processedKb > loggedKb) {
-            val fileName = file.name.removeSuffix(FileTransferManager.TMP_SUFFIX)
-            val msg = if (fullLength > 0) {
-                "$operation: $fileName | ${Formats.fileSizeBytesToHuman(processedBytes)}/${Formats.fileSizeBytesToHuman(fullLength)}" +
-                        " (${Formats.percent(processedBytes, fullLength)}," +
-                        " time left: ${Formats.duration(remainingDownloadTime(startDownloadTime, fullLength))})"
-            } else {
-                "$operation: $fileName | ${Formats.fileSizeBytesToHuman(processedBytes)}"
-            }
-
-            progress(msg)
-
-            loggedKb = processedKb
-        }
-    }
-
-    fun download(size: Long, input: InputStream, target: File) {
+    fun download(input: InputStream, target: File) {
         common.progressLogger {
             input.use { inputStream ->
                 target.parentFile.mkdirs()
+                startTime = System.currentTimeMillis()
 
                 val output = FileOutputStream(target)
                 var finished = false
-                val startDownloadTime = System.currentTimeMillis()
 
                 try {
                     val buf = ByteArray(TRANSFER_CHUNK_100_KB)
@@ -61,7 +32,7 @@ class FileDownloader(private val common: CommonExtension) {
 
                     while (read >= 0) {
                         output.write(buf, 0, read)
-                        logProgress("Downloading", read.toLong(), size, target, startDownloadTime)
+                        logProgress("Downloading", read.toLong(), target)
                         read = inputStream.read(buf)
                     }
 
@@ -75,6 +46,33 @@ class FileDownloader(private val common: CommonExtension) {
                 }
             }
         }
+    }
+
+    private fun ProgressLogger.logProgress(operation: String, readBytes: Long, file: File) {
+        processedBytes += readBytes
+
+        val processedKb = processedBytes / KILOBYTE
+        if (processedKb > loggedKb) {
+            val fileName = file.name.removeSuffix(FileTransferManager.TMP_SUFFIX)
+            val msg = if (size > 0) {
+                "$operation: $fileName | ${Formats.fileSizeBytesToHuman(processedBytes)}/${Formats.fileSizeBytesToHuman(size)}" +
+                        " (${Formats.percent(processedBytes, size)}," +
+                        " time left: ${Formats.duration(remainingTime())})"
+            } else {
+                "$operation: $fileName | ${Formats.fileSizeBytesToHuman(processedBytes)}"
+            }
+
+            progress(msg)
+
+            loggedKb = processedKb
+        }
+    }
+
+    private fun remainingTime(): Long {
+        val elapsedTime = System.currentTimeMillis() - startTime
+        val allTime = (elapsedTime * size / processedBytes)
+
+        return (allTime - elapsedTime).coerceAtLeast(0L)
     }
 
     companion object {

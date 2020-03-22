@@ -23,7 +23,7 @@ class HttpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
         try {
             client.get(sourceUrl) { response ->
                 common.logger.info("Downloading: $sourceUrl -> $target")
-                downloader().download(response.entity.contentLength, asStream(response), target)
+                downloader { size = response.entity.contentLength }.download(asStream(response), target)
             }
         } catch (e: Exception) {
             throw HttpFileException("Cannot download URL '$sourceUrl' to file '$target' using HTTP(s). Cause: ${e.message}", e)

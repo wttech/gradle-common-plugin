@@ -21,7 +21,7 @@ class PathFileTransfer(common: CommonExtension) : AbstractFileTransfer(common) {
         val fileUrl = "$dirUrl/$fileName"
         try {
             target.parentFile.mkdirs()
-            file(dirUrl, fileName).apply { inputStream().use { downloader().download(length(), it, target) } }
+            file(dirUrl, fileName).apply { inputStream().use { downloader { size = length() }.download(it, target) } }
         } catch (e: IOException) {
             throw FileException("Cannot download URL '$fileUrl' to file '$target'. Cause: '${e.message}'", e)
         }
