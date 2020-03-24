@@ -221,6 +221,10 @@ open class HttpClient(private val common: CommonExtension) {
 
     fun asHtml(htmlString: String): Document = Formats.asHtml(htmlString)
 
+    fun asXml(response: HttpResponse): Document = Formats.asXml(asStream(response))
+
+    fun asXml(xmlString: String): Document = Formats.asXml(xmlString)
+
     fun asString(response: HttpResponse): String = IOUtils.toString(asStream(response), Charsets.UTF_8) ?: ""
 
     inline fun <reified T : Any> asObjectFromJson(response: HttpResponse) = asObjectFromJson(response, T::class.java)

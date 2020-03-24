@@ -10,11 +10,10 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.time.DurationFormatUtils
 import org.gradle.api.Project
 import org.gradle.util.GradleVersion
-import org.jsoup.Jsoup
+import org.jsoup.parser.Parser
 import java.io.File
 import java.io.InputStream
 import java.math.BigInteger
-import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
@@ -84,9 +83,15 @@ object Formats {
 
     // HTML
 
-    fun asHtml(value: String) = Jsoup.parse(value)
+    fun asHtml(value: String) = Parser.htmlParser().parseInput(value, "")
 
-    fun asHtml(input: InputStream) = Jsoup.parse(input, StandardCharsets.UTF_8.displayName(), "")
+    fun asHtml(input: InputStream) = Parser.htmlParser().parseInput(input.bufferedReader(), "")
+
+    // XML
+
+    fun asXml(value: String) = Parser.xmlParser().parseInput(value, "")
+
+    fun asXml(input: InputStream) = Parser.xmlParser().parseInput(input.bufferedReader(), "")
 
     // Strings (e.g raw strings parsing from 'gradle.properties')
 
