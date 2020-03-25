@@ -22,6 +22,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.*
 import org.apache.http.conn.ssl.NoopHostnameVerifier
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory
+import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.HttpClientBuilder
@@ -29,6 +30,7 @@ import org.apache.http.message.BasicNameValuePair
 import org.apache.http.ssl.SSLContextBuilder
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.nio.charset.StandardCharsets
 
 @Suppress("TooManyFunctions")
 open class HttpClient(private val common: CommonExtension) {
@@ -58,6 +60,10 @@ open class HttpClient(private val common: CommonExtension) {
             basicUser.set(value.first)
             basicPassword.set(value.second)
         }
+
+    val multipartTextType = common.obj.typed<ContentType> { convention(ContentType.create(ContentType.TEXT_PLAIN.mimeType, StandardCharsets.UTF_8)) }
+
+    val multipartBinaryType = common.obj.typed<ContentType> { convention(ContentType.DEFAULT_BINARY) }
 
     val proxyHost = common.obj.string()
 
@@ -314,9 +320,9 @@ open class HttpClient(private val common: CommonExtension) {
 
     private fun MultipartEntityBuilder.addEntityMultipart(key: String, value: Any?) {
         if (value is File && value.exists()) {
-            addBinaryBody(key, value)
+            addBinaryBody(key, value, multipartBinaryType.get(), value.name)
         } else {
-            addTextBody(key, value?.toString() ?: "")
+            addTextBody(key, value?.toString() ?: "", multipartTextType.get())
         }
     }
 
