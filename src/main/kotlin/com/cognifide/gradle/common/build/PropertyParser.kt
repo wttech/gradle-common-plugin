@@ -41,11 +41,13 @@ class PropertyParser(private val project: Project) {
 
     fun list(name: String, delimiter: String = ","): List<String>? {
         val value = prop(name) ?: return null
+        if (value == EMPTY_LIST) return listOf()
         return Formats.toList(value, delimiter)
     }
 
     fun map(name: String, valueDelimiter: String = ",", keyDelimiter: String = "="): Map<String, String>? {
         val value = prop(name) ?: return null
+        if (value == EMPTY_MAP) return mapOf()
         return Formats.toMap(value, valueDelimiter, keyDelimiter)
     }
 
@@ -104,6 +106,10 @@ class PropertyParser(private val project: Project) {
     companion object {
 
         const val FORCE_PROP = "force"
+
+        const val EMPTY_MAP = "[]"
+
+        const val EMPTY_LIST = "[]"
 
         private const val TEMPLATE_VAR_PREFIX = "{{"
 

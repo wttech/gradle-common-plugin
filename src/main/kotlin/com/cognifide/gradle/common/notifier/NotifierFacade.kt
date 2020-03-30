@@ -78,6 +78,8 @@ class NotifierFacade private constructor(val common: CommonExtension) {
         if (enabled.get()) {
             try {
                 notifier.notify(title, text, level, onClick)
+            } catch (e: LinkageError) {
+                logger.debug("Notifier is not available!", e)
             } catch (e: Exception) {
                 logger.debug("Notifier is not available!", e)
             }

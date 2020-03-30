@@ -9,11 +9,11 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.imageio.ImageIO
 
+@Suppress("TooGenericExceptionCaught")
 class DorkboxNotifier(val facade: NotifierFacade, val configurer: Notify.() -> Unit) : Notifier {
 
     private val common = facade.common
 
-    @Suppress("TooGenericExceptionCaught")
     override fun notify(title: String, text: String, level: LogLevel, onClick: (Notify) -> Unit) {
         try {
             Notify.create().apply {
@@ -34,7 +34,7 @@ class DorkboxNotifier(val facade: NotifierFacade, val configurer: Notify.() -> U
         }
     }
 
-    private fun Notify.assignImage(level: LogLevel) {
+    private fun Notify.assignImage(level: LogLevel) = try {
         when (level) {
             LogLevel.WARN, LogLevel.ERROR -> {
                 val customIconFailure = facade.iconFailure.get().asFile
@@ -53,6 +53,8 @@ class DorkboxNotifier(val facade: NotifierFacade, val configurer: Notify.() -> U
                 }
             }
         }
+    } catch (e: Exception) {
+        common.logger.debug("Cannot assign notification image", e)
     }
 
     private fun Notify.typedImage(type: String) {
