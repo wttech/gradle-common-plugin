@@ -75,7 +75,7 @@ open class CommonExtension(val project: Project) {
      *
      * @see <https://github.com/gradle/gradle/issues/7958>
      */
-    fun <T: Any> publicationArtifact(provider: Provider<T>) = LazyPublishArtifact(provider)
+    fun <T : Any> publicationArtifact(provider: Provider<T>) = LazyPublishArtifact(provider)
 
     /**
      * Allows easily provide artifact in a lazy way (e.g via task provider).
