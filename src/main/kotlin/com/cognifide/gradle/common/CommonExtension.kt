@@ -13,7 +13,9 @@ import com.cognifide.gradle.common.utils.Patterns
 import com.cognifide.gradle.common.build.*
 import com.cognifide.gradle.common.tasks.TaskFacade
 import org.gradle.api.Project
+import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact
 import org.gradle.api.internal.tasks.userinput.UserInputHandler
+import org.gradle.api.provider.Provider
 import java.io.File
 
 open class CommonExtension(val project: Project) {
@@ -67,6 +69,20 @@ open class CommonExtension(val project: Project) {
     fun tasks(configurer: TaskFacade.() -> Unit) {
         tasks.apply(configurer)
     }
+
+    /**
+     * Allows easily provide artifact in a lazy way (e.g via task provider).
+     *
+     * @see <https://github.com/gradle/gradle/issues/7958>
+     */
+    fun <T: Any> publicationArtifact(provider: Provider<T>) = LazyPublishArtifact(provider)
+
+    /**
+     * Allows easily provide artifact in a lazy way (e.g via task provider).
+     *
+     * @see <https://github.com/gradle/gradle/issues/7958>
+     */
+    fun publicationArtifact(taskPath: String) = publicationArtifact(project.tasks.named(taskPath))
 
     /**
      * Show asynchronous 0 indicator with percentage while performing some action.
