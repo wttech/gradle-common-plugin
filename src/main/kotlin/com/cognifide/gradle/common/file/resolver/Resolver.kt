@@ -234,7 +234,9 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
 
     operator fun String.invoke(groupDefiner: Resolver<G>.() -> Unit) = group(this, groupDefiner)
 
-    operator fun String.invoke(value: Any, groupOptions: G.() -> Unit = {}) = invoke(listOf(value), groupOptions)
+    operator fun String.invoke(vararg values: Any) = invoke(values.asIterable()) {}
+
+    operator fun String.invoke(value: Any, groupOptions: G.() -> Unit) = invoke(listOf(value), groupOptions)
 
     operator fun String.invoke(values: Iterable<Any>, groupOptions: G.() -> Unit = {}) = group(this) {
         getAll(values)
