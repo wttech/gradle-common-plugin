@@ -131,12 +131,31 @@ open class CommonExtension(val project: Project) {
     /**
      * Determine temporary directory for particular service (any name).
      */
-    fun temporaryFile(path: String): File = project.buildDir.resolve(path)
+    fun temporaryFile(path: String): File = temporaryDir.resolve(path)
 
     /**
      * Predefined temporary directory.
      */
-    val temporaryDir: File get() = temporaryFile(TEMPORARY_DIR)
+    val temporaryDir: File get() = project.buildDir.resolve(TEMPORARY_DIR)
+
+    /**
+     * Get recent file from directory
+     */
+    fun recentFile(dirPath: String, filePatterns: Iterable<String> = RECENT_FILE_PATTERNS): File = recentFile(project.file(dirPath), filePatterns)
+
+    /**
+     * Get recent file from directory
+     */
+    fun recentFile(dir: File, filePatterns: Iterable<String> = RECENT_FILE_PATTERNS): File = recentFileProvider(dir, filePatterns).orNull
+            ?: throw CommonException("No recent files available in directory '$dir' matching file pattern(s): $filePatterns!")
+
+    /**
+     * Get recent file from directory
+     */
+    fun recentFileProvider(dir: File, filePatterns: Iterable<String> = RECENT_FILE_PATTERNS): Provider<File> = project.fileTree(dir)
+            .matching { it.include(filePatterns) }.elements
+            .map { files -> files.map { it.asFile } }
+            .map { files -> files.maxBy { it.lastModified() } }
 
     /**
      * Factory method for configuration object determining how operation should be retried.
@@ -211,6 +230,8 @@ open class CommonExtension(val project: Project) {
         const val NAME = "common"
 
         const val TEMPORARY_DIR = "tmp"
+
+        val RECENT_FILE_PATTERNS = listOf("**/*.jar", "**/*.zip")
 
         private val PLUGIN_IDS = listOf(CommonPlugin.ID)
 

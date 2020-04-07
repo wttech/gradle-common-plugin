@@ -7,11 +7,10 @@ import org.gradle.api.Project
 class CommonPlugin : Plugin<Project> {
 
     override fun apply(project: Project) = project.using {
-        registerExtension().run { }
-    }
-
-    private fun Project.registerExtension() {
-        extensions.create(CommonExtension.NAME, CommonExtension::class.java, this)
+        val common = extensions.create(CommonExtension.NAME, CommonExtension::class.java, this)
+        if (common.prop.boolean("repository.jcenter") != false) {
+            repositories.jcenter()
+        }
     }
 
     companion object {
