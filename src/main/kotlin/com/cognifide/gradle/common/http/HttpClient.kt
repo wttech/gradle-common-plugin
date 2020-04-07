@@ -2,9 +2,9 @@ package com.cognifide.gradle.common.http
 
 import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.file.transfer.http.HttpFileTransfer
+import com.cognifide.gradle.common.guava.net.UrlEscapers
 import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.utils.Utils
-import com.google.common.net.UrlEscapers
 import com.jayway.jsonpath.DocumentContext
 import java.io.File
 import java.io.IOException
