@@ -250,7 +250,7 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
     abstract fun createGroup(name: String): G
 
     private fun resolveFile(hash: Any, parallel: Boolean, resolver: (FileResolution) -> File): FileResolution {
-        val id = HashCodeBuilder().append(hash).toHashCode().toString()
+        val id = Integer.toHexString(HashCodeBuilder().append(hash).toHashCode())
         if (!parallel) {
             groupCurrent.parallelable = false
         }
