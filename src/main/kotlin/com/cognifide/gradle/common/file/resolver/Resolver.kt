@@ -6,10 +6,10 @@ import com.cognifide.gradle.common.file.transfer.http.HttpFileTransfer
 import com.cognifide.gradle.common.file.transfer.resolve.ResolveFileTransfer
 import com.cognifide.gradle.common.file.transfer.sftp.SftpFileTransfer
 import com.cognifide.gradle.common.file.transfer.smb.SmbFileTransfer
+import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.utils.Patterns
 import java.io.File
 import org.apache.commons.io.FilenameUtils
-import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.gradle.api.InvalidUserDataException
 
 /**
@@ -250,7 +250,7 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
     abstract fun createGroup(name: String): G
 
     private fun resolveFile(hash: Any, parallel: Boolean, resolver: (FileResolution) -> File): FileResolution {
-        val id = Integer.toHexString(HashCodeBuilder().append(hash).toHashCode())
+        val id = Formats.toHashCodeHex(hash)
         if (!parallel) {
             groupCurrent.parallelable = false
         }

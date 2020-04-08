@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.jayway.jsonpath.JsonPath
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.time.DurationFormatUtils
 import org.gradle.api.Project
 import org.gradle.util.GradleVersion
@@ -133,7 +134,9 @@ object Formats {
         return String.format("%1$032x", result)
     }
 
-    // Math & numbers and convertions
+    fun toHashCodeHex(value: Any) = Integer.toHexString(HashCodeBuilder().append(value).toHashCode())
+
+    // Math & numbers and transformations
 
     fun fileSize(file: File): String = fileSizeBytesToHuman(when {
         file.exists() -> FileUtils.sizeOf(file)
