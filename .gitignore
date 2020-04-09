@@ -5,3 +5,5 @@
 # Ignore Gradle build output directory
 build
 !src/main/kotlin/com/cognifide/gradle/common/build
+
+.DS_Store
