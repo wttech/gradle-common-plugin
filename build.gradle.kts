@@ -31,7 +31,7 @@ dependencies {
     implementation("org.apache.httpcomponents:httpmime:4.5.12")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.3")
     implementation("org.samba.jcifs:jcifs:1.3.18-kohsuke-1")
-    implementation("org.jsoup:jsoup:1.13.1")
+    implementation("org.jsoup:jsoup:1.12.1")
     implementation("commons-io:commons-io:2.6")
     implementation("io.pebbletemplates:pebble:3.1.2")
     implementation("com.dorkbox:Notify:3.7")
