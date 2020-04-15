@@ -4,7 +4,6 @@ import com.cognifide.gradle.common.utils.Formats
 import com.mitchellbosecke.pebble.PebbleEngine
 import com.mitchellbosecke.pebble.lexer.Syntax
 import com.mitchellbosecke.pebble.loader.StringLoader
-import org.apache.commons.text.StringSubstitutor
 import org.gradle.api.Project
 import java.io.File
 import java.io.IOException
@@ -65,26 +64,12 @@ class PropertyParser(private val project: Project) {
         project.file(it) ?: if (projectRootFallback) project.rootProject.file(it) else null
     }
 
-    fun expand(file: File, props: Map<String, Any?>) {
-        file.writeText(expand(file.readText(), props, file.toString()))
-    }
+    fun expand(file: File, props: Map<String, Any?>) = file.writeText(expand(file.readText(), props, file.toString()))
 
     fun expand(source: String, props: Map<String, Any?>, context: String? = null): String {
-        return expand(source, envProps + systemProps + props, props, context)
-    }
-
-    private fun expand(
-        source: String,
-        interpolableProps: Map<String, Any?>,
-        templateProps: Map<String, Any?>,
-        context: String? = null
-    ): String {
         try {
-            val interpolated = TEMPLATE_INTERPOLATOR(source, interpolableProps)
             val expanded = StringWriter()
-
-            TEMPLATE_ENGINE.getTemplate(interpolated).evaluate(expanded, templateProps)
-
+            TEMPLATE_ENGINE.getTemplate(source).evaluate(expanded, expandProps + props)
             return expanded.toString()
         } catch (e: IOException) {
             var msg = "Cannot expand properly all properties. Probably used non-existing field name or unescaped char detected. Source: '${source.trim()}'."
@@ -93,12 +78,13 @@ class PropertyParser(private val project: Project) {
         }
     }
 
-    val envProps by lazy { System.getenv() }
-
-    val systemProps: Map<String, String> by lazy {
-        System.getProperties().entries.fold(mutableMapOf<String, String>()) { props, prop ->
-            props.put(prop.key.toString(), prop.value.toString()); props
-        }
+    private val expandProps: Map<String, Any> by lazy {
+        mapOf(
+                "system" to  System.getProperties().entries.fold(mutableMapOf()) { props, prop ->
+                    props[prop.key.toString()] = prop.value.toString(); props
+                },
+                "env" to System.getenv()
+        )
     }
 
     val force: Boolean get() = flag(FORCE_PROP)
@@ -128,9 +114,5 @@ class PropertyParser(private val project: Project) {
                         .build()
                 )
                 .build()
-
-        private val TEMPLATE_INTERPOLATOR: (String, Map<String, Any?>) -> String = { source, props ->
-            StringSubstitutor.replace(source, props, TEMPLATE_VAR_PREFIX, TEMPLATE_VAR_SUFFIX)
-        }
     }
 }

@@ -28,7 +28,6 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
     implementation("org.apache.commons:commons-lang3:3.9")
-    implementation("org.apache.commons:commons-text:1.8")
     implementation("commons-io:commons-io:2.6")
     implementation("org.samba.jcifs:jcifs:1.3.18-kohsuke-1")
 
