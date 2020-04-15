@@ -2,9 +2,9 @@ package com.cognifide.gradle.common.utils
 
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.jayway.jsonpath.JsonPath
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.builder.HashCodeBuilder
@@ -51,6 +51,8 @@ object Formats {
         registerModule(KotlinModule())
     }
 
+    private val ObjectMapper.mapType get() = typeFactory.constructMapType(HashMap::class.java, String::class.java, Any::class.java)
+
     private fun jsonWriter(pretty: Boolean) = jsonMapper().run {
         when {
             pretty -> writer(DefaultPrettyPrinter().apply {
@@ -60,27 +62,25 @@ object Formats {
         }
     }
 
-    fun toJson(value: Any, pretty: Boolean = true): String {
-        return jsonWriter(pretty).writeValueAsString(value) ?: ""
-    }
+    fun asJson(input: InputStream) = jsonMapper().readTree(input)
 
-    fun toJson(value: Map<String, Any?>, pretty: Boolean = true): String {
-        return jsonWriter(pretty).writeValueAsString(value) ?: "{}"
-    }
+    fun asJson(text: String) = jsonMapper().readTree(text)
 
-    inline fun <reified T : Any> fromJson(json: String) = fromJson(json, T::class.java)
+    fun toMapFromJson(jsonNode: JsonNode) = jsonMapper().run { convertValue<Map<String, Any>>(jsonNode, mapType) }
 
-    fun <T> fromJson(input: InputStream, clazz: Class<T>): T = jsonMapper().readValue(input, clazz)
+    inline fun <reified T : Any> toObjectFromJson(json: String) = toObjectFromJson(json, T::class.java)
 
-    fun <T> fromJson(json: String, clazz: Class<T>): T = jsonMapper().readValue(json, clazz)
+    fun <T> toObjectFromJson(input: InputStream, clazz: Class<T>): T = jsonMapper().readValue(input, clazz)
 
-    fun fromJsonToMap(json: String): Map<String, Any?> = jsonMapper().run {
-        readValue(json, typeFactory.constructMapType(HashMap::class.java, String::class.java, Any::class.java))
-    }
+    fun <T> toObjectFromJson(json: String, clazz: Class<T>): T = jsonMapper().readValue(json, clazz)
 
-    fun asJson(input: InputStream) = JsonPath.parse(input)
+    fun toMapFromJson(input: InputStream) = toMapFromJson(asJson(input))
 
-    fun asJson(value: String) = JsonPath.parse(value)
+    fun toMapFromJson(text: String) = toMapFromJson(asJson(text))
+
+    fun toJson(value: Any, pretty: Boolean = true): String = jsonWriter(pretty).writeValueAsString(value) ?: ""
+
+    fun toJson(value: Map<String, Any?>, pretty: Boolean = true): String = jsonWriter(pretty).writeValueAsString(value) ?: "{}"
 
     // HTML
 
@@ -216,3 +216,11 @@ object Formats {
         return path.replace("\\", "/")
     }
 }
+
+fun JsonNode.asMap() = Formats.toMapFromJson(this)
+
+fun String.asXml() = Formats.asXml(this)
+
+fun String.asJson() = Formats.asJson(this)
+
+fun String.asHtml() = Formats.asHtml(this)

@@ -5,7 +5,8 @@ import com.cognifide.gradle.common.file.transfer.http.HttpFileTransfer
 import com.cognifide.gradle.common.guava.net.UrlEscapers
 import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.utils.Utils
-import com.jayway.jsonpath.DocumentContext
+import com.cognifide.gradle.common.utils.asMap
+import com.fasterxml.jackson.databind.JsonNode
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -219,9 +220,9 @@ open class HttpClient(private val common: CommonExtension) {
         return response.entity.content
     }
 
-    fun asJson(response: HttpResponse): DocumentContext = Formats.asJson(asStream(response))
+    fun asJson(response: HttpResponse): JsonNode = Formats.asJson(asStream(response))
 
-    fun asJson(jsonString: String): DocumentContext = Formats.asJson(jsonString)
+    fun asJson(jsonString: String): JsonNode = Formats.asJson(jsonString)
 
     fun asHtml(response: HttpResponse): Document = Formats.asHtml(asStream(response))
 
@@ -236,9 +237,28 @@ open class HttpClient(private val common: CommonExtension) {
     inline fun <reified T : Any> asObjectFromJson(response: HttpResponse) = asObjectFromJson(response, T::class.java)
 
     fun <T> asObjectFromJson(response: HttpResponse, clazz: Class<T>): T = try {
-        Formats.fromJson(asStream(response), clazz)
+        Formats.toObjectFromJson(asStream(response), clazz)
     } catch (e: IOException) {
-        throw ResponseException("Cannot parse response because it is probably malformed. Cause: ${e.message}\n$response", e)
+        throw ResponseException("Cannot parse response JSON as object, because response is probably malformed. Cause: ${e.message}\n$response", e)
+    }
+
+    fun asMapFromJson(response: HttpResponse) = asJson(response).asMap()
+
+    fun asMapFromJson(response: HttpResponse, jsonPointer: String) = asNodeFromJson(response, jsonPointer).asMap()
+
+    @Suppress("TooGenericExceptionCaught")
+    fun asNodeFromJson(response: HttpResponse, jsonPointer: String): JsonNode {
+        val json = asJson(response)
+
+        return try {
+            json.at(jsonPointer).also {
+                if (it.isMissingNode) {
+                    throw ResponseException("Cannot parse response JSON as map, because node at pointer '$jsonPointer' is missing!\n$response")
+                }
+            }
+        } catch (e: Exception) {
+            throw ResponseException("Cannot parse response JSON as map, because response is probably malformed. Cause: ${e.message}\n$response", e)
+        }
     }
 
     fun checkStatus(response: HttpResponse, statusCodes: IntRange = STATUS_CODE_VALID) {

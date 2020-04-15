@@ -26,27 +26,26 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
-    implementation("org.apache.commons:commons-lang3:3.9")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
+    implementation("org.apache.commons:commons-lang3:3.10")
     implementation("commons-io:commons-io:2.6")
-    implementation("org.samba.jcifs:jcifs:1.3.18-kohsuke-1")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1")
-    implementation("org.jsoup:jsoup:1.12.1")
-
     implementation("org.apache.sshd:sshd-sftp:2.3.0")
+    implementation("org.samba.jcifs:jcifs:1.3.18-kohsuke-1")
+    implementation("org.jsoup:jsoup:1.12.1")
     implementation("org.apache.httpcomponents:httpclient:4.5.10")
     implementation("org.apache.httpcomponents:httpmime:4.5.10")
+
     implementation("io.pebbletemplates:pebble:3.1.2")
     implementation("com.dorkbox:Notify:3.7")
-    implementation("com.jayway.jsonpath:json-path:2.4.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 
-    "detektPlugins"("io.gitlab.arturbosch.detekt:detekt-formatting:1.6.0")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.6.0")
 }
 
 val functionalTestSourceSet = sourceSets.create("functionalTest")
