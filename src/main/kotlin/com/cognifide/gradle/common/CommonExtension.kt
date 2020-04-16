@@ -249,3 +249,6 @@ fun Project.pluginProject(id: String): Project? = when {
     plugins.hasPlugin(id) -> this
     else -> rootProject.allprojects.firstOrNull { it.plugins.hasPlugin(id) }
 }
+
+@Synchronized
+fun Project.pluginProjects(id: String): List<Project> = rootProject.allprojects.filter { it.plugins.hasPlugin(id) }
