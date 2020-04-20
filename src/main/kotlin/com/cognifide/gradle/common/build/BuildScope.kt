@@ -2,7 +2,7 @@ package com.cognifide.gradle.common.build
 
 import org.gradle.api.Project
 
-class BuildScope {
+class BuildScope private constructor() {
 
     private val cache = mutableMapOf<String, Any>()
 
@@ -39,9 +39,11 @@ class BuildScope {
     }
 
     @Synchronized
-    fun doOnce(operation: String, action: () -> Unit) = tryGetOrPut(operation) {
-        action()
-        true
+    fun doOnce(operation: String, action: () -> Unit) {
+        tryGetOrPut(operation) {
+            action()
+            true
+        }
     }
 
     companion object {
