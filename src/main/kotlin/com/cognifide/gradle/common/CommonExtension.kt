@@ -164,6 +164,16 @@ open class CommonExtension(val project: Project) {
             .map { files -> files.maxBy { it.lastModified() } }
 
     /**
+     * Get recent files built in directories as file collection.
+     */
+    fun recentFiles(vararg dirs: File, filePatterns: Iterable<String> = RECENT_FILE_PATTERNS) = recentFiles(dirs.asIterable(), filePatterns)
+
+    /**
+     * Get recent files built in directories as file collection.
+     */
+    fun recentFiles(dirs: Iterable<File>, filePatterns: Iterable<String> = RECENT_FILE_PATTERNS) = providedFiles(dirs.map { recentFileProvider(it, filePatterns) })
+
+    /**
      * Returns file collection with providers returning any value (avoids exception).
      */
     fun providedFiles(vararg providers: Provider<File>) = providedFiles(providers.asIterable())
