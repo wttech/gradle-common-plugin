@@ -18,6 +18,7 @@ import org.gradle.api.internal.tasks.userinput.UserInputHandler
 import org.gradle.api.provider.Provider
 import java.io.File
 
+@Suppress("TooManyFunctions")
 open class CommonExtension(val project: Project) {
 
     val logger = project.logger
@@ -152,10 +153,25 @@ open class CommonExtension(val project: Project) {
     /**
      * Get recent file from directory
      */
+    fun recentFileProvider(dirPath: String, filePatterns: Iterable<String> = RECENT_FILE_PATTERNS) = recentFileProvider(project.file(dirPath), filePatterns)
+
+    /**
+     * Get recent file from directory
+     */
     fun recentFileProvider(dir: File, filePatterns: Iterable<String> = RECENT_FILE_PATTERNS): Provider<File> = project.fileTree(dir)
             .matching { it.include(filePatterns) }.elements
             .map { files -> files.map { it.asFile } }
             .map { files -> files.maxBy { it.lastModified() } }
+
+    /**
+     * Returns file collection with providers returning any value (avoids exception).
+     */
+    fun providedFiles(vararg providers: Provider<File>) = providedFiles(providers.asIterable())
+
+    /**
+     * Returns file collection with providers returning any value (avoids exception).
+     */
+    fun providedFiles(providers: Iterable<Provider<File>>) = obj.files { from(obj.provider { providers.mapNotNull { it.orNull } }) }
 
     /**
      * Factory method for configuration object determining how operation should be retried.

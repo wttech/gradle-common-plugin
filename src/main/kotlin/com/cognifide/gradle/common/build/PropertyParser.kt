@@ -38,17 +38,24 @@ class PropertyParser(private val project: Project) {
         return if (!value.isBlank()) value.toBoolean() else true
     }
 
-    fun list(name: String, delimiter: String = ","): List<String>? {
-        val value = prop(name) ?: return null
-        if (value == EMPTY_LIST) return listOf()
-        return Formats.toList(value, delimiter)
+    fun list(name: String, delimiter: String = ","): List<String>? = when (val value = prop(name)) {
+        null -> group(name)?.values?.toList()
+        EMPTY_LIST -> listOf()
+        else -> Formats.toList(value, delimiter)
     }
 
-    fun map(name: String, valueDelimiter: String = ",", keyDelimiter: String = "="): Map<String, String>? {
-        val value = prop(name) ?: return null
-        if (value == EMPTY_MAP) return mapOf()
-        return Formats.toMap(value, valueDelimiter, keyDelimiter)
+    fun map(name: String, valueDelimiter: String = ",", keyDelimiter: String = "=") = when (val value = prop(name)) {
+        null -> group(name)
+        EMPTY_MAP -> mapOf()
+        else -> Formats.toMap(value, valueDelimiter, keyDelimiter)
     }
+
+    fun group(name: String): Map<String, String>? = project.properties
+            .filterKeys { it.startsWith("$name.") }
+            .map { it.key.removePrefix("$name.") to (it.value ?: "").toString() }
+            .sortedBy { it.first }
+            .toMap()
+            .ifEmpty { null }
 
     fun boolean(name: String) = prop(name)?.toBoolean()
 
