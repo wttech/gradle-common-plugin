@@ -2,6 +2,7 @@ package com.cognifide.gradle.common.utils
 
 // https://github.com/Fleshgrinder/kotlin-case-format/blob/master/src/main/kotlin/CaseFormat.kt
 
+@Suppress("ComplexMethod")
 private fun formatCamelCase(input: String, ignore: CharArray, upperCase: Boolean): String {
     return if (input.isEmpty()) input else StringBuilder(input.length).also {
         var seenSeparator = upperCase
@@ -41,6 +42,7 @@ private fun formatCamelCase(input: String, ignore: CharArray, upperCase: Boolean
 fun String.toLowerCamelCase(vararg ignore: Char): String = formatCamelCase(this, ignore, false)
 fun String.toUpperCamelCase(vararg ignore: Char): String = formatCamelCase(this, ignore, true)
 
+@Suppress("ComplexMethod")
 private fun formatCase(input: String, separator: Char, ignore: CharArray, upperCase: Boolean): String {
     return if (input.isEmpty()) input else StringBuilder(input.length).also {
         var seenSeparator = true
