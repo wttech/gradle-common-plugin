@@ -10,7 +10,6 @@ import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.utils.Patterns
 import java.io.File
 import org.apache.commons.io.FilenameUtils
-import org.gradle.api.InvalidUserDataException
 
 /**
  * File downloader with groups supporting files from multiple sources: local and remote (SFTP, SMB, HTTP).
