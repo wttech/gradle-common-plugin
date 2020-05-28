@@ -93,12 +93,12 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
     /**
      * Resolve file in case of various type of specified value: file, url to file, dependency notation, project dependency.
      */
-    @Suppress("NestedBlockDepth")
+    @Suppress("NestedBlockDepth", "TooGenericExceptionCaught")
     fun get(value: Any): FileResolution = common.fileTransfer.run {
         try {
-            // local file
-            useLocal(project.file(value))
-        } catch (e: InvalidUserDataException) {
+            // local file or task providing file
+            useLocal(project.files(value).singleFile)
+        } catch (e: Exception) {
             // files resolved using protocols
             if (value is String) {
                 handling(value).run {
