@@ -2,7 +2,6 @@ package com.cognifide.gradle.common.file.transfer
 
 import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.file.FileException
-import org.apache.commons.io.FilenameUtils
 import java.io.File
 import java.io.Serializable
 
@@ -12,7 +11,7 @@ abstract class AbstractFileTransfer(protected val common: CommonExtension) : Fil
 
     override val parallelable = common.obj.provider { true }
 
-    override fun download(fileUrl: String) = common.temporaryFile(FilenameUtils.getName(fileUrl)).also { download(fileUrl, it) }
+    override fun download(fileUrl: String) = common.temporaryFile(FileUtils.nameFromUrl(fileUrl)).also { download(fileUrl, it) }
 
     override fun downloadFrom(dirUrl: String, fileName: String, target: File) {
         throw FileException("File transfer '$name' does not support 'download' operation.")

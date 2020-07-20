@@ -11,7 +11,6 @@ import com.cognifide.gradle.common.file.transfer.sftp.SftpFileTransfer
 import com.cognifide.gradle.common.file.transfer.smb.SmbFileTransfer
 import com.cognifide.gradle.common.utils.using
 import java.io.File
-import org.apache.commons.io.FilenameUtils
 
 /**
  * Facade for transferring files over multiple protocols HTTP/SFTP/SMB and custom.
@@ -108,7 +107,8 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
     /**
      * Downloads file from specified URL to temporary directory with preserving file name.
      */
-    override fun download(fileUrl: String): File = common.temporaryFile(FilenameUtils.getName(fileUrl)).also { download(fileUrl, it) }
+    override fun download(fileUrl: String): File = common.temporaryFile(FileUtils.nameFromUrl(fileUrl))
+            .also { download(fileUrl, it) }
 
     /**
      * Downloads file of given name from directory at specified URL.
@@ -119,7 +119,7 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
      * Downloads file from specified URL using dedicated transfer type.
      */
     fun downloadUsing(transfer: FileTransfer, fileUrl: String, target: File) {
-        val (dirUrl, fileName) = FileTransfer.splitFileUrl(fileUrl)
+        val (dirUrl, fileName) = FileUtils.splitUrl(fileUrl)
         return downloadUsing(transfer, dirUrl, fileName, target)
     }
 
@@ -152,7 +152,7 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
      * Uploads file to file at specified URL using dedicated transfer type.
      */
     fun uploadUsing(transfer: FileTransfer, fileUrl: String, source: File) {
-        val (dirUrl, fileName) = FileTransfer.splitFileUrl(fileUrl)
+        val (dirUrl, fileName) = FileUtils.splitUrl(fileUrl)
         return uploadUsing(transfer, dirUrl, fileName, source)
     }
 

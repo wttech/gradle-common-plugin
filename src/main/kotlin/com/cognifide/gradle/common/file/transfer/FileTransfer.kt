@@ -1,7 +1,6 @@
 package com.cognifide.gradle.common.file.transfer
 
 import java.io.File
-import org.apache.commons.io.FilenameUtils
 
 interface FileTransfer {
 
@@ -19,7 +18,7 @@ interface FileTransfer {
      * Downloads file from specified URL.
      */
     fun download(fileUrl: String, target: File) {
-        val (dirUrl, fileName) = splitFileUrl(fileUrl)
+        val (dirUrl, fileName) = FileUtils.splitUrl(fileUrl)
         downloadFrom(dirUrl, fileName, target)
     }
 
@@ -31,8 +30,8 @@ interface FileTransfer {
     /**
      * Downloads file from specified URL to specified directory with preserving file name.
      */
-    fun downloadTo(fileUrl: String, dir: File): File {
-        return File(dir, FilenameUtils.getName(fileUrl)).apply { download(fileUrl, this) }
+    fun downloadTo(fileUrl: String, dir: File) = File(dir, FileUtils.nameFromUrl(fileUrl)).apply {
+        download(fileUrl, this)
     }
 
     /**
@@ -53,7 +52,7 @@ interface FileTransfer {
      * Uploads file to specified URL.
      */
     fun upload(fileUrl: String, source: File) {
-        val (dirUrl, fileName) = splitFileUrl(fileUrl)
+        val (dirUrl, fileName) = FileUtils.splitUrl(fileUrl)
         uploadTo(dirUrl, fileName, source)
     }
 
@@ -66,7 +65,7 @@ interface FileTransfer {
      * Deletes file available at specified URL.
      */
     fun delete(fileUrl: String) {
-        val (dirUrl, fileName) = splitFileUrl(fileUrl)
+        val (dirUrl, fileName) = FileUtils.splitUrl(fileUrl)
         deleteFrom(dirUrl, fileName)
     }
 
@@ -84,7 +83,7 @@ interface FileTransfer {
      * Checks if file at specified URL exists.
      */
     fun exists(fileUrl: String): Boolean {
-        val (dirUrl, fileName) = splitFileUrl(fileUrl)
+        val (dirUrl, fileName) = FileUtils.splitUrl(fileUrl)
         return exists(dirUrl, fileName)
     }
 
@@ -102,26 +101,7 @@ interface FileTransfer {
      * Gets file status at specified URL.
      */
     fun stat(fileUrl: String): FileEntry? {
-        val (dirUrl, fileName) = splitFileUrl(fileUrl)
+        val (dirUrl, fileName) = FileUtils.splitUrl(fileUrl)
         return stat(dirUrl, fileName)
-    }
-
-    companion object {
-
-         fun splitFileUrl(fileUrl: String): Pair<String, String> = when {
-            fileUrl.contains("://") -> {
-                val (protocol, path) = fileUrl.split("://")
-                val dirUrl = path.takeIf { it.contains("/") }?.substringBeforeLast("/").orEmpty()
-                val fileName = path.substringAfterLast("/")
-
-                ("$protocol://$dirUrl") to fileName
-            }
-            else -> {
-                val dirUrl = fileUrl.substringBeforeLast("/")
-                val fileName = fileUrl.substringAfterLast("/")
-
-                dirUrl to fileName
-            }
-        }
     }
 }

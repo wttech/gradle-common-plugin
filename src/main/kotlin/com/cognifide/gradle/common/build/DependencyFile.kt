@@ -33,6 +33,9 @@ class DependencyFile(private val project: Project, notation: Any) {
 
         fun isNotation(text: String) = Patterns.wildcard(text, NOTATION_PATTERNS)
 
+        @Suppress("MagicNumber")
+        fun getExtension(text: String): String? = text.split(":").getOrNull(3) ?: "jar"
+
         fun hintNotation(notation: Any, extensionHint: String): Any = when {
             notation is String && isNotation(notation) -> "${notation.substringBeforeLast("@")}@$extensionHint"
             else -> notation
