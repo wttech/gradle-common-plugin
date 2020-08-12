@@ -141,6 +141,13 @@ object Formats {
 
     fun checksum(file: File) = file.inputStream().use { DigestUtils.md5Hex(it) }
 
+    fun checksumLazy(file: File) = file.resolveSibling("${file.name}.md5").let { checksumFile ->
+        when {
+            checksumFile.exists() -> checksumFile.readText()
+            else -> checksum(file).also { checksumFile.writeText(it) }
+        }
+    }
+
     fun fileSize(file: File): String = fileSizeBytesToHuman(when {
         file.exists() -> FileUtils.sizeOf(file)
         else -> 0L

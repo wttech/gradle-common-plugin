@@ -136,14 +136,13 @@ open class CommonExtension(val project: Project) {
     fun temporaryFile(path: String): File = temporaryDir.resolve(path)
 
     /**
-     * Get or compute MD5 checksum of file.
+     * Get or compute MD5 checksum of file interactively.
      */
-    fun checksumFile(file: File): String = file.resolveSibling("${file.name}.md5").let { checksumFile ->
-            when {
-                checksumFile.exists() -> checksumFile.readText()
-                else -> Formats.checksum(file).also { checksumFile.writeText(it) }
-            }
-        }
+    fun checksumFile(file: File): String = progress {
+        step = "Calculating checksum"
+        message = "File '${file.name}'"
+        Formats.checksum(file)
+    }
 
     /**
      * Predefined temporary directory.
@@ -272,7 +271,7 @@ open class CommonExtension(val project: Project) {
 
         const val TEMPORARY_DIR = "tmp"
 
-        val RECENT_FILE_PATTERNS = listOf("**/*.jar", "**/*.zip")
+        val RECENT_FILE_PATTERNS = listOf("*.jar", "*.zip", "*.war", "*.ear")
 
         private val PLUGIN_IDS = listOf(CommonPlugin.ID)
 
