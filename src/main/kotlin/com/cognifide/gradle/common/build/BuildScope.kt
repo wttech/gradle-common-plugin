@@ -38,6 +38,11 @@ class BuildScope private constructor() {
         cache[key] = value
     }
 
+    // Synchronized methods
+
+    @Synchronized
+    fun <T : Any> computeOnce(key: String, defaultValue: () -> T) = getOrPut(key, defaultValue)
+
     @Synchronized
     fun doOnce(operation: String, action: () -> Unit) {
         tryGetOrPut(operation) {

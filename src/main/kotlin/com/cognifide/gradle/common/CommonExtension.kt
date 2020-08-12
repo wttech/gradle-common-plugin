@@ -136,6 +136,16 @@ open class CommonExtension(val project: Project) {
     fun temporaryFile(path: String): File = temporaryDir.resolve(path)
 
     /**
+     * Get or compute MD5 checksum of file.
+     */
+    fun checksumFile(file: File): String = file.resolveSibling("${file.name}.md5").let { checksumFile ->
+            when {
+                checksumFile.exists() -> checksumFile.readText()
+                else -> Formats.checksum(file).also { checksumFile.writeText(it) }
+            }
+        }
+
+    /**
      * Predefined temporary directory.
      */
     val temporaryDir: File get() = project.buildDir.resolve(TEMPORARY_DIR)

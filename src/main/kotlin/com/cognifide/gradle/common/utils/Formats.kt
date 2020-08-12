@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.builder.HashCodeBuilder
@@ -137,6 +138,8 @@ object Formats {
     fun toHashCodeHex(value: Any) = Integer.toHexString(HashCodeBuilder().append(value).toHashCode())
 
     // Math & numbers and transformations
+
+    fun checksum(file: File) = file.inputStream().use { DigestUtils.md5Hex(it) }
 
     fun fileSize(file: File): String = fileSizeBytesToHuman(when {
         file.exists() -> FileUtils.sizeOf(file)
