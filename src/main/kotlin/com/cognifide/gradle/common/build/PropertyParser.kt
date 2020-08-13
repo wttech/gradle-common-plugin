@@ -9,7 +9,9 @@ import java.io.File
 import java.io.IOException
 import java.io.StringWriter
 
-class PropertyParser(private val project: Project) {
+class PropertyParser(anyProject: Project) {
+
+    private val project = anyProject.rootProject
 
     private fun find(name: String): String? {
         if (project.hasProperty(name)) {
