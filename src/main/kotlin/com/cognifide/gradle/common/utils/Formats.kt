@@ -139,12 +139,14 @@ object Formats {
 
     // Math & numbers and transformations
 
-    fun checksum(file: File) = file.inputStream().use { DigestUtils.md5Hex(it) }
+    fun toChecksum(file: File) = file.inputStream().use { DigestUtils.md5Hex(it) }
 
-    fun checksumLazy(file: File) = file.resolveSibling("${file.name}.md5").let { checksumFile ->
+    fun toChecksumFile(file: File) = file.resolveSibling("${file.name}.md5")
+
+    fun checksum(file: File, recalculate: Boolean = false) = toChecksumFile(file).let { checksumFile ->
         when {
-            checksumFile.exists() -> checksumFile.readText()
-            else -> checksum(file).also { checksumFile.writeText(it) }
+            recalculate || !checksumFile.exists() -> toChecksum(file).also { checksumFile.writeText(it) }
+            else -> checksumFile.readText()
         }
     }
 

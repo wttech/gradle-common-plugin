@@ -138,10 +138,10 @@ open class CommonExtension(val project: Project) {
     /**
      * Get or compute MD5 checksum of file interactively.
      */
-    fun checksumFile(file: File): String = progress {
+    fun checksumFile(file: File, recalculate: Boolean = false): String = progress {
         step = "Calculating checksum"
         message = "File '${file.name}'"
-        Formats.checksum(file)
+        Formats.checksum(file, recalculate)
     }
 
     /**
