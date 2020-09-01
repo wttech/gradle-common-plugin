@@ -2,7 +2,6 @@ package com.cognifide.gradle.common.build
 
 import java.util.*
 import java.util.concurrent.TimeUnit
-import org.apache.commons.lang3.time.StopWatch
 import org.gradle.api.Project
 import org.gradle.internal.logging.progress.ProgressLogger as BaseLogger
 import org.gradle.internal.logging.progress.ProgressLoggerFactory
@@ -21,19 +20,18 @@ open class ProgressLogger private constructor(private val project: Project) {
 
     private lateinit var base: BaseLogger
 
-    private lateinit var stopWatch: StopWatch
+    private var progressTime = 0L
 
     private fun create(): BaseLogger = ServiceAccessor(project)
             .get<ProgressLoggerFactory>()
             .newOperation(javaClass, baseParents.peek())
 
     fun <T> launch(block: ProgressLogger.() -> T): T {
-        stopWatch = StopWatch()
         base = create()
         baseParents.add(base)
 
         try {
-            stopWatch.start()
+            progressTime = System.currentTimeMillis()
             base.description = header
             base.started()
 
@@ -41,15 +39,16 @@ open class ProgressLogger private constructor(private val project: Project) {
         } finally {
             base.completed()
             baseParents.remove(base)
-            stopWatch.stop()
+            progressTime = 0L
         }
     }
 
     fun progress(message: String) {
         base.progress(message)
 
-        if (stopWatch.time >= progressWindow) {
-            stopWatch.run { reset(); start() }
+        val progressCurrentTime = System.currentTimeMillis()
+        if (progressTime > 0 && (progressCurrentTime - progressTime) >= progressWindow) {
+            progressTime = progressCurrentTime
             progressEach(message)
         }
     }

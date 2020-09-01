@@ -1,5 +1,6 @@
 package com.cognifide.gradle.common.build
 
+import com.cognifide.gradle.common.CommonException
 import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.utils.Formats
 
@@ -59,6 +60,8 @@ class Retry(val common: CommonExtension) {
         throw exception
     }
 
+    fun withCountdown(operation: String, block: (Long) -> Unit) = withCountdown<Unit, CommonException>(operation, block)
+
     @Suppress("TooGenericExceptionCaught")
     inline fun <T, reified E> withSleep(block: (Long) -> T): T {
         lateinit var exception: Exception
@@ -82,6 +85,8 @@ class Retry(val common: CommonExtension) {
 
         throw exception
     }
+
+    fun withSleep(block: (Long) -> Unit) = withSleep<Unit, CommonException>(block)
 
     companion object {
         fun none(common: CommonExtension) = Retry(common)
