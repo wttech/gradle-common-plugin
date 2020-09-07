@@ -12,6 +12,7 @@ import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.utils.Patterns
 import com.cognifide.gradle.common.build.*
 import com.cognifide.gradle.common.tasks.TaskFacade
+import com.cognifide.gradle.common.zip.ZipFile
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact
@@ -254,6 +255,16 @@ open class CommonExtension(val project: Project) {
      * Transfer files using over SMB protocol using custom settings.
      */
     fun <T> smbFile(consumer: SmbFileTransfer.() -> T) = fileTransfer.factory.smb(consumer)
+
+    /**
+     * Utility to work with ZIP files (even big ones)
+     */
+    fun zip(file: File) = ZipFile(file)
+
+    /**
+     * Utility to work with ZIP files (even big ones)
+     */
+    fun zip(path: String) = zip(project.file(path))
 
     // Utilities (to use without imports)
 

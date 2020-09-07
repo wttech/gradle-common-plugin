@@ -34,6 +34,7 @@ dependencies {
     implementation("commons-io:commons-io:2.6")
     implementation("io.pebbletemplates:pebble:3.1.2")
     implementation("com.dorkbox:Notify:3.7")
+    implementation("net.lingala.zip4j:zip4j:2.5.1")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
