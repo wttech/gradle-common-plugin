@@ -41,7 +41,7 @@ class ProgressIndicator(private val project: Project) {
 
     private fun <T> ProgressIndicator.launchAsync(block: ProgressIndicator.() -> T): T {
         return runBlocking {
-            val loggerJob = async(Dispatchers.IO) {
+            val loggerJob = launch(Dispatchers.IO) {
                 ProgressLogger.of(project).launch {
                     this@ProgressIndicator.logger = this
                     Behaviors.waitUntil(delay) { timer ->
@@ -53,8 +53,11 @@ class ProgressIndicator(private val project: Project) {
             }
 
             loggerJob.start()
-            val result = block()
-            loggerJob.cancelAndJoin()
+            val result = try {
+                block()
+            } finally {
+                loggerJob.cancelAndJoin()
+            }
             result
         }
     }
@@ -76,11 +79,13 @@ class ProgressIndicator(private val project: Project) {
     fun <T> increment(message: String, block: () -> T): T {
         update()
         messageQueue.add(message)
-        val result = block()
-        count++
-        messageQueue.remove(message)
-        update()
-        return result
+        return try {
+            block()
+        } finally {
+            count++
+            messageQueue.remove(message)
+            update()
+        }
     }
 
     fun update() {
