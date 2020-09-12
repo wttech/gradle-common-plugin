@@ -2,8 +2,8 @@ package com.cognifide.gradle.common.build
 
 import com.cognifide.gradle.common.utils.Formats
 import java.util.*
-import kotlinx.coroutines.*
 import org.gradle.api.Project
+import java.util.concurrent.Executors
 
 class ProgressIndicator(private val project: Project) {
 
@@ -40,25 +40,21 @@ class ProgressIndicator(private val project: Project) {
     }
 
     private fun <T> ProgressIndicator.launchAsync(block: ProgressIndicator.() -> T): T {
-        return runBlocking {
-            val loggerJob = launch(Dispatchers.IO) {
-                ProgressLogger.of(project).launch {
-                    this@ProgressIndicator.logger = this
-                    Behaviors.waitUntil(delay) { timer ->
-                        this@ProgressIndicator.timer = timer
-                        updater()
-                        isActive
-                    }
+        val executor = Executors.newSingleThreadExecutor()
+        executor.submit {
+            ProgressLogger.of(project).launch {
+                this@ProgressIndicator.logger = this
+                Behaviors.waitUntil(delay) { timer ->
+                    this@ProgressIndicator.timer = timer
+                    updater()
+                    true
                 }
             }
-
-            loggerJob.start()
-            val result = try {
-                block()
-            } finally {
-                loggerJob.cancelAndJoin()
-            }
-            result
+        }
+        return try {
+            block()
+        } finally {
+            executor.shutdownNow()
         }
     }
 

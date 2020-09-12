@@ -62,7 +62,7 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
                 }
             } else {
                 val (parallel, sequential) = partition { it.parallelable }
-                common.parallel.poolEach(parallelLevel.get(), "resolver", parallel) { group ->
+                common.parallel.poolEach(parallelLevel.get(), parallel) { group ->
                     increment("Group '${group.name}'") { group.resolve() }
                 }
                 sequential.forEach { group ->

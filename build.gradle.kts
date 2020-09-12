@@ -23,7 +23,6 @@ repositories {
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
     implementation("org.apache.commons:commons-lang3:3.10")
     implementation("org.apache.sshd:sshd-sftp:2.4.0")
     implementation("org.apache.httpcomponents:httpclient:4.5.12")

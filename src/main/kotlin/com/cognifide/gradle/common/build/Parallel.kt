@@ -1,49 +1,45 @@
 package com.cognifide.gradle.common.build
 
-import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.*
-import java.util.*
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 
-@UseExperimental(ObsoleteCoroutinesApi::class)
 object Parallel {
 
-    fun <A, B : Any> map(iterable: Iterable<A>, mapper: CoroutineScope.(A) -> B): Collection<B> {
-        return map(iterable, { true }, mapper)
-    }
+    val poolSize: Int get() = Runtime.getRuntime().availableProcessors()
 
-    fun <A, B : Any> map(iterable: Iterable<A>, filter: (A) -> Boolean, mapper: CoroutineScope.(A) -> B): List<B> {
-        return map(Dispatchers.IO, iterable) {
-            if (filter(it)) { mapper(it) } else { null }
+    fun <A, B : Any> poolMap(iterable: Iterable<A>, mapper: (A) -> B) = poolMap(poolSize, iterable, mapper)
+
+    fun <A, B : Any> poolMap(size: Int, iterable: Iterable<A>, mapper: (A) -> B): List<B> {
+        val executor = Executors.newFixedThreadPool(size)
+        return try {
+            val futures = iterable.map { i -> executor.submit(Callable { mapper(i) }) }
+            futures.map { it.get() }
+        } finally {
+            executor.shutdownNow()
         }
     }
 
-    private fun <A, B : Any> map(context: CoroutineContext, iterable: Iterable<A>, mapper: CoroutineScope.(A) -> B?): List<B> {
-        return runBlocking(context) {
-            iterable.map { value -> async { if (value != null) mapper(value) else null } }.mapNotNull { it.await() }
-        }
+    fun <A, B : Any> map(iterable: Iterable<A>, mapper: (A) -> B): List<B> = poolMap(iterable.count(), iterable, mapper)
+
+    fun <A> poolEach(iterable: Iterable<A>, callback: (A) -> Unit) = poolEach(poolSize, iterable, callback)
+
+    fun <A> poolEach(size: Int, iterable: Iterable<A>, callback: (A) -> Unit) {
+        poolMap(size, iterable) { callback(it); Unit }
     }
 
-    fun <A> each(iterable: Iterable<A>, callback: CoroutineScope.(A) -> Unit) {
+    fun <A> each(iterable: Iterable<A>, callback: (A) -> Unit) {
         map(iterable) { callback(it); Unit }
     }
 
+    fun <A> poolWith(iterable: Iterable<A>, callback: A.() -> Unit) = poolWith(poolSize, iterable, callback)
+
+    fun <A> poolWith(size: Int, iterable: Iterable<A>, callback: A.() -> Unit) {
+        poolMap(size, iterable) {
+            callback(it); Unit
+        }
+    }
+
     fun <A> with(iterable: Iterable<A>, callback: A.() -> Unit) {
-        map(iterable) { it.apply(callback); Unit }
+        map(iterable) { callback(it); Unit }
     }
-
-    fun <A, B : Any> poolMap(iterable: Iterable<A>, mapper: CoroutineScope.(A) -> B) = poolMap(poolThreads, poolName, iterable, mapper)
-
-    fun <A, B : Any> poolMap(threads: Int, name: String, iterable: Iterable<A>, mapper: CoroutineScope.(A) -> B): List<B> {
-        return map(newFixedThreadPoolContext(threads, name), iterable, mapper)
-    }
-
-    fun <A> poolEach(iterable: Iterable<A>, callback: CoroutineScope.(A) -> Unit) = poolEach(poolThreads, poolName, iterable, callback)
-
-    fun <A> poolEach(threads: Int, name: String, iterable: Iterable<A>, callback: CoroutineScope.(A) -> Unit) {
-        poolMap(threads, name, iterable) { callback(it); Unit }
-    }
-
-    val poolThreads: Int get() = Runtime.getRuntime().availableProcessors()
-
-    val poolName: String get() = "pool-${UUID.randomUUID()}"
 }
