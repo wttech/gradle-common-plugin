@@ -4,7 +4,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.*
 import java.util.*
 
-@UseExperimental(ObsoleteCoroutinesApi::class)
+@OptIn(ObsoleteCoroutinesApi::class)
 object Parallel {
 
     fun <A, B : Any> map(iterable: Iterable<A>, mapper: CoroutineScope.(A) -> B): Collection<B> {
