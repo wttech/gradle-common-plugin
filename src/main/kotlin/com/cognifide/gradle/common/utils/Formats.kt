@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
@@ -67,7 +68,14 @@ object Formats {
 
     fun asJson(text: String) = jsonMapper().readTree(text)
 
-    fun toMapFromJson(jsonNode: JsonNode) = jsonMapper().run { convertValue<Map<String, Any>>(jsonNode, mapType) }
+    fun toMapFromJson(jsonNode: JsonNode): Map<String, Any> {
+        if (jsonNode.nodeType != JsonNodeType.OBJECT) {
+            throw FormatException("Only JSON node of type '${JsonNodeType.OBJECT}' " +
+                    "can be converted to map but type '${jsonNode.nodeType}' detected!\n" +
+                    "Ensure that JSON to be converted is not blank.")
+        }
+        return jsonMapper().run { convertValue<Map<String, Any>>(jsonNode, mapType) } ?: mapOf()
+    }
 
     inline fun <reified T : Any> toObjectFromJson(json: String) = toObjectFromJson(json, T::class.java)
 
