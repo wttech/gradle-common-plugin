@@ -89,7 +89,8 @@ class PropertyParser(anyProject: Project) {
 
     private val expandProps: Map<String, Any> by lazy {
         mapOf(
-                "system" to System.getProperties().entries.fold(mutableMapOf()) { props, prop ->
+                "rootProject" to project,
+                "system" to System.getProperties().entries.fold(mutableMapOf<String, Any>()) { props, prop ->
                     props[prop.key.toString()] = prop.value.toString(); props
                 },
                 "env" to System.getenv()
