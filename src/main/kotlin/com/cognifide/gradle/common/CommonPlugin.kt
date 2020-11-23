@@ -8,10 +8,10 @@ import org.gradle.api.plugins.BasePlugin
 class CommonPlugin : Plugin<Project> {
 
     override fun apply(project: Project) = project.using {
+        val common = extensions.create(CommonExtension.NAME, CommonExtension::class.java, this)
         if (common.prop.boolean("common.plugin.base") != false) {
             plugins.apply(BasePlugin::class.java)
         }
-        val common = extensions.create(CommonExtension.NAME, CommonExtension::class.java, this)
         if (common.prop.boolean("common.repository.jcenter") != false) {
             repositories.jcenter()
         }
