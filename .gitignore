@@ -7,4 +7,4 @@ build
 !src/main/kotlin/com/cognifide/gradle/common/build
 
 .DS_Store
-.java-version
+.java-version:x
