@@ -7,9 +7,6 @@ import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.utils.Utils
 import com.cognifide.gradle.common.utils.asMap
 import com.fasterxml.jackson.databind.JsonNode
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
 import org.apache.commons.io.IOUtils
 import org.apache.http.HttpEntity
 import org.apache.http.HttpHost
@@ -26,11 +23,15 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.impl.client.BasicCredentialsProvider
+import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.ssl.SSLContextBuilder
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.io.File
+import java.io.IOException
+import java.io.InputStream
 import java.nio.charset.StandardCharsets
 
 @Suppress("TooManyFunctions")
@@ -122,7 +123,9 @@ open class HttpClient(private val common: CommonExtension) {
         }
     }
 
-    val client by lazy { HttpClientBuilder.create().apply(clientBuilder).build() }
+    private val client get() = HttpClientBuilder.create().apply(clientBuilder).build()
+
+    fun <T> client(action: CloseableHttpClient.() -> T) = client.use(action)
 
     fun responseHandler(handler: (HttpResponse) -> Unit) {
         this.responseHandler = handler
@@ -305,18 +308,15 @@ open class HttpClient(private val common: CommonExtension) {
     }
 
     @Suppress("TooGenericExceptionCaught")
-    open fun <T> execute(method: HttpRequestBase, handler: HttpClient.(HttpResponse) -> T): T {
-        try {
+    open fun <T> execute(method: HttpRequestBase, handler: HttpClient.(HttpResponse) -> T) = try {
+        client {
             requestConfigurer(method)
-            val response = client.execute(method)
+            val response = execute(method)
             responseHandler(response)
-
-            return handler.invoke(this, response)
-        } catch (e: Exception) {
-            throw RequestException("Failed request to $method! Cause: ${e.message}", e)
-        } finally {
-            method.releaseConnection()
+            this@HttpClient.handler(response)
         }
+    } catch (e: Exception) {
+        throw RequestException("Failed request to $method! Cause: ${e.message}", e)
     }
 
     fun execute(method: HttpRequestBase) = execute(method) { checkStatus(it) }
