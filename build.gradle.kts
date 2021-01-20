@@ -29,6 +29,8 @@ dependencies {
     implementation("org.apache.httpcomponents:httpclient:4.5.12")
     implementation("org.apache.httpcomponents:httpmime:4.5.12")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.3")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.3")
+
     implementation("org.samba.jcifs:jcifs:1.3.18-kohsuke-1")
     implementation("org.jsoup:jsoup:1.12.1")
     implementation("commons-io:commons-io:2.6")

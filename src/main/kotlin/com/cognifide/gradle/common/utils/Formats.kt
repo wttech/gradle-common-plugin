@@ -1,10 +1,12 @@
 package com.cognifide.gradle.common.utils
 
+import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.JsonNodeType
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
@@ -47,13 +49,15 @@ object Formats {
 
     fun versionUnknown() = GradleVersion.version("0.0.0")
 
-    // JSON convertions
-
-    private fun jsonMapper() = ObjectMapper().apply {
-        registerModule(KotlinModule())
-    }
+    // Type convertions
 
     private val ObjectMapper.mapType get() = typeFactory.constructMapType(HashMap::class.java, String::class.java, Any::class.java)
+
+    // JSON
+
+    private fun jsonMapper() = ObjectMapper(JsonFactory()).apply {
+        registerModule(KotlinModule())
+    }
 
     private fun jsonWriter(pretty: Boolean) = jsonMapper().run {
         when {
@@ -90,6 +94,20 @@ object Formats {
     fun toJson(value: Any, pretty: Boolean = true): String = jsonWriter(pretty).writeValueAsString(value) ?: ""
 
     fun toJson(value: Map<String, Any?>, pretty: Boolean = true): String = jsonWriter(pretty).writeValueAsString(value) ?: "{}"
+
+    // YML
+
+    private fun ymlMapper() = ObjectMapper(YAMLFactory()).apply {
+        registerModule(KotlinModule())
+    }
+
+    private fun ymlWriter() = ymlMapper().writer()
+
+    fun asYml(input: InputStream) = ymlMapper().readTree(input)
+
+    fun asYml(text: String) = ymlMapper().readTree(text)
+
+    fun toYml(value: Any): String = ymlWriter().writeValueAsString(value) ?: ""
 
     // HTML
 
@@ -242,5 +260,7 @@ fun JsonNode.asMap() = Formats.toMapFromJson(this)
 fun String.asXml() = Formats.asXml(this)
 
 fun String.asJson() = Formats.asJson(this)
+
+fun String.asYml() = Formats.asYml(this)
 
 fun String.asHtml() = Formats.asHtml(this)
