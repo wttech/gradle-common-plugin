@@ -11,6 +11,7 @@ import com.cognifide.gradle.common.notifier.NotifierFacade
 import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.utils.Patterns
 import com.cognifide.gradle.common.build.*
+import com.cognifide.gradle.common.health.HealthChecker
 import com.cognifide.gradle.common.tasks.TaskFacade
 import com.cognifide.gradle.common.zip.ZipFile
 import org.gradle.api.Project
@@ -265,6 +266,8 @@ open class CommonExtension(val project: Project) {
      * Utility to work with ZIP files (even big ones)
      */
     fun zip(path: String) = zip(project.file(path))
+
+    fun healthCheck(options: HealthChecker.() -> Unit) = HealthChecker(this).apply(options).start()
 
     // Utilities (to use without imports)
 
