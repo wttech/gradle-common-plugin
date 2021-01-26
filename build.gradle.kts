@@ -157,8 +157,8 @@ val pluginTags = listOf("sftp", "smb", "ssh", "progress", "file watcher", "file 
         "gui notification", "gradle-plugin", "gradle plugin development")
 
 pluginBundle {
-    website = "https://github.com/Cognifide/gradle-common-plugin"
-    vcsUrl = "https://github.com/Cognifide/gradle-common-plugin.git"
+    website = "https://github.com/wttech/gradle-common-plugin"
+    vcsUrl = "https://github.com/wttech/gradle-common-plugin.git"
     description = "Gradle Common Plugin"
     tags = pluginTags
 }
@@ -170,9 +170,9 @@ bintray {
     with(pkg) {
         repo = "maven-public"
         name = "gradle-common-plugin"
-        userOrg = "cognifide"
+        userOrg = "wttech"
         setLicenses("Apache-2.0")
-        vcsUrl = "https://github.com/Cognifide/gradle-common-plugin.git"
+        vcsUrl = "https://github.com/wttech/gradle-common-plugin.git"
         setLabels(*pluginTags.toTypedArray())
         with(version) {
             name = project.version.toString()
@@ -185,7 +185,7 @@ bintray {
 }
 
 githubRelease {
-    owner("Cognifide")
+    owner("wttech")
     repo("gradle-common-plugin")
     token((project.findProperty("github.token") ?: "").toString())
     tagName(project.version.toString())
