@@ -50,6 +50,11 @@ class ZipFile(val baseFile: File) {
         }
     }
 
+    private fun allFileHeaders(): Sequence<FileHeader> {
+        ensureExists()
+        return base.run { (fileHeaders as List<FileHeader>).asSequence() }
+    }
+
     private fun dirFileHeaders(dirName: String): Sequence<FileHeader> {
         ensureExists()
 
@@ -82,6 +87,8 @@ class ZipFile(val baseFile: File) {
     }
 
     fun walkDir(dirName: String, callback: (FileHeader) -> Unit) = dirFileHeaders(dirName).forEach { callback(it) }
+
+    fun listAll() = allFileHeaders().map { it.fileName }
 
     fun listDir(dirName: String) = dirFileHeaders(dirName).map { it.fileName }
 

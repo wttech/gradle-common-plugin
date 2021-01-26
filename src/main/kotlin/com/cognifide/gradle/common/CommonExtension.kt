@@ -12,7 +12,9 @@ import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.utils.Patterns
 import com.cognifide.gradle.common.build.*
 import com.cognifide.gradle.common.health.HealthChecker
+import com.cognifide.gradle.common.java.JavaSupport
 import com.cognifide.gradle.common.tasks.TaskFacade
+import com.cognifide.gradle.common.utils.using
 import com.cognifide.gradle.common.zip.ZipFile
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
@@ -52,18 +54,14 @@ open class CommonExtension(val project: Project) {
     /**
      * Configures file transfer facade.
      */
-    fun fileTransfer(options: FileTransferManager.() -> Unit) {
-        fileTransfer.apply(options)
-    }
+    fun fileTransfer(options: FileTransferManager.() -> Unit) = fileTransfer.using(options)
 
     /**
      * Provides API for displaying interactive notification during running build tasks.
      */
     val notifier = NotifierFacade.of(this)
 
-    fun notifier(configurer: NotifierFacade.() -> Unit) {
-        notifier.apply(configurer)
-    }
+    fun notifier(configurer: NotifierFacade.() -> Unit) = notifier.using(configurer)
 
     val tasks = TaskFacade(project)
 
@@ -73,6 +71,13 @@ open class CommonExtension(val project: Project) {
     fun tasks(configurer: TaskFacade.() -> Unit) {
         tasks.apply(configurer)
     }
+
+    /**
+     * Configure Java for running AEM instance and compilation.
+     */
+    val javaSupport by lazy { JavaSupport(this) }
+
+    fun javaSupport(options: JavaSupport.() -> Unit) = javaSupport.using(options)
 
     /**
      * Allows easily provide artifact in a lazy way (e.g via task provider).

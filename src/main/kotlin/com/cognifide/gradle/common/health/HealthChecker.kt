@@ -4,9 +4,11 @@ import com.cognifide.gradle.common.CommonException
 import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.build.Retry
 import com.cognifide.gradle.common.http.HttpClient
+import com.cognifide.gradle.common.net.NetUtils
 import com.cognifide.gradle.common.utils.Formats
 import org.apache.http.HttpStatus
 import java.util.concurrent.TimeUnit
+import kotlin.math.min
 
 class HealthChecker(val common: CommonExtension) {
 
@@ -44,6 +46,11 @@ class HealthChecker(val common: CommonExtension) {
         common.prop.long("healthChecker.waitAfter")?.let { set(it) }
     }
 
+    fun wait(before: Long, after: Long) {
+        waitBefore.set(before)
+        waitAfter.set(after)
+    }
+
     fun check(name: String, check: () -> Unit) {
         checks += HealthCheck(name, check)
     }
@@ -60,18 +67,20 @@ class HealthChecker(val common: CommonExtension) {
         val count by lazy { "${passed.size}/${all.size} (${Formats.percent(passed.size, all.size)})" }
 
         common.progress(checks.size) {
-            step = "Health checking (tearing up)"
+            step = "Health checking"
+
             if (waitBefore.get() > 0) {
-                Thread.sleep(waitBefore.get())
+                common.progressCountdown(waitBefore.get())
             }
 
             try {
                 retry.withSleep<Unit, HealthException> { no ->
                     reset()
 
-                    step = when {
-                        no > 1 -> "Health checking (attempt ${no - 1}/${retry.times}, ${failed.size} ${if (failed.size == 1) "check" else "checks"} failed)"
-                        else -> "Health checking"
+                    step = "Health checking"
+                    message = when {
+                        failed.isNotEmpty() -> "Attempt ${min(no, retry.times)}/${retry.times}, ${failed.size} failed"
+                        else -> "Attempt ${min(no, retry.times)}/${retry.times}"
                     }
 
                     all = common.parallel.map(checks) { check ->
@@ -87,11 +96,11 @@ class HealthChecker(val common: CommonExtension) {
                     }
 
                     if (failed.isNotEmpty()) {
-                        throw HealthException("There are failed environment health checks. Retrying...")
+                        throw HealthException("There are failed health checks. Retrying...")
                     }
                 }
             } catch (e: HealthException) {
-                val message = "Environment health check(s) failed. Success ratio: $count:\n" +
+                val message = "Health checking failed. Success ratio: $count:\n" +
                         all.sortedWith(compareBy({ it.succeed }, { it.check.name })).joinToString("\n")
                 if (!verbose) {
                     logger.error(message)
@@ -100,12 +109,11 @@ class HealthChecker(val common: CommonExtension) {
                 }
             }
 
-            step = "Health checking (tearing down)"
             if (waitAfter.get() > 0) {
-                Thread.sleep(waitAfter.get())
+                common.progressCountdown(waitAfter.get())
             }
 
-            logger.lifecycle("Environment health check(s) succeed: $count")
+            logger.lifecycle("Health checking succeed: $count")
         }
 
         return all
@@ -149,8 +157,20 @@ class HealthChecker(val common: CommonExtension) {
                 // ignore known errors
             }
             if (responds) {
-                throw IllegalStateException("HTTP ${check.method.toUpperCase()} '${check.url}' available")
+                throw IllegalStateException("HTTP ${check.method.toUpperCase()} '${check.url}' is available")
             }
+        }
+    }
+
+    fun host(checkName: String, hostName: String, port: Int, timeout: Int = 1000) = check(checkName) {
+        if (!NetUtils.isHostReachable(hostName, port, timeout)) {
+            throw IllegalStateException("Host '$hostName' at port $port is not reachable")
+        }
+    }
+
+    fun noHost(checkName: String, hostName: String, port: Int, timeout: Int = 1000) = check(checkName) {
+        if (NetUtils.isHostReachable(hostName, port, timeout)) {
+            throw IllegalStateException("Host '$hostName' at port $port is reachable")
         }
     }
 

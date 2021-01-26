@@ -20,13 +20,11 @@ class Retry(val common: CommonExtension) {
         this.times = times
     }
 
-    fun afterSecond(times: Long) {
-        after(times) { SECOND_MILLIS }
-    }
+    fun after(times: Long, delay: Long) = after(times) { delay }
 
-    fun afterSquaredSecond(times: Long) {
-        after(times) { n -> n * n * SECOND_MILLIS }
-    }
+    fun afterSecond(times: Long) = after(times) { SECOND_MILLIS }
+
+    fun afterSquaredSecond(times: Long) = after(times) { n -> n * n * SECOND_MILLIS }
 
     @Suppress("TooGenericExceptionCaught")
     inline fun <T, reified E> withCountdown(operation: String, block: (Long) -> T): T {
