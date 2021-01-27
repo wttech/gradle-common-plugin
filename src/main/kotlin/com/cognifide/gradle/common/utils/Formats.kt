@@ -53,6 +53,8 @@ object Formats {
 
     private val ObjectMapper.mapType get() = typeFactory.constructMapType(HashMap::class.java, String::class.java, Any::class.java)
 
+    private val ObjectMapper.listType get() = typeFactory.constructCollectionType(LinkedList::class.java, Any::class.java)
+
     // JSON
 
     private fun jsonMapper() = ObjectMapper(JsonFactory()).apply {
@@ -72,13 +74,24 @@ object Formats {
 
     fun asJson(text: String) = jsonMapper().readTree(text)
 
-    fun toMapFromJson(jsonNode: JsonNode): Map<String, Any> {
+    fun toMapFromJson(jsonNode: JsonNode): Map<String, Any?> {
+        if (jsonNode.isMissingNode) return mapOf()
         if (jsonNode.nodeType != JsonNodeType.OBJECT) {
             throw FormatException("Only JSON node of type '${JsonNodeType.OBJECT}' " +
                     "can be converted to map but type '${jsonNode.nodeType}' detected!\n" +
                     "Ensure that JSON to be converted is not blank.")
         }
-        return jsonMapper().run { convertValue<Map<String, Any>>(jsonNode, mapType) } ?: mapOf()
+        return jsonMapper().run { convertValue<Map<String, Any?>>(jsonNode, mapType) } ?: mapOf()
+    }
+
+    fun toListFromJson(jsonNode: JsonNode): List<Any?> {
+        if (jsonNode.isMissingNode) return listOf()
+        if (jsonNode.nodeType != JsonNodeType.ARRAY) {
+            throw FormatException("Only JSON node of type '${JsonNodeType.ARRAY}' " +
+                    "can be converted to list but type '${jsonNode.nodeType}' detected!\n" +
+                    "Ensure that JSON to be converted is not blank.")
+        }
+        return jsonMapper().run { convertValue<List<Any?>>(jsonNode, listType) } ?: listOf()
     }
 
     inline fun <reified T : Any> toObjectFromJson(json: String) = toObjectFromJson(json, T::class.java)
@@ -256,6 +269,8 @@ object Formats {
 }
 
 fun JsonNode.asMap() = Formats.toMapFromJson(this)
+
+fun JsonNode.asList() = Formats.toListFromJson(this)
 
 fun String.asXml() = Formats.asXml(this)
 
