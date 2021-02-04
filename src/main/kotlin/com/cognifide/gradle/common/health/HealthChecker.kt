@@ -51,11 +51,11 @@ class HealthChecker(val common: CommonExtension) {
         waitAfter.set(after)
     }
 
-    fun check(name: String, check: () -> Unit) {
+    fun check(name: String, check: () -> Any?) {
         checks += HealthCheck(name, check)
     }
 
-    fun String.invoke(check: () -> Unit) = check(this, check)
+    fun String.invoke(check: () -> Any?) = check(this, check)
 
     // Evaluation
 
@@ -113,7 +113,9 @@ class HealthChecker(val common: CommonExtension) {
                 common.progressCountdown(waitAfter.get())
             }
 
-            logger.lifecycle("Health checking succeed: $count")
+            val message = "Health checking succeed.\n" +
+                    all.sortedWith(compareBy({ it.succeed }, { it.check.name })).joinToString("\n")
+            logger.lifecycle(message)
         }
 
         return all
@@ -133,14 +135,17 @@ class HealthChecker(val common: CommonExtension) {
     }
 
     fun http(checkName: String, url: String, criteria: HttpCheck.() -> Unit) = check(checkName) {
+        var result: Any? = null
         common.http {
             val check = HttpCheck(url).apply(criteria)
             apply(httpOptions)
             apply(check.options)
             request(check.method, check.url) { response ->
+                result = "${check.method} ${check.url} -> ${response.statusLine}"
                 check.checks.forEach { it(response) }
             }
         }
+        result
     }
 
     fun noHttp(checkName: String, url: String, criteria: HttpCheck.() -> Unit = {}) = check(checkName) {

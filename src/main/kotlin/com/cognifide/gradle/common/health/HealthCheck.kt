@@ -2,16 +2,13 @@ package com.cognifide.gradle.common.health
 
 class HealthCheck(val name: String, val action: () -> Any?) {
 
-    @Suppress("TooGenericExceptionCaught")
-    fun perform(): HealthStatus {
-        var cause: Exception? = null
-        try {
-            action()
-        } catch (e: Exception) {
-            cause = e
-        }
+    private var result: Any? = null
 
-        return HealthStatus(this, cause)
+    @Suppress("TooGenericExceptionCaught")
+    fun perform(): HealthStatus = try {
+        HealthStatus(this, true, action())
+    } catch (e: Exception) {
+        HealthStatus(this, false, e.message)
     }
 
     override fun toString(): String = name

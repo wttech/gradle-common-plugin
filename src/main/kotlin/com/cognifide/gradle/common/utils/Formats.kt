@@ -74,6 +74,11 @@ object Formats {
 
     fun asJson(text: String) = jsonMapper().readTree(text)
 
+    fun <T> toObjectFromJson(jsonNode: JsonNode, clazz: Class<T>): T? {
+        if (jsonNode.isMissingNode) return null
+        return jsonMapper().treeToValue(jsonNode, clazz)
+    }
+
     fun toMapFromJson(jsonNode: JsonNode): Map<String, Any?> {
         if (jsonNode.isMissingNode) return mapOf()
         if (jsonNode.nodeType != JsonNodeType.OBJECT) {
@@ -267,6 +272,8 @@ object Formats {
         return path.replace("\\", "/")
     }
 }
+
+fun <T> JsonNode.asObject(clazz: Class<T>) = Formats.toObjectFromJson(this, clazz)
 
 fun JsonNode.asMap() = Formats.toMapFromJson(this)
 

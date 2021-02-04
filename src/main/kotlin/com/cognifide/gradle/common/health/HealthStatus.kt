@@ -1,10 +1,12 @@
 package com.cognifide.gradle.common.health
 
-class HealthStatus(val check: HealthCheck, val cause: Exception? = null) {
+class HealthStatus(val check: HealthCheck, val succeed: Boolean, val details: Any? = null) {
 
-    val succeed: Boolean get() = cause == null
+    val indicator get() = if (succeed) "+" else "-"
 
-    val status: String get() = (if (succeed) "$check | Succeed" else "$check | ${cause!!.message}").trim()
+    val message get() = listOfNotNull(check.name, details).joinToString(" | ").trim()
+
+    val status: String get() = "[$indicator] $message"
 
     override fun toString() = status
 }
