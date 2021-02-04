@@ -51,9 +51,9 @@ object Formats {
 
     // Type convertions
 
-    private val ObjectMapper.mapType get() = typeFactory.constructMapType(HashMap::class.java, String::class.java, Any::class.java)
+    private fun <T> ObjectMapper.mapType(clazz: Class<T>) = typeFactory.constructMapType(LinkedHashMap::class.java, String::class.java, clazz)
 
-    private val ObjectMapper.listType get() = typeFactory.constructCollectionType(LinkedList::class.java, Any::class.java)
+    private fun <T> ObjectMapper.listType(clazz: Class<T>) = typeFactory.constructCollectionType(LinkedList::class.java, clazz)
 
     // JSON
 
@@ -79,6 +79,16 @@ object Formats {
         return jsonMapper().treeToValue(jsonNode, clazz)
     }
 
+    fun <T> toMapFromJson(jsonNode: JsonNode, clazz: Class<T>): Map<String, T>? {
+        if (jsonNode.isMissingNode) return null
+        return jsonMapper().run { convertValue<Map<String, T>>(jsonNode, mapType(clazz)) } ?: mapOf()
+    }
+
+    fun <T> toListFromJson(jsonNode: JsonNode, clazz: Class<T>): List<T>? {
+        if (jsonNode.isMissingNode) return null
+        return jsonMapper().run { convertValue<List<T>>(jsonNode, listType(clazz)) } ?: listOf()
+    }
+
     fun toMapFromJson(jsonNode: JsonNode): Map<String, Any?> {
         if (jsonNode.isMissingNode) return mapOf()
         if (jsonNode.nodeType != JsonNodeType.OBJECT) {
@@ -86,7 +96,7 @@ object Formats {
                     "can be converted to map but type '${jsonNode.nodeType}' detected!\n" +
                     "Ensure that JSON to be converted is not blank.")
         }
-        return jsonMapper().run { convertValue<Map<String, Any?>>(jsonNode, mapType) } ?: mapOf()
+        return jsonMapper().run { convertValue<Map<String, Any?>>(jsonNode, mapType(Any::class.java)) } ?: mapOf()
     }
 
     fun toListFromJson(jsonNode: JsonNode): List<Any?> {
@@ -96,7 +106,7 @@ object Formats {
                     "can be converted to list but type '${jsonNode.nodeType}' detected!\n" +
                     "Ensure that JSON to be converted is not blank.")
         }
-        return jsonMapper().run { convertValue<List<Any?>>(jsonNode, listType) } ?: listOf()
+        return jsonMapper().run { convertValue<List<Any?>>(jsonNode, listType(Any::class.java)) } ?: listOf()
     }
 
     inline fun <reified T : Any> toObjectFromJson(json: String) = toObjectFromJson(json, T::class.java)
@@ -274,6 +284,10 @@ object Formats {
 }
 
 fun <T> JsonNode.asObject(clazz: Class<T>) = Formats.toObjectFromJson(this, clazz)
+
+fun <T> JsonNode.asMap(clazz: Class<T>) = Formats.toMapFromJson(this, clazz)
+
+fun <T> JsonNode.asList(clazz: Class<T>) = Formats.toListFromJson(this, clazz)
 
 fun JsonNode.asMap() = Formats.toMapFromJson(this)
 
