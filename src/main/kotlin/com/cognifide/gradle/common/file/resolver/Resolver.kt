@@ -183,7 +183,7 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
     /**
      * Use local file from directory or file when not found any.
      */
-    fun useLocalBy(dir: Any, filePatterns: Iterable<String>, selector: (Iterable<File>).() -> File?): FileResolution? {
+    fun useLocalBy(dir: Any, filePatterns: Iterable<String>, selector: (Iterable<File>).() -> File?): FileResolution {
         return resolveFile(listOf(dir, filePatterns), true) {
             common.project.fileTree(dir) { it.include(filePatterns) }.run(selector)
                     ?: throw FileException("Cannot find any local file under directory '$dir' matching file pattern '$filePatterns'!")
@@ -199,12 +199,12 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
      * Use local file with name being highest version located in directory or fail when not found any.
      * Highest version is determined by descending alphanumeric sorting.
      */
-    fun useLocalLastNamed(dir: Any) = useLocalBy(dir) { maxBy { it.name } }
+    fun useLocalLastNamed(dir: Any) = useLocalBy(dir) { maxByOrNull { it.name } }
 
     /**
      * Use last modified local file located in directory or fail when not found any.
      */
-    fun useLocalLastModified(dir: Any) = useLocalBy(dir) { maxBy { it.lastModified() } }
+    fun useLocalLastModified(dir: Any) = useLocalBy(dir) { maxByOrNull { it.lastModified() } }
 
     /**
      * Use last modified local file located in directory or fail when not found any.

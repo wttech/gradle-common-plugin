@@ -178,7 +178,7 @@ open class CommonExtension(val project: Project) {
     fun recentFileProvider(dir: File, filePatterns: Iterable<String> = RECENT_FILE_PATTERNS): Provider<File> = project.fileTree(dir)
             .matching { it.include(filePatterns) }.elements
             .map { files -> files.map { it.asFile } }
-            .map { files -> files.maxBy { it.lastModified() } }
+            .map { files -> files.maxByOrNull { it.lastModified() } }
 
     /**
      * Get recent files built in directories as file collection.
