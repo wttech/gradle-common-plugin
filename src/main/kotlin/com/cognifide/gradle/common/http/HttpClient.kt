@@ -89,8 +89,14 @@ open class HttpClient(private val common: CommonExtension) {
     }
 
     fun HttpClientBuilder.useDefaults() {
-        if (authorizationPreemptive.get()) {
-            addInterceptorFirst(PreemptiveAuthInterceptor())
+        if (!basicUser.orNull.isNullOrBlank() && !basicPassword.orNull.isNullOrBlank()) {
+            if (authorizationPreemptive.get()) {
+                addInterceptorFirst(PreemptiveAuthInterceptor())
+            }
+
+            setDefaultCredentialsProvider(BasicCredentialsProvider().apply {
+                setCredentials(AuthScope.ANY, UsernamePasswordCredentials(basicUser.get(), basicPassword.get()))
+            })
         }
 
         setDefaultRequestConfig(RequestConfig.custom().apply {
@@ -105,12 +111,6 @@ open class HttpClient(private val common: CommonExtension) {
 
         if (!proxyHost.orNull.isNullOrBlank() && proxyPort.isPresent) {
             setProxy(HttpHost(proxyHost.get(), proxyPort.get(), proxyScheme.get()))
-        }
-
-        if (!basicUser.orNull.isNullOrBlank() && !basicPassword.orNull.isNullOrBlank()) {
-            setDefaultCredentialsProvider(BasicCredentialsProvider().apply {
-                setCredentials(AuthScope.ANY, UsernamePasswordCredentials(basicUser.get(), basicPassword.get()))
-            })
         }
 
         if (connectionIgnoreSsl.get()) {
