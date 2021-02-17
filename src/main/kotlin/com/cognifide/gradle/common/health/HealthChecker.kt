@@ -19,6 +19,7 @@ class HealthChecker(val common: CommonExtension) {
     private val checks = mutableListOf<HealthCheck>()
 
     private var httpOptions: HttpClient.() -> Unit = {
+        authorizationPreemptive.set(true)
         connectionRetries.apply {
             convention(false)
             prop.boolean("healthChecker.http.connectionRetries")?.let { set(it) }
