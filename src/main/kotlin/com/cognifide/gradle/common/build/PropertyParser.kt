@@ -73,7 +73,12 @@ class PropertyParser(anyProject: Project) {
         project.file(it) ?: if (projectRootFallback) project.rootProject.file(it) else null
     }
 
-    fun expand(file: File, props: Map<String, Any?>) = file.writeText(expand(file.readText(), props, file.toString()))
+    fun expandFile(file: File, props: Map<String, Any?>) {
+        val content = expand(file.readText(), props, file.toString())
+        file.writeText(content)
+    }
+
+    fun expand(file: File, props: Map<String, Any?>): String = expand(file.readText(), props, file.toString())
 
     fun expand(source: String, props: Map<String, Any?>, context: String? = null): String {
         try {
