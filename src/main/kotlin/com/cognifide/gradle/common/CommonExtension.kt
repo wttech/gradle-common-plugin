@@ -311,3 +311,5 @@ fun Project.pluginProject(id: String): Project? = when {
 
 @Synchronized
 fun Project.pluginProjects(id: String): List<Project> = rootProject.allprojects.filter { it.plugins.hasPlugin(id) }
+
+val Project.pathPrefix get() = if (project.rootProject == project) ":" else "${project.path}:"
