@@ -93,9 +93,9 @@ class TaskFacade(val project: Project) : Serializable {
 
     fun registerSequence(name: String, sequenceOptions: TaskSequence.() -> Unit) = registerSequence(name, {}, sequenceOptions)
 
-    fun registerSequence(name: String, taskOptions: Task.() -> Unit, sequenceOptions: TaskSequence.() -> Unit): TaskProvider<Task> {
-        val options = TaskSequence().apply(sequenceOptions)
+    fun orderSequence(options: TaskSequence.() -> Unit) = TaskSequence().apply(options).also { orderSequence(it) }
 
+    fun orderSequence(options: TaskSequence) {
         project.gradle.projectsEvaluated {
             val dependentTasks = pathed(options.dependentTasks)
             val afterTasks = pathed(options.afterTasks)
@@ -112,7 +112,10 @@ class TaskFacade(val project: Project) : Serializable {
                 dependentTask.configure { it.mustRunAfter(afterTasks) }
             }
         }
+    }
 
+    fun registerSequence(name: String, taskOptions: Task.() -> Unit, sequenceOptions: TaskSequence.() -> Unit): TaskProvider<Task> {
+        val options = orderSequence(sequenceOptions)
         return project.tasks.register(name) { task ->
             task.dependsOn(options.dependentTasks).mustRunAfter(options.afterTasks)
             task.apply(taskOptions)
