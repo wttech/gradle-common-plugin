@@ -93,32 +93,38 @@ class TaskFacade(val project: Project) : Serializable {
 
     fun registerSequence(name: String, sequenceOptions: TaskSequence.() -> Unit) = registerSequence(name, {}, sequenceOptions)
 
-    fun orderSequence(options: TaskSequence.() -> Unit) = TaskSequence().apply(options).also { orderSequence(it) }
-
-    fun orderSequence(options: TaskSequence) {
-        project.gradle.projectsEvaluated {
-            val dependentTasks = pathed(options.dependentTasks)
-            val afterTasks = pathed(options.afterTasks)
-
-            if (dependentTasks.size > 1) {
-                for (i in 1 until dependentTasks.size) {
-                    val previous = dependentTasks[i - 1]
-                    val current = dependentTasks[i]
-
-                    current.configure { it.mustRunAfter(previous) }
-                }
-            }
-            dependentTasks.forEach { dependentTask ->
-                dependentTask.configure { it.mustRunAfter(afterTasks) }
-            }
-        }
-    }
-
     fun registerSequence(name: String, taskOptions: Task.() -> Unit, sequenceOptions: TaskSequence.() -> Unit): TaskProvider<Task> {
         val options = orderSequence(sequenceOptions)
         return project.tasks.register(name) { task ->
             task.dependsOn(options.dependentTasks).mustRunAfter(options.afterTasks)
             task.apply(taskOptions)
+        }
+    }
+
+    fun orderSequence(options: TaskSequence.() -> Unit) = TaskSequence().apply(options).also { orderSequence(it) }
+
+    fun orderSequence(options: TaskSequence) {
+        project.gradle.projectsEvaluated {
+            orderSequenceImmediately(options)
+        }
+    }
+
+    fun orderSequenceImmediately(options: TaskSequence.() -> Unit) = TaskSequence().apply(options).also { orderSequenceImmediately(it) }
+
+    fun orderSequenceImmediately(options: TaskSequence) {
+        val dependentTasks = pathed(options.dependentTasks)
+        val afterTasks = pathed(options.afterTasks)
+
+        if (dependentTasks.size > 1) {
+            for (i in 1 until dependentTasks.size) {
+                val previous = dependentTasks[i - 1]
+                val current = dependentTasks[i]
+
+                current.configure { it.mustRunAfter(previous) }
+            }
+        }
+        dependentTasks.forEach { dependentTask ->
+            dependentTask.configure { it.mustRunAfter(afterTasks) }
         }
     }
 
