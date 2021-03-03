@@ -9,7 +9,6 @@ import com.cognifide.gradle.common.net.NetUtils
 import com.cognifide.gradle.common.utils.Formats
 import org.apache.http.HttpStatus
 import java.util.concurrent.TimeUnit
-import kotlin.math.min
 
 class HealthChecker(val common: CommonExtension) {
 
