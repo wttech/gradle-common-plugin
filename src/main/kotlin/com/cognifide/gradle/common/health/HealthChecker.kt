@@ -35,25 +35,33 @@ class HealthChecker(val common: CommonExtension) {
         common.prop.boolean("healthChecker.verbose")?.let { set(it) }
     }
 
-    var retry = common.retry { afterSquaredSecond(prop.long("healthChecker.retry") ?: 10) }
+    var retry = common.retry {
+        after(
+            prop.long("healthChecker.retry.times") ?: 60,
+            prop.long("healthChecker.retry.delay") ?: 5_000L,
+        )
+    }
+
+    var assuranceRetry = common.retry {
+        after(
+            prop.long("healthChecker.assuranceRetry.times") ?: 2,
+            prop.long("healthChecker.assuranceRetry.delay") ?: 1_000L,
+        )
+    }
 
     val waitBefore = common.obj.long {
         convention(TimeUnit.SECONDS.toMillis(0))
-        common.prop.long("healthChecker.waitBefore")?.let { set(it) }
+        common.prop.long("healthChecker.wait.before")?.let { set(it) }
     }
 
     val waitAfter = common.obj.long {
         convention(TimeUnit.SECONDS.toMillis(0))
-        common.prop.long("healthChecker.waitAfter")?.let { set(it) }
+        common.prop.long("healthChecker.wait.after")?.let { set(it) }
     }
 
     fun wait(before: Long, after: Long) {
         waitBefore.set(before)
         waitAfter.set(after)
-    }
-
-    var assuranceRetry = common.retry {
-        afterSecond(prop.long("healthChecker.assuranceRetry") ?: 3)
     }
 
     fun check(name: String, check: () -> Any?) {
