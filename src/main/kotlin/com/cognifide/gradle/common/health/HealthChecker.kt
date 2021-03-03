@@ -69,9 +69,9 @@ class HealthChecker(val common: CommonExtension) {
 
     var passed = listOf<HealthStatus>()
 
-    var failed = listOf<HealthStatus>()
+    val passedRatio get() = "${passed.size}/${all.size} (${Formats.percent(passed.size, all.size)})"
 
-    val count get() = "${passed.size}/${all.size} (${Formats.percent(passed.size, all.size)})"
+    var failed = listOf<HealthStatus>()
 
     @Suppress("ComplexMethod")
     fun start(verbose: Boolean = this.verbose.get(), retry: Retry = this.retry): List<HealthStatus> {
@@ -88,7 +88,7 @@ class HealthChecker(val common: CommonExtension) {
                 }
             } catch (e: HealthException) {
                 val message = listOf(
-                    "Health checking failed. Success ratio: $count:",
+                    "Health checking failed. Success ratio: $passedRatio:",
                     all.sortedWith(compareBy({ it.succeed }, { it.check.name })).joinToString("\n")
                 ).joinToString("\n")
                 when {
