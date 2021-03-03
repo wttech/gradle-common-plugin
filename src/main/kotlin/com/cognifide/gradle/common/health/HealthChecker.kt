@@ -86,7 +86,7 @@ class HealthChecker(val common: CommonExtension) {
                 assuranceRetry.withSleepTillEnd { no ->
                     step = "Health checking ($no/${assuranceRetry.times})"
                     start(retry, verbose)
-                    logger.lifecycle("Health checking passed ($no/${assuranceRetry.times})")
+                    logger.info("Health checking passed ($no/${assuranceRetry.times})")
                 }
             } catch (e: HealthException) {
                 val message = "Health checking failed. Success ratio: $passedRatio:\n$allStatuses"
