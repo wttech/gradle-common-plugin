@@ -2,6 +2,7 @@ package com.cognifide.gradle.common.health
 
 import com.cognifide.gradle.common.CommonException
 import com.cognifide.gradle.common.CommonExtension
+import com.cognifide.gradle.common.build.ProgressIndicator
 import com.cognifide.gradle.common.build.Retry
 import com.cognifide.gradle.common.http.HttpClient
 import com.cognifide.gradle.common.net.NetUtils
@@ -52,6 +53,10 @@ class HealthChecker(val common: CommonExtension) {
         waitAfter.set(after)
     }
 
+    var assuranceRetry = common.retry {
+        afterSecond(prop.long("healthChecker.assuranceRetry") ?: 3)
+    }
+
     fun check(name: String, check: () -> Any?) {
         checks += HealthCheck(name, check)
     }
@@ -60,56 +65,39 @@ class HealthChecker(val common: CommonExtension) {
 
     // Evaluation
 
+    var all = listOf<HealthStatus>()
+
+    var passed = listOf<HealthStatus>()
+
+    var failed = listOf<HealthStatus>()
+
+    val count get() = "${passed.size}/${all.size} (${Formats.percent(passed.size, all.size)})"
+
     @Suppress("ComplexMethod")
     fun start(verbose: Boolean = this.verbose.get(), retry: Retry = this.retry): List<HealthStatus> {
-        var all = listOf<HealthStatus>()
-        var passed = listOf<HealthStatus>()
-        var failed = listOf<HealthStatus>()
-        val count by lazy { "${passed.size}/${all.size} (${Formats.percent(passed.size, all.size)})" }
-
         common.progress(checks.size) {
             step = "Health checking"
-
             if (waitBefore.get() > 0) {
                 common.progressCountdown(waitBefore.get())
             }
 
             try {
-                retry.withSleep<Unit, HealthException> { no ->
-                    reset()
-
-                    step = "Health checking"
-                    message = when {
-                        failed.isNotEmpty() -> "Attempt ${min(no, retry.times)}/${retry.times}, ${failed.size} failed"
-                        else -> "Attempt ${min(no, retry.times)}/${retry.times}"
-                    }
-
-                    all = common.parallel.map(checks) { check ->
-                        increment(check.name) {
-                            check.perform()
-                        }
-                    }.toList()
-                    passed = all.filter { it.succeed }
-                    failed = all - passed
-
-                    if (verbose) {
-                        logger.info(failed.sortedBy { it.check.name }.joinToString("\n"))
-                    }
-
-                    if (failed.isNotEmpty()) {
-                        throw HealthException("There are failed health checks. Retrying...")
-                    }
+                assuranceRetry.withSleepTillEnd { no ->
+                    step = "Health checking ($no/${assuranceRetry.times})"
+                    start(retry, verbose)
                 }
             } catch (e: HealthException) {
-                val message = "Health checking failed. Success ratio: $count:\n" +
-                        all.sortedWith(compareBy({ it.succeed }, { it.check.name })).joinToString("\n")
-                if (!verbose) {
-                    logger.error(message)
-                } else {
-                    throw HealthException(message)
+                val message = listOf(
+                    "Health checking failed. Success ratio: $count:",
+                    all.sortedWith(compareBy({ it.succeed }, { it.check.name })).joinToString("\n")
+                ).joinToString("\n")
+                when {
+                    verbose -> throw HealthException(message)
+                    else -> logger.error(message)
                 }
             }
 
+            step = "Health checking"
             if (waitAfter.get() > 0) {
                 common.progressCountdown(waitAfter.get())
             }
@@ -120,6 +108,31 @@ class HealthChecker(val common: CommonExtension) {
         }
 
         return all
+    }
+
+    private fun ProgressIndicator.start(retry: Retry, verbose: Boolean) = retry.withSleep<Unit, HealthException> { no ->
+        reset()
+
+        message = when {
+            failed.isNotEmpty() -> "Attempt $no/${retry.times}, ${failed.size} failed"
+            else -> "Attempt $no/${retry.times}"
+        }
+
+        all = common.parallel.map(checks) { check ->
+            increment(check.name) {
+                check.perform()
+            }
+        }.toList()
+        passed = all.filter { it.succeed }
+        failed = all - passed
+
+        if (verbose) {
+            logger.info(failed.sortedBy { it.check.name }.joinToString("\n"))
+        }
+
+        if (failed.isNotEmpty()) {
+            throw HealthException("Health checks failed. Retrying...")
+        }
     }
 
     // Shorthand methods for defining health checks

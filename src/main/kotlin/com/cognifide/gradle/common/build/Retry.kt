@@ -29,7 +29,7 @@ class Retry(val common: CommonExtension) {
     @Suppress("TooGenericExceptionCaught")
     inline fun <T, reified E> withCountdown(operation: String, block: (Long) -> T): T {
         lateinit var exception: Exception
-        for (i in 0..times) {
+        for (i in 0 until times) {
             val no = i + 1
 
             try {
@@ -63,7 +63,7 @@ class Retry(val common: CommonExtension) {
     @Suppress("TooGenericExceptionCaught")
     inline fun <T, reified E> withSleep(block: (Long) -> T): T {
         lateinit var exception: Exception
-        for (i in 0..times) {
+        for (i in 0 until times) {
             val no = i + 1
             try {
                 return block(no)
@@ -86,9 +86,18 @@ class Retry(val common: CommonExtension) {
 
     fun withSleep(block: (Long) -> Unit) = withSleep<Unit, CommonException>(block)
 
-    companion object {
-        fun none(common: CommonExtension) = Retry(common)
+    fun withSleepTillEnd(block: (Long) -> Unit) {
+        for (i in 0 until times) {
+            val no = i + 1
+            block(no)
+            if (i < times) {
+                val delay = delay(no)
+                Thread.sleep(delay)
+            }
+        }
+    }
 
+    companion object {
         const val SECOND_MILLIS = 1000L
     }
 }
