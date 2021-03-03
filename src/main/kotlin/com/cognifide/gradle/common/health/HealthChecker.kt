@@ -66,6 +66,8 @@ class HealthChecker(val common: CommonExtension) {
 
     var all = listOf<HealthStatus>()
 
+    val allStatuses get() = all.sortedWith(compareBy({ it.succeed }, { it.check.name })).joinToString("\n")
+
     var passed = listOf<HealthStatus>()
 
     val passedRatio get() = "${passed.size}/${all.size} (${Formats.percent(passed.size, all.size)})"
@@ -84,12 +86,10 @@ class HealthChecker(val common: CommonExtension) {
                 assuranceRetry.withSleepTillEnd { no ->
                     step = "Health checking ($no/${assuranceRetry.times})"
                     start(retry, verbose)
+                    logger.lifecycle("Health checking passed ($no/${assuranceRetry.times})")
                 }
             } catch (e: HealthException) {
-                val message = listOf(
-                    "Health checking failed. Success ratio: $passedRatio:",
-                    all.sortedWith(compareBy({ it.succeed }, { it.check.name })).joinToString("\n")
-                ).joinToString("\n")
+                val message = "Health checking failed. Success ratio: $passedRatio:\n$allStatuses"
                 when {
                     verbose -> throw HealthException(message)
                     else -> logger.error(message)
@@ -101,9 +101,7 @@ class HealthChecker(val common: CommonExtension) {
                 common.progressCountdown(waitAfter.get())
             }
 
-            val message = "Health checking succeed.\n" +
-                    all.sortedWith(compareBy({ it.succeed }, { it.check.name })).joinToString("\n")
-            logger.lifecycle(message)
+            logger.lifecycle("Health checking succeed.\n$allStatuses")
         }
 
         return all
