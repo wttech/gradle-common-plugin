@@ -3,21 +3,22 @@ package com.cognifide.gradle.common.build
 import com.cognifide.gradle.common.CommonException
 import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.utils.Formats
+import kotlin.math.max
 
 class Retry(val common: CommonExtension) {
 
-    var times = 0L
+    var times = 1L
 
     var delay: (Long) -> Long = { 0L }
 
     fun never() {
-        times = 0L
+        times = 1L
         delay = { 0L }
     }
 
     fun after(times: Long, delay: (Long) -> Long) {
         this.delay = delay
-        this.times = times
+        this.times = max(1, times)
     }
 
     fun after(times: Long, delay: Long) = after(times) { delay }
