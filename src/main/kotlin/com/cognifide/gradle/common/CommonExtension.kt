@@ -13,6 +13,7 @@ import com.cognifide.gradle.common.utils.Patterns
 import com.cognifide.gradle.common.build.*
 import com.cognifide.gradle.common.health.HealthChecker
 import com.cognifide.gradle.common.java.JavaSupport
+import com.cognifide.gradle.common.mvn.MvnInvoker
 import com.cognifide.gradle.common.tasks.TaskFacade
 import com.cognifide.gradle.common.utils.using
 import com.cognifide.gradle.common.zip.ZipFile
@@ -273,6 +274,11 @@ open class CommonExtension(val project: Project) {
     fun zip(path: String) = zip(project.file(path))
 
     fun healthCheck(options: HealthChecker.() -> Unit) = HealthChecker(this).apply(options).start()
+
+    /**
+     * Invoke Maven process.
+     */
+    fun mvn(options: MvnInvoker.() -> Unit) = MvnInvoker(this).apply(options).invoke()
 
     // Utilities (to use without imports)
 
