@@ -49,6 +49,8 @@ class TaskFacade(val project: Project) : Serializable {
         }
     }
 
+    inline fun <reified T : Task> typed() = project.tasks.withType(T::class.java)
+
     inline fun <reified T : Task> typed(noinline configurer: T.() -> Unit) {
         project.tasks.withType(T::class.java).configureEach(configurer)
     }

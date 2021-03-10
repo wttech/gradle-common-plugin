@@ -86,14 +86,16 @@ class HealthChecker(val common: CommonExtension) {
     fun start(verbose: Boolean = this.verbose.get(), retry: Retry = this.retry): List<HealthStatus> {
         common.progress(checks.size) {
             step = "Health checking"
+
+            message = "Wait Before"
             if (waitBefore.get() > 0) {
                 common.progressCountdown(waitBefore.get())
             }
 
             try {
                 assuranceRetry.withSleepTillEnd { no ->
-                    step = "Health checking ($no/${assuranceRetry.times})"
                     start(retry, verbose)
+                    increment()
                     logger.info("Health checking passed ($no/${assuranceRetry.times})")
                 }
             } catch (e: HealthException) {
@@ -104,7 +106,7 @@ class HealthChecker(val common: CommonExtension) {
                 }
             }
 
-            step = "Health checking"
+            message = "Wait After"
             if (waitAfter.get() > 0) {
                 common.progressCountdown(waitAfter.get())
             }
@@ -116,17 +118,13 @@ class HealthChecker(val common: CommonExtension) {
     }
 
     private fun ProgressIndicator.start(retry: Retry, verbose: Boolean) = retry.withSleep<Unit, HealthException> { no ->
-        reset()
-
         message = when {
             failed.isNotEmpty() -> "Attempt $no/${retry.times}, ${failed.size} failed"
             else -> "Attempt $no/${retry.times}"
         }
 
         all = common.parallel.map(checks) { check ->
-            increment(check.name) {
-                check.perform()
-            }
+            check.perform()
         }.toList()
         passed = all.filter { it.succeed }
         failed = all - passed

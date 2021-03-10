@@ -18,10 +18,13 @@ import com.cognifide.gradle.common.tasks.TaskFacade
 import com.cognifide.gradle.common.utils.using
 import com.cognifide.gradle.common.zip.ZipFile
 import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact
 import org.gradle.api.internal.tasks.userinput.UserInputHandler
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskProvider
 import java.io.File
 
 @Suppress("TooManyFunctions")
@@ -319,3 +322,31 @@ fun Project.pluginProject(id: String): Project? = when {
 fun Project.pluginProjects(id: String): List<Project> = rootProject.allprojects.filter { it.plugins.hasPlugin(id) }
 
 val Project.pathPrefix get() = if (project.rootProject == project) ":" else "${project.path}:"
+
+fun <T : Task> Project.whenEvaluated(task: TaskProvider<T>, configurer: T.() -> Unit) {
+    afterEvaluate {
+        task.configure { configurer(it) }
+    }
+}
+
+fun <T : Task> Project.whenEvaluatedAll(task: TaskProvider<T>, configurer: T.() -> Unit) {
+    gradle.projectsEvaluated {
+        task.configure { configurer(it) }
+    }
+}
+
+fun <T : Task> Project.whenGraphReady(task: TaskProvider<T>, configurer: T.(TaskExecutionGraph) -> Unit) {
+    gradle.taskGraph.whenReady { graph ->
+        task.configure { task ->
+            if (graph.hasTask(task)) {
+                configurer(task, graph)
+            }
+        }
+    }
+}
+
+fun <T : Task> Project.checkForce(task: TaskProvider<T>) = whenGraphReady(task) {
+    if (!common.prop.force) {
+        throw CommonException("Unable to run unsafe task '$path' without param '-P${PropertyParser.FORCE_PROP}'!")
+    }
+}
