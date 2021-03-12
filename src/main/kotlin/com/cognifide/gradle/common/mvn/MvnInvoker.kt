@@ -1,33 +1,27 @@
 package com.cognifide.gradle.common.mvn
 
 import com.cognifide.gradle.common.CommonExtension
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Internal
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecSpec
 import java.io.File
 
 class MvnInvoker(private val common: CommonExtension) {
 
-    @Internal
     val workingDir = common.obj.dir()
 
     fun workingDir(dir: File) {
         workingDir.set(dir)
     }
 
-    @Internal
     val executableDir = common.obj.dir {
         common.prop.file("mvn.executableDir")?.let { set(it) }
     }
 
-    @Internal
     val executableOld = common.obj.boolean {
         convention(false)
         common.prop.boolean("mvn.executableOld")?.let { set(it) }
     }
 
-    @Input
     val executableArgs = common.obj.strings {
         set(common.project.provider {
             val windows = OperatingSystem.current().isWindows
@@ -47,7 +41,6 @@ class MvnInvoker(private val common: CommonExtension) {
         })
     }
 
-    @Input
     val args = common.obj.strings {
         set(listOf("-B"))
         common.prop.string("mvn.args")?.let { set(it.split(" ")) }
@@ -65,7 +58,7 @@ class MvnInvoker(private val common: CommonExtension) {
         this.specOptions = options
     }
 
-    @SuppressWarnings("TooGenericExceptionCaught")
+    @Suppress("TooGenericExceptionCaught")
     fun invoke() {
         val dir = workingDir.get().asFile
         if (!dir.exists()) {
