@@ -84,6 +84,11 @@ class HealthChecker(val common: CommonExtension) {
 
     @Suppress("ComplexMethod")
     fun start(verbose: Boolean = this.verbose.get(), retry: Retry = this.retry): List<HealthStatus> {
+        if (checks.isEmpty()) {
+            logger.info("Health checking skipped as no checks defined.")
+            return listOf()
+        }
+
         common.progress(checks.size) {
             step = "Health checking"
 
