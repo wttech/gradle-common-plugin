@@ -171,6 +171,7 @@ class HealthChecker(val common: CommonExtension) {
     }
 
     fun noHttp(checkName: String, url: String, criteria: HttpCheck.() -> Unit = {}) = check(checkName) {
+        var result: Any? = null
         common.http {
             val check = HttpCheck(url).apply(criteria)
             apply(httpOptions)
@@ -185,20 +186,25 @@ class HealthChecker(val common: CommonExtension) {
             }
             if (responds) {
                 throw IllegalStateException("HTTP ${check.method.toUpperCase()} '${check.url}' is available")
+            } else {
+                result = "${check.method} ${check.url} -> unavailable"
             }
         }
+        result
     }
 
     fun host(checkName: String, hostName: String, port: Int, timeout: Int = 1000) = check(checkName) {
         if (!NetUtils.isHostReachable(hostName, port, timeout)) {
             throw IllegalStateException("Host '$hostName' at port $port is not reachable")
         }
+        "$hostName:$port -> reachable"
     }
 
     fun noHost(checkName: String, hostName: String, port: Int, timeout: Int = 1000) = check(checkName) {
         if (NetUtils.isHostReachable(hostName, port, timeout)) {
             throw IllegalStateException("Host '$hostName' at port $port is reachable")
         }
+        "$hostName:$port -> unreachable"
     }
 
     // Default options
