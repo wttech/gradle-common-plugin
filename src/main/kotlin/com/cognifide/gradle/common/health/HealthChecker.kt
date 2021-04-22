@@ -89,7 +89,7 @@ class HealthChecker(val common: CommonExtension) {
             return listOf()
         }
 
-        common.progress(checks.size) {
+        common.progress(assuranceRetry.times) {
             step = "Health checking"
 
             message = "Wait Before"
@@ -124,7 +124,7 @@ class HealthChecker(val common: CommonExtension) {
 
     private fun ProgressIndicator.start(retry: Retry, verbose: Boolean) = retry.withSleep<Unit, HealthException> { no ->
         message = when {
-            failed.isNotEmpty() -> "Attempt $no/${retry.times}, ${failed.size} failed"
+            failed.isNotEmpty() -> "Attempt $no/${retry.times}, Check(s) succeeded ${passed.size}/${all.size}"
             else -> "Attempt $no/${retry.times}"
         }
 
