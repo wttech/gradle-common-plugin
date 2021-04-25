@@ -159,9 +159,10 @@ class HealthChecker(val common: CommonExtension) {
     fun http(checkName: String, url: String, criteria: HttpCheck.() -> Unit) = check(checkName) {
         var result: Any? = null
         common.http {
-            val check = HttpCheck(url).apply(criteria)
+            val check = HttpCheck(url)
             apply(httpOptions)
             apply(check.options)
+            check.apply(criteria)
             request(check.method, check.url) { response ->
                 result = "${check.method} ${check.url} -> ${response.statusLine}"
                 check.checks.forEach { it(response) }
