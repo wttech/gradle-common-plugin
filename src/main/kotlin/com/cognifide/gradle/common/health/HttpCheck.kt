@@ -32,10 +32,14 @@ class HttpCheck(val url: String) {
 
     fun respondsOk() = respondsWith(HttpStatus.SC_OK)
 
-    fun containsText(text: String, statusCode: Int = HttpStatus.SC_OK) {
+    fun containsText(text: String, statusCode: Int = HttpStatus.SC_OK) = containsTexts(listOf(text), statusCode)
+
+    fun containsTexts(vararg texts: String, statusCode: Int = HttpStatus.SC_OK) = containsTexts(texts.asIterable(), statusCode)
+
+    fun containsTexts(texts: Iterable<String>, statusCode: Int = HttpStatus.SC_OK) {
         check { response ->
             checkStatus(response, statusCode)
-            checkText(response, text)
+            checkTexts(response, texts)
         }
     }
 }

@@ -282,11 +282,15 @@ open class HttpClient(private val common: CommonExtension) {
         throw ResponseException("Unexpected response status detected: ${response.statusLine}")
     }
 
-    fun checkText(response: HttpResponse, containedText: String, ignoreCase: Boolean = true) {
+    fun checkText(response: HttpResponse, containedText: String, ignoreCase: Boolean = true) = checkTexts(response, listOf(containedText), ignoreCase)
+
+    fun checkTexts(response: HttpResponse, containedTexts: Iterable<String>, ignoreCase: Boolean = true) {
         val text = asString(response)
-        if (!text.contains(containedText, ignoreCase)) {
-            logger.debug("Actual text:\n$text")
-            throw ResponseException("Response does not contain text: $containedText")
+        containedTexts.forEach { containedText ->
+            if (!text.contains(containedText, ignoreCase)) {
+                logger.debug("Actual text:\n$text")
+                throw ResponseException("Response does not contain text: $containedText")
+            }
         }
     }
 
