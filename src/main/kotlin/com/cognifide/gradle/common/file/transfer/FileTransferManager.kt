@@ -9,6 +9,7 @@ import com.cognifide.gradle.common.file.transfer.http.HttpFileTransfer
 import com.cognifide.gradle.common.file.transfer.resolve.ResolveFileTransfer
 import com.cognifide.gradle.common.file.transfer.sftp.SftpFileTransfer
 import com.cognifide.gradle.common.file.transfer.smb.SmbFileTransfer
+import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.utils.using
 import java.io.File
 
@@ -128,7 +129,7 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
      */
     fun downloadUsing(transfer: FileTransfer, dirUrl: String, fileName: String, target: File) {
         if (target.exists()) {
-            common.logger.info("Skipping downloading file from URL '$dirUrl/$fileName' to '$target' as of it already exists.")
+            logger.info("Skipping downloading file from URL '$dirUrl/$fileName' to '$target' as of it already exists.")
             return
         }
 
@@ -139,8 +140,11 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
             tmp.delete()
         }
 
+        val started = System.currentTimeMillis()
         transfer.downloadFrom(dirUrl, fileName, tmp)
         tmp.renameTo(target)
+
+        logger.info("Downloaded file from URL '$dirUrl/$fileName' to '$target' in ${Formats.durationWordsSince(started)}")
     }
 
     /**
@@ -171,7 +175,10 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
             logger.debug("Cannot check status of uploaded file at URL '$fileUrl'", e)
         }
 
+        val started = System.currentTimeMillis()
         transfer.uploadTo(dirUrl, fileName, source)
+
+        logger.info("Uploaded file from '$source' to URL '$dirUrl/$fileName' in ${Formats.durationWordsSince(started)}")
     }
 
     /**

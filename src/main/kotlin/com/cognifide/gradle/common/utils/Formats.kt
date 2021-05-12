@@ -243,7 +243,11 @@ object Formats {
 
     fun duration(millis: Long): String = DurationFormatUtils.formatDuration(millis.coerceAtLeast(0L), "mm:ss")
 
+    fun durationWords(millis: Long): String = DurationFormatUtils.formatDurationWords(millis.coerceAtLeast(0L), true, true)
+
     fun durationSince(millis: Long) = duration(System.currentTimeMillis() - millis)
+
+    fun durationWordsSince(millis: Long) = durationWords(System.currentTimeMillis() - millis)
 
     fun durationFit(thenMillis: Long, thenZoneId: ZoneId, durationMillis: Long): Boolean {
         val nowTimestamp = LocalDateTime.now().atZone(ZoneId.systemDefault())

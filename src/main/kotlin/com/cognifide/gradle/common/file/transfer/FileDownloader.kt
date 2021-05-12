@@ -1,6 +1,5 @@
 package com.cognifide.gradle.common.file.transfer
 
-import com.cognifide.gradle.common.build.ProgressLogger
 import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.CommonExtension
 import java.io.File
@@ -11,14 +10,15 @@ class FileDownloader(private val common: CommonExtension) {
 
     private var processedBytes: Long = 0
 
-    private var loggedKb: Long = 0
-
     private var startTime: Long = -1
 
     var size: Long = 0
 
+    var chunkSize: Int = common.prop.int("fileTransfer.downloader.chunkSize") ?: CHUNK_SIZE
+
     fun download(input: InputStream, target: File) {
-        common.progressLogger {
+        common.progress {
+            updater { update(currentProgress(target)) }
             input.use { inputStream ->
                 target.parentFile.mkdirs()
                 startTime = System.currentTimeMillis()
@@ -27,12 +27,12 @@ class FileDownloader(private val common: CommonExtension) {
                 var finished = false
 
                 try {
-                    val buf = ByteArray(TRANSFER_CHUNK_100_KB)
+                    val buf = ByteArray(chunkSize)
                     var read = inputStream.read(buf)
 
                     while (read >= 0) {
                         output.write(buf, 0, read)
-                        logProgress("Downloading", read.toLong(), target)
+                        processedBytes += read.toLong()
                         read = inputStream.read(buf)
                     }
 
@@ -48,27 +48,19 @@ class FileDownloader(private val common: CommonExtension) {
         }
     }
 
-    private fun ProgressLogger.logProgress(operation: String, readBytes: Long, file: File) {
-        processedBytes += readBytes
-
-        val processedKb = processedBytes / KILOBYTE
-        if (processedKb > loggedKb) {
-            val fileName = file.name.removeSuffix(FileTransferManager.TMP_SUFFIX)
-            val msg = if (size > 0) {
-                "$operation: $fileName | ${Formats.fileSizeBytesToHuman(processedBytes)}/${Formats.fileSizeBytesToHuman(size)}" +
-                        " (${Formats.percent(processedBytes, size)}," +
-                        " time left: ${Formats.duration(remainingTime())})"
-            } else {
-                "$operation: $fileName | ${Formats.fileSizeBytesToHuman(processedBytes)}"
-            }
-
-            progress(msg)
-
-            loggedKb = processedKb
+    private fun currentProgress(file: File): String {
+        val fileName = file.name.removeSuffix(FileTransferManager.TMP_SUFFIX)
+        return if (size > 0) {
+            "Downloading: $fileName | ${Formats.fileSizeBytesToHuman(processedBytes)}/${Formats.fileSizeBytesToHuman(size)}" +
+                    " (${Formats.percent(processedBytes, size)}," +
+                    " time left: ${Formats.duration(remainingTime())})"
+        } else {
+            "Downloading: $fileName | ${Formats.fileSizeBytesToHuman(processedBytes)}"
         }
     }
 
     private fun remainingTime(): Long {
+        if (processedBytes == 0L) return 0
         val elapsedTime = System.currentTimeMillis() - startTime
         val allTime = (elapsedTime * size / processedBytes)
 
@@ -76,8 +68,8 @@ class FileDownloader(private val common: CommonExtension) {
     }
 
     companion object {
-        const val TRANSFER_CHUNK_100_KB = 100 * 1024
-
         const val KILOBYTE = 1024
+
+        const val CHUNK_SIZE = 512 * KILOBYTE
     }
 }
