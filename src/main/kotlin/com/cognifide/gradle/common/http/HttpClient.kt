@@ -21,6 +21,9 @@ import org.apache.http.client.methods.*
 import org.apache.http.conn.ssl.NoopHostnameVerifier
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory
 import org.apache.http.entity.ContentType
+import org.apache.http.entity.FileEntity
+import org.apache.http.entity.InputStreamEntity
+import org.apache.http.entity.StringEntity
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.CloseableHttpClient
@@ -183,12 +186,28 @@ open class HttpClient(private val common: CommonExtension) {
         return execute(HttpPut(baseUrl(uri)).apply(options), handler)
     }
 
+    fun put(uri: String, entity: File) = put(uri, entity) { checkStatus(it) }
+
+    fun <T> put(uri: String, entity: File, handler: HttpClient.(HttpResponse) -> T) = put(uri, entity, handler) {}
+
+    fun <T> put(uri: String, entity: File, handler: HttpClient.(HttpResponse) -> T, options: HttpPut.() -> Unit): T {
+        return put(uri, handler) { this.entity = createEntity(entity); options() }
+    }
+
     fun patch(path: String) = patch(path) { checkStatus(it) }
 
     fun <T> patch(uri: String, handler: HttpClient.(HttpResponse) -> T): T = patch(uri, handler) {}
 
     fun <T> patch(uri: String, handler: HttpClient.(HttpResponse) -> T, options: HttpPatch.() -> Unit): T {
         return execute(HttpPatch(baseUrl(uri)).apply(options), handler)
+    }
+
+    fun patch(uri: String, entity: File) = patch(uri, entity) { checkStatus(it) }
+
+    fun <T> patch(uri: String, entity: File, handler: HttpClient.(HttpResponse) -> T) = patch(uri, entity, handler) {}
+
+    fun <T> patch(uri: String, entity: File, handler: HttpClient.(HttpResponse) -> T, options: HttpPatch.() -> Unit): T {
+        return patch(uri, handler) { this.entity = createEntity(entity); options() }
     }
 
     fun post(url: String, params: Map<String, Any?> = mapOf()) = postUrlencoded(url, params)
@@ -210,6 +229,14 @@ open class HttpClient(private val common: CommonExtension) {
     }
 
     fun <T> post(uri: String, handler: HttpClient.(HttpResponse) -> T): T = post(uri, handler) {}
+
+    fun post(uri: String, entity: File) = post(uri, entity) { checkStatus(it) }
+
+    fun <T> post(uri: String, entity: File, handler: HttpClient.(HttpResponse) -> T) = post(uri, entity, handler) {}
+
+    fun <T> post(uri: String, entity: File, handler: HttpClient.(HttpResponse) -> T, options: HttpPost.() -> Unit) = post(uri, handler) {
+        this.entity = createEntity(entity); options()
+    }
 
     fun <T> post(uri: String, handler: HttpClient.(HttpResponse) -> T, options: HttpPost.() -> Unit): T {
         return execute(HttpPost(baseUrl(uri)).apply(options), handler)
@@ -341,6 +368,19 @@ open class HttpClient(private val common: CommonExtension) {
             params.forEach { (key, value) -> Utils.unroll(value) { addEntityMultipart(key, it) } }
         }.build()
     }
+
+    fun createEntity(value: Any) = when (value) {
+        is File -> createEntity(value)
+        is String -> createEntity(value)
+        is InputStream -> createEntity(value)
+        else -> throw RequestException("Unsupported request entity type '${value.javaClass}'!")
+    }
+
+    fun createEntity(text: String) = StringEntity(text)
+
+    fun createEntity(file: File) = FileEntity(file)
+
+    fun createEntity(input: InputStream) = InputStreamEntity(input)
 
     private fun MultipartEntityBuilder.addEntityMultipart(key: String, value: Any?) {
         if (value is File && value.exists()) {
