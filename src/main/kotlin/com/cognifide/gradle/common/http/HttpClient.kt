@@ -66,6 +66,10 @@ open class HttpClient(private val common: CommonExtension) {
             basicPassword.set(value.second)
         }
 
+    fun fileTransferCredentials() {
+        basicCredentials = common.fileTransfer.credentials
+    }
+
     val multipartTextType = common.obj.typed<ContentType> { convention(ContentType.create(ContentType.TEXT_PLAIN.mimeType, StandardCharsets.UTF_8)) }
 
     val multipartBinaryType = common.obj.typed<ContentType> { convention(ContentType.DEFAULT_BINARY) }
