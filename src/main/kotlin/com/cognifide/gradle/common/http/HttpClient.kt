@@ -42,19 +42,35 @@ open class HttpClient(private val common: CommonExtension) {
 
     private val logger = common.logger
 
-    val connectionTimeout = common.obj.int { convention(30000) }
+    val connectionTimeout = common.obj.int {
+        convention(30_000)
+        common.prop.int("httpClient.connectionTimeout")?.let { set(it) }
+    }
 
-    val connectionIgnoreSsl = common.obj.boolean { convention(true) }
+    val connectionIgnoreSsl = common.obj.boolean {
+        convention(true)
+        common.prop.boolean("httpClient.connectionIgnoreSsl")?.let { set(it) }
+    }
 
-    val connectionRetries = common.obj.boolean { convention(true) }
+    val connectionRetries = common.obj.boolean {
+        convention(true)
+        common.prop.boolean("httpClient.connectionRetries")?.let { set(it) }
+    }
 
-    val authorizationPreemptive = common.obj.boolean { convention(false) }
+    val authorizationPreemptive = common.obj.boolean {
+        convention(false)
+        common.prop.boolean("httpClient.authorizationPreemptive")?.let { set(it) }
+    }
 
     val baseUrl = common.obj.string()
 
-    val basicUser = common.obj.string()
+    val basicUser = common.obj.string {
+        common.prop.string("httpClient.basicUser")?.let { set(it) }
+    }
 
-    val basicPassword = common.obj.string()
+    val basicPassword = common.obj.string {
+        common.prop.string("httpClient.basicPassword")?.let { set(it) }
+    }
 
     var basicCredentials: Pair<String?, String?>
         get() = when {
@@ -74,11 +90,17 @@ open class HttpClient(private val common: CommonExtension) {
 
     val multipartBinaryType = common.obj.typed<ContentType> { convention(ContentType.DEFAULT_BINARY) }
 
-    val proxyHost = common.obj.string()
+    val proxyHost = common.obj.string {
+        common.prop.string("httpClient.proxyHost")?.let { set(it) }
+    }
 
-    val proxyPort = common.obj.int()
+    val proxyPort = common.obj.int {
+        common.prop.int("httpClient.proxyPort")?.let { set(it) }
+    }
 
-    val proxyScheme = common.obj.string()
+    val proxyScheme = common.obj.string {
+        common.prop.string("httpClient.proxyScheme")?.let { set(it) }
+    }
 
     fun requestConfigurer(configurer: HttpRequestBase.() -> Unit) {
         this.requestConfigurer = configurer
