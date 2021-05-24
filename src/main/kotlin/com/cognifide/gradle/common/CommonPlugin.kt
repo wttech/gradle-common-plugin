@@ -26,8 +26,8 @@ class CommonPlugin : Plugin<Project> {
         if (common.prop.boolean("common.plugin.base") != false) {
             plugins.apply(BasePlugin::class.java)
         }
-        if (common.prop.boolean("common.repository.jcenter") != false) {
-            repositories.jcenter()
+        if (common.prop.boolean("common.repository.mavenCentral") != false) {
+            repositories.mavenCentral()
         }
     }
 

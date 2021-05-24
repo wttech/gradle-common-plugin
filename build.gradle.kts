@@ -4,7 +4,7 @@ plugins {
     id("java-gradle-plugin")
     id("maven-publish")
     id("org.jetbrains.kotlin.jvm") version "1.4.20"
-    id("org.jetbrains.dokka") version "1.4.0-rc"
+    id("org.jetbrains.dokka") version "1.4.20"
     id("com.gradle.plugin-publish") version "0.11.0"
     id("io.gitlab.arturbosch.detekt") version "1.6.0"
     id("net.researchgate.release") version "2.8.1"
@@ -16,6 +16,7 @@ description = "Gradle Common Plugin"
 group = "com.cognifide.gradle"
 
 repositories {
+    mavenCentral()
     jcenter()
 }
 
@@ -67,7 +68,7 @@ tasks {
     }
 
     dokkaJavadoc {
-        outputDirectory = "$buildDir/javadoc"
+        outputDirectory.set(file("$buildDir/javadoc"))
     }
 
     register<Jar>("javadocJar") {
