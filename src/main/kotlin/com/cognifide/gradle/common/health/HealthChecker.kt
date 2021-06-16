@@ -8,6 +8,7 @@ import com.cognifide.gradle.common.http.HttpClient
 import com.cognifide.gradle.common.net.NetUtils
 import com.cognifide.gradle.common.utils.Formats
 import org.apache.http.HttpStatus
+import org.apache.http.client.methods.HttpRequestBase
 import java.util.concurrent.TimeUnit
 
 class HealthChecker(val common: CommonExtension) {
@@ -18,7 +19,7 @@ class HealthChecker(val common: CommonExtension) {
 
     private val checks = mutableListOf<HealthCheck>()
 
-    private var httpOptions: HttpClient.() -> Unit = {
+    private var httpClientOptions: HttpClient.() -> Unit = {
         authorizationPreemptive.set(true)
         connectionRetries.apply {
             convention(false)
@@ -28,6 +29,10 @@ class HealthChecker(val common: CommonExtension) {
             convention(5_000)
             prop.int("healthChecker.http.connectionTimeout")?.let { set(it) }
         }
+    }
+
+    private var httpRequestOptions: HttpRequestBase.() -> Unit = {
+        prop.string("healthChecker.http.userAgent")?.let { addHeader("user-agent", it) }
     }
 
     val verbose = common.obj.boolean {
@@ -159,12 +164,12 @@ class HealthChecker(val common: CommonExtension) {
     fun http(checkName: String, url: String, criteria: HttpCheck.() -> Unit) = check(checkName) {
         var result: Any? = null
         common.http {
-            apply(httpOptions)
+            apply(httpClientOptions)
 
             val check = HttpCheck(url).apply(criteria)
             apply(check.options)
 
-            request(check.method, check.url) { response ->
+            request(check.method, check.url, httpRequestOptions) { response ->
                 result = "${check.method} ${check.url} -> ${response.statusLine}"
                 check.checks.forEach { it(response) }
             }
@@ -176,7 +181,7 @@ class HealthChecker(val common: CommonExtension) {
         var result: Any? = null
         common.http {
             val check = HttpCheck(url).apply(criteria)
-            apply(httpOptions)
+            apply(httpClientOptions)
             apply(check.options)
             var responds = false
             try {
@@ -211,7 +216,11 @@ class HealthChecker(val common: CommonExtension) {
 
     // Default options
 
-    fun httpOptions(options: HttpClient.() -> Unit) {
-        this.httpOptions = options
+    fun httpClient(options: HttpClient.() -> Unit) {
+        this.httpClientOptions = options
+    }
+
+    fun httpRequest(options: HttpRequestBase.() -> Unit) {
+        this.httpRequestOptions = options
     }
 }

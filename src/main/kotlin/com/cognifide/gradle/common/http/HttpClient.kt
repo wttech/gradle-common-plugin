@@ -170,13 +170,15 @@ open class HttpClient(private val common: CommonExtension) {
 
     private var responseChecker: (HttpResponse) -> Unit = { checkStatus(it) }
 
-    fun <T> request(method: String, uri: String, handler: HttpClient.(HttpResponse) -> T) = when (method.toLowerCase()) {
-        "get" -> get(uri, handler)
-        "post" -> post(uri, handler)
-        "put" -> put(uri, handler)
-        "patch" -> patch(uri, handler)
-        "head" -> head(uri, handler)
-        "delete" -> delete(uri, handler)
+    fun <T> request(method: String, uri: String, handler: HttpClient.(HttpResponse) -> T) = request(method, uri, {}, handler)
+
+    fun <T> request(method: String, uri: String, options: HttpRequestBase.() -> Unit, handler: HttpClient.(HttpResponse) -> T) = when (method.toLowerCase()) {
+        "get" -> get(uri, handler, options)
+        "post" -> post(uri, handler, options)
+        "put" -> put(uri, handler, options)
+        "patch" -> patch(uri, handler, options)
+        "head" -> head(uri, handler, options)
+        "delete" -> delete(uri, handler, options)
         else -> throw RequestException("Invalid HTTP client method: '$method'")
     }
 
