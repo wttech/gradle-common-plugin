@@ -64,6 +64,8 @@ open class HttpClient(private val common: CommonExtension) {
 
     val baseUrl = common.obj.string()
 
+    val escapeUrl = common.obj.boolean { convention(false) }
+
     val basicUser = common.obj.string {
         common.prop.string("httpClient.basicUser")?.let { set(it) }
     }
@@ -363,7 +365,8 @@ open class HttpClient(private val common: CommonExtension) {
      * https://stackoverflow.com/questions/13652681/httpclient-invalid-uri-escaped-absolute-path-not-valid
      */
     open fun baseUrl(uri: String): String {
-        return "${baseUrl.orNull ?: ""}${UrlEscapers.urlFragmentEscaper().escape(uri)}"
+        val escapedUri = if (escapeUrl.get()) UrlEscapers.urlFragmentEscaper().escape(uri) else uri
+        return "${baseUrl.orNull ?: ""}$escapedUri"
     }
 
     @Suppress("TooGenericExceptionCaught")
