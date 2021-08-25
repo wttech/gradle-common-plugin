@@ -7,7 +7,9 @@ import java.io.File
 
 class MvnInvoker(private val common: CommonExtension) {
 
-    val workingDir = common.obj.dir()
+    val workingDir = common.obj.dir() {
+        convention(common.project.layout.projectDirectory)
+    }
 
     fun workingDir(dir: File) {
         workingDir.set(dir)
@@ -52,7 +54,16 @@ class MvnInvoker(private val common: CommonExtension) {
         args.addAll(values)
     }
 
-    private var specOptions: ExecSpec.() -> Unit = {}
+    val javaToolchain = common.obj.boolean {
+        convention(true)
+        common.prop.boolean("mvn.javaToolchain")?.let { set(it) }
+    }
+
+    private var specOptions: ExecSpec.() -> Unit = {
+        if (javaToolchain.get()) {
+            environment("JAVA_HOME", common.javaSupport.homePath)
+        }
+    }
 
     fun spec(options: ExecSpec.() -> Unit) {
         this.specOptions = options
