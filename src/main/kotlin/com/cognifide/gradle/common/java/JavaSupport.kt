@@ -18,7 +18,7 @@ class JavaSupport(private val common: CommonExtension) {
     private val logger = common.project.logger
 
     val version = common.obj.string {
-        convention("11")
+        convention(VERSION_DEFAULT)
         common.prop.string("javaSupport.version")?.let { set(it) }
     }
 
@@ -89,5 +89,7 @@ class JavaSupport(private val common: CommonExtension) {
 
     companion object {
         const val TOOLCHAINS_EXTENSION = "aemJavaToolchains"
+
+        const val VERSION_DEFAULT = "11"
     }
 }
