@@ -1,6 +1,7 @@
 package com.cognifide.gradle.common.file.transfer
 
 import com.cognifide.gradle.common.build.DependencyFile
+import com.cognifide.gradle.common.utils.Formats
 import org.apache.commons.io.FilenameUtils
 
 object FileUtils {
@@ -22,8 +23,9 @@ object FileUtils {
             ("$protocol://$dirUrl") to fileName
         }
         else -> {
-            val dirUrl = fileUrl.substringBeforeLast("/")
-            val fileName = fileUrl.substringAfterLast("/")
+            val normalizedPath = Formats.normalizePath(fileUrl)
+            val dirUrl = normalizedPath.substringBeforeLast("/")
+            val fileName = normalizedPath.substringAfterLast("/")
 
             dirUrl to fileName
         }
