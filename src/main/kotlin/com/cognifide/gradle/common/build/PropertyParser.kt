@@ -18,12 +18,12 @@ class PropertyParser(anyProject: Project) {
             return project.property(name).toString()
         }
 
-        val systemValue = System.getProperty(name)
+        val systemValue: String? = System.getProperty(name)
         if (systemValue != null) {
             return systemValue
         }
 
-        val envValue = System.getenv(name)
+        val envValue: String? = System.getenv(name)
         if (envValue != null) {
             return envValue
         }

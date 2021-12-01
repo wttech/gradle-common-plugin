@@ -44,7 +44,7 @@ class CommonPlugin : Plugin<Project> {
      */
     private fun checkPathEnabled(project: Project): Boolean {
         val envVars = listOf("JENKINS_HOME")
-        if (envVars.any { System.getenv(it).isNotBlank() }) {
+        if (envVars.any { (System.getenv(it) ?: "").isNotBlank() }) {
             return false
         }
 
