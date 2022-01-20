@@ -6,6 +6,7 @@ import dorkbox.notify.Notify
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.gradle.api.BuildCancelledException
 import org.gradle.api.logging.LogLevel
+import org.gradle.internal.os.OperatingSystem
 
 class NotifierFacade private constructor(val common: CommonExtension) {
 
@@ -19,7 +20,7 @@ class NotifierFacade private constructor(val common: CommonExtension) {
      * Turn on/off default system notifications.
      */
     val enabled = common.obj.boolean {
-        convention(true)
+        convention(OperatingSystem.current().isWindows || OperatingSystem.current().isMacOsX)
         prop.boolean("notifier.enabled")?.let { set(it) }
     }
 
