@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("java-gradle-plugin")
     id("maven-publish")
-    id("org.jetbrains.kotlin.jvm") version "1.4.20"
+    id("org.jetbrains.kotlin.jvm") version "1.5.31"
     id("com.gradle.plugin-publish") version "0.11.0"
     id("io.gitlab.arturbosch.detekt") version "1.19.0"
     id("net.researchgate.release") version "2.8.1"
@@ -19,10 +19,15 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.20")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.20")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
+    // Build environment
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.19.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
 
+    // External dependencies
     implementation("org.apache.commons:commons-lang3:3.10")
     implementation("org.apache.sshd:sshd-sftp:2.4.0")
     implementation("org.apache.httpcomponents:httpclient:4.5.12")
@@ -37,11 +42,7 @@ dependencies {
     implementation("com.dorkbox:Notify:3.7")
     implementation("net.lingala.zip4j:zip4j:2.5.1")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.19.0")
 }
 
 val functionalTestSourceSet = sourceSets.create("functionalTest")

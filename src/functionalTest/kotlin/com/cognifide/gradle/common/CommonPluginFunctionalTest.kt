@@ -2,9 +2,9 @@ package com.cognifide.gradle.common
 
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import java.io.File
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class CommonPluginFunctionalTest {
 

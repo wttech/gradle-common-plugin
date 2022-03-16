@@ -9,6 +9,7 @@ import com.cognifide.gradle.common.net.NetUtils
 import com.cognifide.gradle.common.utils.Formats
 import org.apache.http.HttpStatus
 import org.apache.http.client.methods.HttpRequestBase
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class HealthChecker(val common: CommonExtension) {
@@ -192,7 +193,7 @@ class HealthChecker(val common: CommonExtension) {
                 // ignore known errors
             }
             if (responds) {
-                throw IllegalStateException("HTTP ${check.method.toUpperCase()} '${check.url}' is available")
+                throw IllegalStateException("HTTP ${check.method.uppercase(Locale.getDefault())} '${check.url}' is available")
             } else {
                 result = "${check.method} ${check.url} -> unavailable"
             }

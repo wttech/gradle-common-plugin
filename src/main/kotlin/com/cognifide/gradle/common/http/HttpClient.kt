@@ -36,6 +36,7 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
+import java.util.*
 
 @Suppress("TooManyFunctions")
 open class HttpClient(private val common: CommonExtension) {
@@ -88,7 +89,14 @@ open class HttpClient(private val common: CommonExtension) {
         basicCredentials = common.fileTransfer.credentials
     }
 
-    val multipartTextType = common.obj.typed<ContentType> { convention(ContentType.create(ContentType.TEXT_PLAIN.mimeType, StandardCharsets.UTF_8)) }
+    val multipartTextType = common.obj.typed<ContentType> {
+        convention(
+            ContentType.create(
+                ContentType.TEXT_PLAIN.mimeType,
+                StandardCharsets.UTF_8
+            )
+        )
+    }
 
     val multipartBinaryType = common.obj.typed<ContentType> { convention(ContentType.DEFAULT_BINARY) }
 
@@ -181,14 +189,15 @@ open class HttpClient(private val common: CommonExtension) {
 
     private var responseChecker: (HttpResponse) -> Unit = { checkStatus(it) }
 
-    fun <T> request(method: String, uri: String, handler: HttpClient.(HttpResponse) -> T) = request(method, uri, {}, handler)
+    fun <T> request(method: String, uri: String, handler: HttpClient.(HttpResponse) -> T) =
+        request(method, uri, {}, handler)
 
     fun <T> request(
         method: String,
         uri: String,
         options: HttpRequestBase.() -> Unit,
         handler: HttpClient.(HttpResponse) -> T
-    ) = when (method.toLowerCase()) {
+    ) = when (method.lowercase(Locale.getDefault())) {
         "get" -> get(uri, handler, options)
         "post" -> post(uri, handler, options)
         "put" -> put(uri, handler, options)
@@ -250,7 +259,12 @@ open class HttpClient(private val common: CommonExtension) {
 
     fun <T> patch(uri: String, entity: File, handler: HttpClient.(HttpResponse) -> T) = patch(uri, entity, handler) {}
 
-    fun <T> patch(uri: String, entity: File, handler: HttpClient.(HttpResponse) -> T, options: HttpPatch.() -> Unit): T {
+    fun <T> patch(
+        uri: String,
+        entity: File,
+        handler: HttpClient.(HttpResponse) -> T,
+        options: HttpPatch.() -> Unit
+    ): T {
         return patch(uri, handler) { this.entity = createEntity(entity); options() }
     }
 
@@ -260,15 +274,24 @@ open class HttpClient(private val common: CommonExtension) {
         return postUrlencoded(uri, params, handler)
     }
 
-    fun postUrlencoded(uri: String, params: Map<String, Any?> = mapOf()) = postUrlencoded(uri, params) { checkStatus(it) }
+    fun postUrlencoded(uri: String, params: Map<String, Any?> = mapOf()) =
+        postUrlencoded(uri, params) { checkStatus(it) }
 
-    fun <T> postUrlencoded(uri: String, params: Map<String, Any?> = mapOf(), handler: HttpClient.(HttpResponse) -> T): T {
+    fun <T> postUrlencoded(
+        uri: String,
+        params: Map<String, Any?> = mapOf(),
+        handler: HttpClient.(HttpResponse) -> T
+    ): T {
         return post(uri, handler) { entity = createEntityUrlencoded(params) }
     }
 
     fun postMultipart(uri: String, params: Map<String, Any?> = mapOf()) = postMultipart(uri, params) { checkStatus(it) }
 
-    fun <T> postMultipart(uri: String, params: Map<String, Any?> = mapOf(), handler: HttpClient.(HttpResponse) -> T): T {
+    fun <T> postMultipart(
+        uri: String,
+        params: Map<String, Any?> = mapOf(),
+        handler: HttpClient.(HttpResponse) -> T
+    ): T {
         return post(uri, handler) { entity = createEntityMultipart(params) }
     }
 
@@ -278,9 +301,10 @@ open class HttpClient(private val common: CommonExtension) {
 
     fun <T> post(uri: String, entity: File, handler: HttpClient.(HttpResponse) -> T) = post(uri, entity, handler) {}
 
-    fun <T> post(uri: String, entity: File, handler: HttpClient.(HttpResponse) -> T, options: HttpPost.() -> Unit) = post(uri, handler) {
-        this.entity = createEntity(entity); options()
-    }
+    fun <T> post(uri: String, entity: File, handler: HttpClient.(HttpResponse) -> T, options: HttpPost.() -> Unit) =
+        post(uri, handler) {
+            this.entity = createEntity(entity); options()
+        }
 
     fun <T> post(uri: String, handler: HttpClient.(HttpResponse) -> T, options: HttpPost.() -> Unit): T {
         return execute(HttpPost(baseUrl(uri)).apply(options), handler)
@@ -313,7 +337,10 @@ open class HttpClient(private val common: CommonExtension) {
     fun <T> asObjectFromJson(response: HttpResponse, clazz: Class<T>): T = try {
         Formats.toObjectFromJson(asStream(response), clazz)
     } catch (e: IOException) {
-        throw ResponseException("Cannot parse response JSON as object, because response is probably malformed. Cause: ${e.message}\n$response", e)
+        throw ResponseException(
+            "Cannot parse response JSON as object, because response is probably malformed. Cause: ${e.message}\n$response",
+            e
+        )
     }
 
     fun asMapFromJson(response: HttpResponse) = asJson(response).asMap()
@@ -331,7 +358,10 @@ open class HttpClient(private val common: CommonExtension) {
                 }
             }
         } catch (e: Exception) {
-            throw ResponseException("Cannot parse response JSON as map, because response is probably malformed. Cause: ${e.message}\n$response", e)
+            throw ResponseException(
+                "Cannot parse response JSON as map, because response is probably malformed. Cause: ${e.message}\n$response",
+                e
+            )
         }
     }
 
@@ -353,7 +383,8 @@ open class HttpClient(private val common: CommonExtension) {
         throw ResponseException("Unexpected response status detected: ${response.statusLine}")
     }
 
-    fun checkText(response: HttpResponse, containedText: String, ignoreCase: Boolean = true) = checkTexts(response, listOf(containedText), ignoreCase)
+    fun checkText(response: HttpResponse, containedText: String, ignoreCase: Boolean = true) =
+        checkTexts(response, listOf(containedText), ignoreCase)
 
     fun checkTexts(response: HttpResponse, containedTexts: Iterable<String>, ignoreCase: Boolean = true) {
         val text = asString(response)
@@ -443,7 +474,8 @@ open class HttpClient(private val common: CommonExtension) {
 
     fun downloadTo(fileUrl: String, dir: File) = fileTransfer { downloadTo(fileUrl, dir) }
 
-    private fun <T> fileTransfer(operation: HttpFileTransfer.() -> T): T = common.httpFile { client = this@HttpClient; operation() }
+    private fun <T> fileTransfer(operation: HttpFileTransfer.() -> T): T =
+        common.httpFile { client = this@HttpClient; operation() }
 
     companion object {
         val STATUS_CODE_VALID = 200 until 300

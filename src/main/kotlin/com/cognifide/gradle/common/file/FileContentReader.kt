@@ -18,7 +18,7 @@ class FileContentReader(input: Reader) : BaseFilterReader(input), ChainableReade
     override fun read(): Int {
         if (index > -1) {
             if (index < buffer.size) {
-                return buffer[index++].toInt()
+                return buffer[index++].code
             }
 
             index = -1

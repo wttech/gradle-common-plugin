@@ -15,6 +15,7 @@ import com.cognifide.gradle.common.notifier.NotifierFacade
 import com.cognifide.gradle.common.tasks.TaskFacade
 import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.utils.Patterns
+import com.cognifide.gradle.common.utils.capitalizeChar
 import com.cognifide.gradle.common.utils.using
 import com.cognifide.gradle.common.zip.ZipFile
 import org.gradle.api.Project
@@ -290,7 +291,7 @@ open class CommonExtension(val project: Project) {
 
         fun of(project: Project): CommonExtension {
             return project.extensions.findByType(CommonExtension::class.java)
-                ?: throw CommonException("${project.displayName.capitalize()} must have at least one of following plugins applied: $PLUGIN_IDS")
+                ?: throw CommonException("${project.displayName.capitalizeChar()} must have at least one of following plugins applied: $PLUGIN_IDS")
         }
     }
 }
