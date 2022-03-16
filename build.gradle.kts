@@ -22,27 +22,25 @@ dependencies {
     // Build environment
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+    // implementation("org.jetbrains.kotlin:kotlin-reflect") // maybe could be skipped
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2") // see compat table - https://kotlinlang.org/docs/releases.html#release-details
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.19.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
 
     // External dependencies
-    implementation("org.apache.commons:commons-lang3:3.10")
-    implementation("org.apache.sshd:sshd-sftp:2.4.0")
-    implementation("org.apache.httpcomponents:httpclient:4.5.12")
-    implementation("org.apache.httpcomponents:httpmime:4.5.12")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.3")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.3")
+    implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("org.apache.sshd:sshd-sftp:2.8.0")
+    implementation("org.apache.httpcomponents:httpclient:4.5.13")
+    implementation("org.apache.httpcomponents:httpmime:4.5.13")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.1")
 
     implementation("org.codelibs:jcifs:1.3.18.3")
-    implementation("org.jsoup:jsoup:1.12.1")
-    implementation("commons-io:commons-io:2.6")
-    implementation("io.pebbletemplates:pebble:3.1.2")
+    implementation("org.jsoup:jsoup:1.14.3")
+    implementation("commons-io:commons-io:2.11.0")
+    implementation("io.pebbletemplates:pebble:3.1.5")
     implementation("com.dorkbox:Notify:3.7")
-    implementation("net.lingala.zip4j:zip4j:2.5.1")
-
-
+    implementation("net.lingala.zip4j:zip4j:2.9.1")
 }
 
 val functionalTestSourceSet = sourceSets.create("functionalTest")
@@ -113,16 +111,8 @@ detekt {
     autoCorrect = true
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
-            artifact(tasks["sourcesJar"])
-        }
-    }
-}
-
 gradlePlugin {
+    isAutomatedPublishing = false
     plugins {
         create("common") {
             id = "com.cognifide.common"
@@ -136,6 +126,15 @@ gradlePlugin {
             implementationClass = "com.cognifide.gradle.common.RuntimePlugin"
             displayName = "Runtime Plugin"
             description = "Introduces base lifecycle tasks (like 'up', 'down') for controlling runtimes (servers, applications)"
+        }
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("pluginMaven") {
+            from(components["java"])
+            artifact(tasks["sourcesJar"])
         }
     }
 }

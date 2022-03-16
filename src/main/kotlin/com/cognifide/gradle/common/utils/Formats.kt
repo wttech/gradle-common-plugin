@@ -58,7 +58,7 @@ object Formats {
     // JSON
 
     private fun jsonMapper() = ObjectMapper(JsonFactory()).apply {
-        registerModule(KotlinModule())
+        registerModule(KotlinModule.Builder().build())
     }
 
     private fun jsonWriter(pretty: Boolean) = jsonMapper().run {
@@ -132,7 +132,7 @@ object Formats {
     // YML
 
     private fun ymlMapper() = ObjectMapper(YAMLFactory()).apply {
-        registerModule(KotlinModule())
+        registerModule(KotlinModule.Builder().build())
     }
 
     private fun ymlWriter() = ymlMapper().writer()

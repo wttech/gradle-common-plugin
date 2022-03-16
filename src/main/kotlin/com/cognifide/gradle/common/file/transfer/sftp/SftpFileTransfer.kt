@@ -6,10 +6,10 @@ import com.cognifide.gradle.common.file.transfer.ProtocolFileTransfer
 import org.apache.http.client.utils.URIBuilder
 import org.apache.sshd.client.SshClient
 import org.apache.sshd.client.session.ClientSession
-import org.apache.sshd.client.subsystem.sftp.SftpClient
-import org.apache.sshd.client.subsystem.sftp.SftpClientFactory
-import org.apache.sshd.common.subsystem.sftp.SftpConstants
-import org.apache.sshd.common.subsystem.sftp.SftpException
+import org.apache.sshd.sftp.client.SftpClient
+import org.apache.sshd.sftp.client.SftpClientFactory
+import org.apache.sshd.sftp.common.SftpConstants
+import org.apache.sshd.sftp.common.SftpException
 import java.io.File
 
 @Suppress("TooGenericExceptionCaught")
