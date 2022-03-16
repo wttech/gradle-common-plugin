@@ -4,9 +4,8 @@ plugins {
     id("java-gradle-plugin")
     id("maven-publish")
     id("org.jetbrains.kotlin.jvm") version "1.4.20"
-    id("org.jetbrains.dokka") version "1.4.20"
     id("com.gradle.plugin-publish") version "0.11.0"
-    id("io.gitlab.arturbosch.detekt") version "1.6.0"
+    id("io.gitlab.arturbosch.detekt") version "1.19.0"
     id("net.researchgate.release") version "2.8.1"
     id("com.github.breadmoirai.github-release") version "2.2.10"
 }
@@ -17,7 +16,6 @@ group = "com.cognifide.gradle"
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
@@ -32,7 +30,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.3")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.3")
 
-    implementation("org.samba.jcifs:jcifs:1.3.18-kohsuke-1")
+    implementation("org.codelibs:jcifs:1.3.18.3")
     implementation("org.jsoup:jsoup:1.12.1")
     implementation("commons-io:commons-io:2.6")
     implementation("io.pebbletemplates:pebble:3.1.2")
@@ -43,7 +41,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.6.0")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.19.0")
 }
 
 val functionalTestSourceSet = sourceSets.create("functionalTest")
@@ -67,19 +65,9 @@ tasks {
         from(sourceSets["main"].allSource)
     }
 
-    dokkaJavadoc {
-        outputDirectory.set(file("$buildDir/javadoc"))
-    }
-
-    register<Jar>("javadocJar") {
-        archiveClassifier.set("javadoc")
-        dependsOn("dokkaJavadoc")
-        from("$buildDir/javadoc")
-    }
-
     withType<JavaCompile>().configureEach{
-        sourceCompatibility = JavaVersion.VERSION_1_8.toString()
-        targetCompatibility = JavaVersion.VERSION_1_8.toString()
+        sourceCompatibility = JavaVersion.VERSION_11.toString()
+        targetCompatibility = JavaVersion.VERSION_11.toString()
     }
 
     withType<Test>().configureEach {
@@ -89,8 +77,7 @@ tasks {
 
     withType<KotlinCompile>().configureEach {
         kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_1_8.toString()
-            freeCompilerArgs = freeCompilerArgs + "-Xuse-experimental=kotlin.Experimental"
+            jvmTarget = JavaVersion.VERSION_11.toString()
         }
     }
 
@@ -99,11 +86,11 @@ tasks {
     }
 
     named<Task>("build") {
-        dependsOn("sourcesJar", "javadocJar")
+        dependsOn("sourcesJar")
     }
 
     named<Task>("publishToMavenLocal") {
-        dependsOn("sourcesJar", "javadocJar")
+        dependsOn("sourcesJar")
     }
 
     named("afterReleaseBuild") {
@@ -123,7 +110,6 @@ detekt {
     config.from(file("detekt.yml"))
     parallel = true
     autoCorrect = true
-    failFast = true
 }
 
 publishing {
@@ -131,7 +117,6 @@ publishing {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
             artifact(tasks["sourcesJar"])
-            artifact(tasks["javadocJar"])
         }
     }
 }
@@ -172,7 +157,7 @@ githubRelease {
     token((project.findProperty("github.token") ?: "").toString())
     tagName(project.version.toString())
     releaseName(project.version.toString())
-    releaseAssets(tasks["jar"], tasks["sourcesJar"], tasks["javadocJar"])
+    releaseAssets(tasks["jar"], tasks["sourcesJar"])
     draft((project.findProperty("github.draft") ?: "false").toString().toBoolean())
     prerelease((project.findProperty("github.prerelease") ?: "false").toString().toBoolean())
     overwrite((project.findProperty("github.override") ?: "true").toString().toBoolean())

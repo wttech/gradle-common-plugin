@@ -66,8 +66,8 @@ class PathFileTransfer(common: CommonExtension) : AbstractFileTransfer(common) {
 
         return try {
             file(dirUrl, fileName)
-                    .takeIf { it.isFile }
-                    ?.run { FileEntry(fileName, length(), lastModified()) }
+                .takeIf { it.isFile }
+                ?.run { FileEntry(fileName, length(), lastModified()) }
         } catch (e: Exception) {
             throw FileException("Cannot check file status at URL '$fileUrl'. Cause: '${e.message}", e)
         }

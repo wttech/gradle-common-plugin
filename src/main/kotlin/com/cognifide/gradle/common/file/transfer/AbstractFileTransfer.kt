@@ -3,9 +3,8 @@ package com.cognifide.gradle.common.file.transfer
 import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.file.FileException
 import java.io.File
-import java.io.Serializable
 
-abstract class AbstractFileTransfer(protected val common: CommonExtension) : FileTransferHandler, Serializable {
+abstract class AbstractFileTransfer(protected val common: CommonExtension) : FileTransferHandler {
 
     override val enabled = common.obj.boolean { convention(true) }
 

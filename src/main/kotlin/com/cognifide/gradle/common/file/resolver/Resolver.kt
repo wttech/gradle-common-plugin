@@ -8,8 +8,8 @@ import com.cognifide.gradle.common.file.transfer.sftp.SftpFileTransfer
 import com.cognifide.gradle.common.file.transfer.smb.SmbFileTransfer
 import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.utils.Patterns
-import java.io.File
 import org.apache.commons.io.FilenameUtils
+import java.io.File
 
 /**
  * File downloader with groups supporting files from multiple sources: local and remote (SFTP, SMB, HTTP).
@@ -77,7 +77,7 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
     val files get() = groupFiles(Patterns.WILDCARD)
 
     fun group(name: String) = groupList.find { it.name == name }
-            ?: throw FileException("File group '$name' is not defined.")
+        ?: throw FileException("File group '$name' is not defined.")
 
     /**
      * Resolve files in case of various type of specified value: file, url to file, dependency notation, project dependency.
@@ -186,7 +186,7 @@ abstract class Resolver<G : FileGroup>(val common: CommonExtension) {
     fun useLocalBy(dir: Any, filePatterns: Iterable<String>, selector: (Iterable<File>).() -> File?): FileResolution {
         return resolveFile(listOf(dir, filePatterns), true) {
             common.project.fileTree(dir) { it.include(filePatterns) }.run(selector)
-                    ?: throw FileException("Cannot find any local file under directory '$dir' matching file pattern '$filePatterns'!")
+                ?: throw FileException("Cannot find any local file under directory '$dir' matching file pattern '$filePatterns'!")
         }
     }
 

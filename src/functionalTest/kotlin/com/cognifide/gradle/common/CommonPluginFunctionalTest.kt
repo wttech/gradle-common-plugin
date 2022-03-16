@@ -1,8 +1,8 @@
 package com.cognifide.gradle.common
 
-import java.io.File
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -14,11 +14,13 @@ class CommonPluginFunctionalTest {
         val projectDir = File("build/functionalTest")
         projectDir.mkdirs()
         projectDir.resolve("settings.gradle").writeText("")
-        projectDir.resolve("build.gradle").writeText("""
+        projectDir.resolve("build.gradle").writeText(
+            """
             plugins {
                 id('com.cognifide.gradle.common')
             }
-        """)
+        """
+        )
 
         // Run the build
         val result = GradleRunner.create().run {

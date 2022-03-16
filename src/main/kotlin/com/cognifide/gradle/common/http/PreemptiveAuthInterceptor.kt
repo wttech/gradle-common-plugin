@@ -24,7 +24,7 @@ class PreemptiveAuthInterceptor : HttpRequestInterceptor {
             val credsProvider = context.getAttribute(HttpClientContext.CREDS_PROVIDER) as CredentialsProvider
             val targetHost = context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST) as HttpHost
             val creds = credsProvider.getCredentials(AuthScope(targetHost.getHostName(), targetHost.getPort()))
-                    ?: throw HttpException("No credentials for preemptive authentication")
+                ?: throw HttpException("No credentials for preemptive authentication")
 
             authState.update(BasicScheme(), creds)
         }

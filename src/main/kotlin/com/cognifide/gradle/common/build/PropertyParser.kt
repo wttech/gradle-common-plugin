@@ -53,11 +53,11 @@ class PropertyParser(anyProject: Project) {
     }
 
     fun group(name: String): Map<String, String>? = project.properties
-            .filterKeys { it.startsWith("$name.") }
-            .map { it.key.removePrefix("$name.") to (it.value ?: "").toString() }
-            .sortedBy { it.first }
-            .toMap()
-            .ifEmpty { null }
+        .filterKeys { it.startsWith("$name.") }
+        .map { it.key.removePrefix("$name.") to (it.value ?: "").toString() }
+        .sortedBy { it.first }
+        .toMap()
+        .ifEmpty { null }
 
     fun boolean(name: String) = prop(name)?.toBoolean()
 
@@ -94,11 +94,11 @@ class PropertyParser(anyProject: Project) {
 
     private val expandProps: Map<String, Any> by lazy {
         mapOf(
-                "rootProject" to project,
-                "system" to System.getProperties().entries.fold(mutableMapOf<String, Any>()) { props, prop ->
-                    props[prop.key.toString()] = prop.value.toString(); props
-                },
-                "env" to System.getenv()
+            "rootProject" to project,
+            "system" to System.getProperties().entries.fold(mutableMapOf<String, Any>()) { props, prop ->
+                props[prop.key.toString()] = prop.value.toString(); props
+            },
+            "env" to System.getenv()
         )
     }
 
@@ -117,17 +117,18 @@ class PropertyParser(anyProject: Project) {
         private const val TEMPLATE_VAR_SUFFIX = "}}"
 
         private val TEMPLATE_ENGINE = PebbleEngine.Builder()
-                .autoEscaping(false)
-                .cacheActive(false)
-                .strictVariables(true)
-                .newLineTrimming(false)
-                .loader(StringLoader())
-                .syntax(Syntax.Builder()
-                        .setEnableNewLineTrimming(false)
-                        .setPrintOpenDelimiter(TEMPLATE_VAR_PREFIX)
-                        .setPrintCloseDelimiter(TEMPLATE_VAR_SUFFIX)
-                        .build()
-                )
-                .build()
+            .autoEscaping(false)
+            .cacheActive(false)
+            .strictVariables(true)
+            .newLineTrimming(false)
+            .loader(StringLoader())
+            .syntax(
+                Syntax.Builder()
+                    .setEnableNewLineTrimming(false)
+                    .setPrintOpenDelimiter(TEMPLATE_VAR_PREFIX)
+                    .setPrintCloseDelimiter(TEMPLATE_VAR_SUFFIX)
+                    .build()
+            )
+            .build()
     }
 }

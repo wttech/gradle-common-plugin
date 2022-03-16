@@ -9,9 +9,8 @@ import org.gradle.api.UnknownTaskException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.testing.Test
 import org.gradle.language.base.plugins.LifecycleBasePlugin
-import java.io.Serializable
 
-class TaskFacade(val project: Project) : Serializable {
+class TaskFacade(val project: Project) {
 
     val tests get() = getAll<Test>()
 

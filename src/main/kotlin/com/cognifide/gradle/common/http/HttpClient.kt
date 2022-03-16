@@ -125,29 +125,38 @@ open class HttpClient(private val common: CommonExtension) {
                 addInterceptorFirst(PreemptiveAuthInterceptor())
             }
 
-            setDefaultCredentialsProvider(BasicCredentialsProvider().apply {
-                setCredentials(AuthScope.ANY, UsernamePasswordCredentials(basicUser.get(), basicPassword.get()))
-            })
+            setDefaultCredentialsProvider(
+                BasicCredentialsProvider().apply {
+                    setCredentials(AuthScope.ANY, UsernamePasswordCredentials(basicUser.get(), basicPassword.get()))
+                }
+            )
         }
 
-        setDefaultRequestConfig(RequestConfig.custom().apply {
-            setCookieSpec(CookieSpecs.STANDARD)
+        setDefaultRequestConfig(
+            RequestConfig.custom().apply {
+                setCookieSpec(CookieSpecs.STANDARD)
 
-            if (!connectionRetries.get()) {
-                setSocketTimeout(connectionTimeout.get())
-            }
-            setConnectTimeout(connectionTimeout.get())
-            setConnectionRequestTimeout(connectionTimeout.get())
-        }.build())
+                if (!connectionRetries.get()) {
+                    setSocketTimeout(connectionTimeout.get())
+                }
+                setConnectTimeout(connectionTimeout.get())
+                setConnectionRequestTimeout(connectionTimeout.get())
+            }.build()
+        )
 
         if (!proxyHost.orNull.isNullOrBlank() && proxyPort.isPresent) {
             setProxy(HttpHost(proxyHost.get(), proxyPort.get(), proxyScheme.get()))
         }
 
         if (connectionIgnoreSsl.get()) {
-            setSSLSocketFactory(SSLConnectionSocketFactory(SSLContextBuilder()
-                    .loadTrustMaterial(null) { _, _ -> true }
-                    .build(), NoopHostnameVerifier.INSTANCE))
+            setSSLSocketFactory(
+                SSLConnectionSocketFactory(
+                    SSLContextBuilder()
+                        .loadTrustMaterial(null) { _, _ -> true }
+                        .build(),
+                    NoopHostnameVerifier.INSTANCE
+                )
+            )
         }
         if (!connectionRetries.get()) {
             disableAutomaticRetries()
@@ -174,7 +183,12 @@ open class HttpClient(private val common: CommonExtension) {
 
     fun <T> request(method: String, uri: String, handler: HttpClient.(HttpResponse) -> T) = request(method, uri, {}, handler)
 
-    fun <T> request(method: String, uri: String, options: HttpRequestBase.() -> Unit, handler: HttpClient.(HttpResponse) -> T) = when (method.toLowerCase()) {
+    fun <T> request(
+        method: String,
+        uri: String,
+        options: HttpRequestBase.() -> Unit,
+        handler: HttpClient.(HttpResponse) -> T
+    ) = when (method.toLowerCase()) {
         "get" -> get(uri, handler, options)
         "post" -> post(uri, handler, options)
         "put" -> put(uri, handler, options)
@@ -384,10 +398,12 @@ open class HttpClient(private val common: CommonExtension) {
     fun execute(method: HttpRequestBase) = execute(method) { checkStatus(it) }
 
     open fun createEntityUrlencoded(params: Map<String, Any?>): HttpEntity {
-        return UrlEncodedFormEntity(params.entries.fold(mutableListOf<NameValuePair>()) { result, (key, value) ->
-            Utils.unroll(value) { addEntityUrlencoded(result, key, it) }
-            result
-        })
+        return UrlEncodedFormEntity(
+            params.entries.fold(mutableListOf<NameValuePair>()) { result, (key, value) ->
+                Utils.unroll(value) { addEntityUrlencoded(result, key, it) }
+                result
+            }
+        )
     }
 
     private fun addEntityUrlencoded(result: MutableList<NameValuePair>, key: String, value: Any?) {

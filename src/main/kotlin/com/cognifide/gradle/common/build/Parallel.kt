@@ -1,8 +1,8 @@
 package com.cognifide.gradle.common.build
 
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.*
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
 @OptIn(ObsoleteCoroutinesApi::class)
 object Parallel {

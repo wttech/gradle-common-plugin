@@ -1,9 +1,9 @@
 package com.cognifide.gradle.common.file
 
-import java.io.Reader
 import org.apache.tools.ant.filters.BaseFilterReader
 import org.apache.tools.ant.filters.ChainableReader
 import org.gradle.api.file.ContentFilterable
+import java.io.Reader
 
 class FileContentReader(input: Reader) : BaseFilterReader(input), ChainableReader {
 

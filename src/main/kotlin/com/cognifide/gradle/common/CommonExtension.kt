@@ -1,27 +1,26 @@
 package com.cognifide.gradle.common
 
+import com.cognifide.gradle.common.build.*
 import com.cognifide.gradle.common.file.FileWatcher
 import com.cognifide.gradle.common.file.resolver.FileResolver
 import com.cognifide.gradle.common.file.transfer.FileTransferManager
 import com.cognifide.gradle.common.file.transfer.http.HttpFileTransfer
 import com.cognifide.gradle.common.file.transfer.sftp.SftpFileTransfer
 import com.cognifide.gradle.common.file.transfer.smb.SmbFileTransfer
-import com.cognifide.gradle.common.http.HttpClient
-import com.cognifide.gradle.common.notifier.NotifierFacade
-import com.cognifide.gradle.common.utils.Formats
-import com.cognifide.gradle.common.utils.Patterns
-import com.cognifide.gradle.common.build.*
 import com.cognifide.gradle.common.health.HealthChecker
+import com.cognifide.gradle.common.http.HttpClient
 import com.cognifide.gradle.common.java.JavaSupport
 import com.cognifide.gradle.common.mvn.MvnInvoker
+import com.cognifide.gradle.common.notifier.NotifierFacade
 import com.cognifide.gradle.common.tasks.TaskFacade
+import com.cognifide.gradle.common.utils.Formats
+import com.cognifide.gradle.common.utils.Patterns
 import com.cognifide.gradle.common.utils.using
 import com.cognifide.gradle.common.zip.ZipFile
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact
 import org.gradle.api.internal.tasks.userinput.UserInputHandler
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
@@ -82,20 +81,6 @@ open class CommonExtension(val project: Project) {
     val javaSupport by lazy { JavaSupport(this) }
 
     fun javaSupport(options: JavaSupport.() -> Unit) = javaSupport.using(options)
-
-    /**
-     * Allows easily provide artifact in a lazy way (e.g via task provider).
-     *
-     * @see <https://github.com/gradle/gradle/issues/7958>
-     */
-    fun <T : Any> publicationArtifact(provider: Provider<T>) = LazyPublishArtifact(provider)
-
-    /**
-     * Allows easily provide artifact in a lazy way (e.g via task provider).
-     *
-     * @see <https://github.com/gradle/gradle/issues/7958>
-     */
-    fun publicationArtifact(taskPath: String) = publicationArtifact(project.tasks.named(taskPath))
 
     /**
      * Show asynchronous 0 indicator with percentage while performing some action.
@@ -169,7 +154,7 @@ open class CommonExtension(val project: Project) {
      * Get recent file from directory
      */
     fun recentFile(dir: File, filePatterns: Iterable<String> = RECENT_FILE_PATTERNS): File = recentFileProvider(dir, filePatterns).orNull
-            ?: throw CommonException("No recent files available in directory '$dir' matching file pattern(s): $filePatterns!")
+        ?: throw CommonException("No recent files available in directory '$dir' matching file pattern(s): $filePatterns!")
 
     /**
      * Get recent file from directory
@@ -180,9 +165,9 @@ open class CommonExtension(val project: Project) {
      * Get recent file from directory
      */
     fun recentFileProvider(dir: File, filePatterns: Iterable<String> = RECENT_FILE_PATTERNS): Provider<File> = project.fileTree(dir)
-            .matching { it.include(filePatterns) }.elements
-            .map { files -> files.map { it.asFile } }
-            .map { files -> files.maxByOrNull { it.lastModified() } }
+        .matching { it.include(filePatterns) }.elements
+        .map { files -> files.map { it.asFile } }
+        .map { files -> files.maxByOrNull { it.lastModified() } }
 
     /**
      * Get recent files built in directories as file collection.
@@ -229,7 +214,7 @@ open class CommonExtension(val project: Project) {
      * Resolve single file from defined repositories or by using defined file transfers.
      */
     fun resolveFile(options: FileResolver.() -> Unit) = resolveFiles(options).firstOrNull()
-            ?: throw CommonException("File not resolved!")
+        ?: throw CommonException("File not resolved!")
 
     /**
      * Resolve files from defined repositories or by using defined file transfers.
@@ -305,7 +290,7 @@ open class CommonExtension(val project: Project) {
 
         fun of(project: Project): CommonExtension {
             return project.extensions.findByType(CommonExtension::class.java)
-                    ?: throw CommonException("${project.displayName.capitalize()} must have at least one of following plugins applied: $PLUGIN_IDS")
+                ?: throw CommonException("${project.displayName.capitalize()} must have at least one of following plugins applied: $PLUGIN_IDS")
         }
     }
 }

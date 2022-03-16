@@ -3,7 +3,6 @@ package com.cognifide.gradle.common.file.transfer.sftp
 import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.file.transfer.FileEntry
 import com.cognifide.gradle.common.file.transfer.ProtocolFileTransfer
-import java.io.File
 import org.apache.http.client.utils.URIBuilder
 import org.apache.sshd.client.SshClient
 import org.apache.sshd.client.session.ClientSession
@@ -11,6 +10,7 @@ import org.apache.sshd.client.subsystem.sftp.SftpClient
 import org.apache.sshd.client.subsystem.sftp.SftpClientFactory
 import org.apache.sshd.common.subsystem.sftp.SftpConstants
 import org.apache.sshd.common.subsystem.sftp.SftpException
+import java.io.File
 
 @Suppress("TooGenericExceptionCaught")
 class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
@@ -149,8 +149,11 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                 }
             }
         } catch (e: Exception) {
-            throw SftpFileException("SFTP file transfer error (check credentials, network / VPN etc)." +
-                    " Cause: ${e.message ?: e.javaClass.name}", e)
+            throw SftpFileException(
+                "SFTP file transfer error (check credentials, network / VPN etc)." +
+                    " Cause: ${e.message ?: e.javaClass.name}",
+                e
+            )
         }
     }
 
@@ -161,8 +164,11 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
                     throw SftpFileException("Path at URL '$dirUrl' is not a directory.")
                 }
             } catch (e: Exception) {
-                throw SftpFileException("Directory at URL '$dirUrl' does not exist or not accessible: '${e.message}'." +
-                        " Cause: ${e.message ?: e.javaClass.name}", e)
+                throw SftpFileException(
+                    "Directory at URL '$dirUrl' does not exist or not accessible: '${e.message}'." +
+                        " Cause: ${e.message ?: e.javaClass.name}",
+                    e
+                )
             }
 
             callback(dirPath)
@@ -177,8 +183,8 @@ class SftpFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
         const val PORT_DEFAULT = 22
 
         val STATUS_NOT_EXISTS = arrayOf(
-                SftpConstants.SSH_FX_NO_SUCH_FILE,
-                SftpConstants.SSH_FX_NO_SUCH_PATH
+            SftpConstants.SSH_FX_NO_SUCH_FILE,
+            SftpConstants.SSH_FX_NO_SUCH_PATH
         )
     }
 }

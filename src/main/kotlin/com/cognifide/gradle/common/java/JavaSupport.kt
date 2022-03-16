@@ -49,8 +49,9 @@ class JavaSupport(private val common: CommonExtension) {
         if (common.project.plugins.hasPlugin(JavaBasePlugin::class.java)) {
             common.project.extensions.getByType(JavaToolchainService::class.java)
         } else {
-            common.project.extensions.create(JavaToolchainService::class.java, TOOLCHAINS_EXTENSION,
-                    DefaultJavaToolchainService::class.java, toolchainQuery
+            common.project.extensions.create(
+                JavaToolchainService::class.java, TOOLCHAINS_EXTENSION,
+                DefaultJavaToolchainService::class.java, toolchainQuery
             )
         }
     }

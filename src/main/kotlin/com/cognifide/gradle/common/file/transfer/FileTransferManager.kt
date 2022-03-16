@@ -109,7 +109,7 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
      * Downloads file from specified URL to temporary directory with preserving file name.
      */
     override fun download(fileUrl: String): File = common.temporaryFile(FileUtils.nameFromUrl(fileUrl))
-            .also { download(fileUrl, it) }
+        .also { download(fileUrl, it) }
 
     /**
      * Downloads file of given name from directory at specified URL.
@@ -210,26 +210,28 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
      * Get file transfer supporting specified URL.
      */
     fun handling(fileUrl: String): FileTransferHandler = all.find { it.handles(fileUrl) }
-            ?: throw FileException("File transfer supporting URL '$fileUrl' not found!")
+        ?: throw FileException("File transfer supporting URL '$fileUrl' not found!")
 
     /**
      * Register custom file transfer for e.g downloading / uploading files from cloud storages like:
      * Amazon S3, Google Cloud Storage etc.
      */
     fun custom(name: String, definition: CustomFileTransfer.() -> Unit) {
-        custom.add(CustomFileTransfer(common).apply {
-            this.name = name
-            this.protocols = listOf("$name://*")
+        custom.add(
+            CustomFileTransfer(common).apply {
+                this.name = name
+                this.protocols = listOf("$name://*")
 
-            apply(definition)
-        })
+                apply(definition)
+            }
+        )
     }
 
     /**
      * Get custom (or built-in) file transfer by name.
      */
     fun named(name: String): FileTransfer = all.find { it.name == name }
-            ?: throw FileException("File transfer named '$name' not found!")
+        ?: throw FileException("File transfer named '$name' not found!")
 
     companion object {
         const val NAME = "manager"

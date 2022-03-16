@@ -1,12 +1,12 @@
 package com.cognifide.gradle.common.zip
 
-import net.lingala.zip4j.ZipFile as Base
 import net.lingala.zip4j.io.inputstream.ZipInputStream
 import net.lingala.zip4j.model.FileHeader
 import net.lingala.zip4j.model.ZipParameters
 import net.lingala.zip4j.model.enums.CompressionMethod
 import org.apache.commons.lang3.StringUtils
 import java.io.File
+import net.lingala.zip4j.ZipFile as Base
 
 /**
  * Only Zip4j correctly extracts big ZIP files (bigger than 10 GB)
@@ -65,7 +65,7 @@ class ZipFile(val baseFile: File) {
 
         return base.run {
             (fileHeaders as List<FileHeader>).asSequence()
-                    .filter { it.fileName.startsWith(dirFileName) }
+                .filter { it.fileName.startsWith(dirFileName) }
         }
     }
 
@@ -119,7 +119,7 @@ class ZipFile(val baseFile: File) {
         ensureExists()
 
         return base.getFileHeader(fileName)?.let { base.getInputStream(it) }
-                ?: throw ZipException("ZIP file '$baseFile' does not contain file '$fileName'!")
+            ?: throw ZipException("ZIP file '$baseFile' does not contain file '$fileName'!")
     }
 
     fun readFileAsText(fileName: String) = readFile(fileName).use { it.bufferedReader().readText() }

@@ -34,13 +34,17 @@ open class FileWatcher(val common: CommonExtension) {
 
         val monitor = FileAlterationMonitor(interval.get()).apply {
             dirs.forEach { dir ->
-                addObserver(FileAlterationObserver(dir).apply {
-                    addListener(DelegatingFileAlterationListener { event ->
-                        if (!Patterns.wildcard(event.file, ignores.get())) {
-                            onChange!!.invoke(event)
-                        }
-                    })
-                })
+                addObserver(
+                    FileAlterationObserver(dir).apply {
+                        addListener(
+                            DelegatingFileAlterationListener { event ->
+                                if (!Patterns.wildcard(event.file, ignores.get())) {
+                                    onChange!!.invoke(event)
+                                }
+                            }
+                        )
+                    }
+                )
             }
 
             start()
@@ -48,12 +52,16 @@ open class FileWatcher(val common: CommonExtension) {
 
         // Clean up on exit // TODO remove/refactor shutdown hook somehow
 
-        Runtime.getRuntime().addShutdownHook(Thread(Runnable {
-            try {
-                monitor.stop()
-            } catch (ignored: Exception) {
-                // ignore
-            }
-        }))
+        Runtime.getRuntime().addShutdownHook(
+            Thread(
+                Runnable {
+                    try {
+                        monitor.stop()
+                    } catch (ignored: Exception) {
+                        // ignore
+                    }
+                }
+            )
+        )
     }
 }

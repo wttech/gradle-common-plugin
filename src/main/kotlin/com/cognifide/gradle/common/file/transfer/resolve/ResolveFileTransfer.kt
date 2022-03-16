@@ -23,10 +23,13 @@ class ResolveFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common
     }
 
     fun resolve(value: Any) = try {
-        DependencyFile(common.project, when (value) {
-            is String -> value.substringAfter("://")
-            else -> value
-        }).file
+        DependencyFile(
+            common.project,
+            when (value) {
+                is String -> value.substringAfter("://")
+                else -> value
+            }
+        ).file
     } catch (e: Exception) {
         throw ResolveFileException("Cannot resolve value '$value'. Cause: ${e.message}", e)
     }
