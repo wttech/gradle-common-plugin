@@ -11,16 +11,18 @@ class CommonPluginFunctionalTest {
     @Test
     fun `can run task`() {
         // Setup the test build
-        val projectDir = File("build/functionalTest")
-        projectDir.mkdirs()
-        projectDir.resolve("settings.gradle").writeText("")
-        projectDir.resolve("build.gradle").writeText(
+        val projectDir = File("build/functionalTest").apply {
+            deleteRecursively()
+            mkdirs()
+            resolve("settings.gradle.kts").writeText("")
+            resolve("build.gradle.kts").writeText(
+                """
+                plugins {
+                    id("com.cognifide.common")
+                }
             """
-            plugins {
-                id('com.cognifide.gradle.common')
-            }
-        """
-        )
+            )
+        }
 
         // Run the build
         val result = GradleRunner.create().run {
