@@ -30,3 +30,5 @@ fun <T> T.using(block: T.() -> Unit) {
 }
 
 fun String.capitalizeChar() = this.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+
+fun String.decapitalizeChar() = this.replaceFirstChar { it.lowercase(Locale.getDefault()) }

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class CommonPluginFunctionalTest {
+class CommonPluginTest {
 
     @Test
     fun `can run task`() {
@@ -34,10 +34,5 @@ class CommonPluginFunctionalTest {
         }
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":tasks")?.outcome)
-
-        // val result = runner.build()
-
-        // Verify the result
-        // assertTrue(result.output.contains("Hello from plugin 'com.cognifide.gradle.common'"))
     }
 }

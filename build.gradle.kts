@@ -4,27 +4,52 @@ plugins {
     id("java-gradle-plugin")
     id("maven-publish")
     id("org.jetbrains.kotlin.jvm") version "1.5.31"
-    id("com.gradle.plugin-publish") version "0.11.0"
-    id("io.gitlab.arturbosch.detekt") version "1.19.0"
+    id("com.gradle.plugin-publish") version "0.20.0"
+    id("io.gitlab.arturbosch.detekt") version "1.20.0-RC1"
     id("net.researchgate.release") version "2.8.1"
-    id("com.github.breadmoirai.github-release") version "2.2.10"
+    id("com.github.breadmoirai.github-release") version "2.2.12"
 }
 
 defaultTasks("build", "publishToMavenLocal")
 description = "Gradle Common Plugin"
 group = "com.cognifide.gradle"
 
-repositories {
-    mavenCentral()
+allprojects {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    plugins.withId("java") {
+        java {
+            withJavadocJar()
+            withSourcesJar()
+        }
+        tasks.withType<JavaCompile>().configureEach{
+            sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+            targetCompatibility = JavaVersion.VERSION_1_8.toString()
+        }
+        tasks.withType<Test>().configureEach {
+            testLogging.showStandardStreams = true
+            useJUnitPlatform()
+        }
+    }
+    plugins.withId("kotlin") {
+        tasks.withType<KotlinCompile>().configureEach {
+            kotlinOptions {
+                jvmTarget = JavaVersion.VERSION_1_8.toString()
+            }
+        }
+    }
 }
 
 dependencies {
     // Build environment
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    // implementation("org.jetbrains.kotlin:kotlin-reflect") // maybe could be skipped
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2") // see compat table - https://kotlinlang.org/docs/releases.html#release-details
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.19.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.20.0-RC1")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
 
     // External dependencies
@@ -43,6 +68,11 @@ dependencies {
     implementation("net.lingala.zip4j:zip4j:2.9.1")
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 val functionalTestSourceSet = sourceSets.create("functionalTest")
 gradlePlugin.testSourceSets(functionalTestSourceSet)
 configurations.getByName("functionalTestImplementation").extendsFrom(configurations.getByName("testImplementation"))
@@ -58,41 +88,11 @@ val check by tasks.getting(Task::class) {
 }
 
 tasks {
-    register<Jar>("sourcesJar") {
-        archiveClassifier.set("sources")
-        dependsOn("classes")
-        from(sourceSets["main"].allSource)
-    }
-
-    withType<JavaCompile>().configureEach{
-        sourceCompatibility = JavaVersion.VERSION_11.toString()
-        targetCompatibility = JavaVersion.VERSION_11.toString()
-    }
-
-    withType<Test>().configureEach {
-        testLogging.showStandardStreams = true
-        useJUnitPlatform()
-    }
-
-    withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_11.toString()
-        }
-    }
-
-    named<Test>("test") {
+    test {
         dependsOn("detektTest")
     }
 
-    named<Task>("build") {
-        dependsOn("sourcesJar")
-    }
-
-    named<Task>("publishToMavenLocal") {
-        dependsOn("sourcesJar")
-    }
-
-    named("afterReleaseBuild") {
+    afterReleaseBuild {
         dependsOn("publishPlugins")
     }
 
@@ -134,7 +134,6 @@ publishing {
     publications {
         create<MavenPublication>("pluginMaven") {
             from(components["java"])
-            artifact(tasks["sourcesJar"])
         }
     }
 }
@@ -157,7 +156,7 @@ githubRelease {
     token((project.findProperty("github.token") ?: "").toString())
     tagName(project.version.toString())
     releaseName(project.version.toString())
-    releaseAssets(tasks["jar"], tasks["sourcesJar"])
+    releaseAssets(tasks["jar"], tasks["sourcesJar"], tasks["javadocJar"])
     draft((project.findProperty("github.draft") ?: "false").toString().toBoolean())
     prerelease((project.findProperty("github.prerelease") ?: "false").toString().toBoolean())
     overwrite((project.findProperty("github.override") ?: "true").toString().toBoolean())
