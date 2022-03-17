@@ -68,6 +68,11 @@ dependencies {
     implementation("net.lingala.zip4j:zip4j:2.9.1")
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 val functionalTestSourceSet = sourceSets.create("functionalTest")
 gradlePlugin.testSourceSets(functionalTestSourceSet)
 configurations.getByName("functionalTestImplementation").extendsFrom(configurations.getByName("testImplementation"))
@@ -107,7 +112,6 @@ detekt {
 }
 
 gradlePlugin {
-    isAutomatedPublishing = false
     plugins {
         create("common") {
             id = "com.cognifide.common"
@@ -121,14 +125,6 @@ gradlePlugin {
             implementationClass = "com.cognifide.gradle.common.RuntimePlugin"
             displayName = "Runtime Plugin"
             description = "Introduces base lifecycle tasks (like 'up', 'down') for controlling runtimes (servers, applications)"
-        }
-    }
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("pluginMaven") {
-            from(components["java"])
         }
     }
 }
