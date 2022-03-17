@@ -25,22 +25,24 @@ class MvnInvoker(private val common: CommonExtension) {
     }
 
     val executableArgs = common.obj.strings {
-        set(common.project.provider {
-            val windows = OperatingSystem.current().isWindows
-            val wrapper = workingDir.get().asFile.run { resolve("mvnw.cmd").exists() || resolve("mvnw").exists() }
-            val bin = when {
-                wrapper -> when {
-                    windows -> if (executableOld.get()) "mvnw.bat" else "mvnw.cmd"
-                    else -> "mvnw"
+        set(
+            common.project.provider {
+                val windows = OperatingSystem.current().isWindows
+                val wrapper = workingDir.get().asFile.run { resolve("mvnw.cmd").exists() || resolve("mvnw").exists() }
+                val bin = when {
+                    wrapper -> when {
+                        windows -> if (executableOld.get()) "mvnw.bat" else "mvnw.cmd"
+                        else -> "mvnw"
+                    }
+                    else -> "mvn"
                 }
-                else -> "mvn"
+                val executable = executableDir.orNull?.asFile?.resolve(bin)?.absolutePath ?: bin
+                when {
+                    windows -> listOf("cmd", "/c", executable)
+                    else -> listOf(executable)
+                }
             }
-            val executable = executableDir.orNull?.asFile?.resolve(bin)?.absolutePath ?: bin
-            when {
-                windows -> listOf("cmd", "/c", executable)
-                else -> listOf(executable)
-            }
-        })
+        )
     }
 
     val args = common.obj.strings {
@@ -83,12 +85,15 @@ class MvnInvoker(private val common: CommonExtension) {
                 spec.commandLine = clArgs
             }
         } catch (e: Exception) {
-            throw MvnException(listOf(
-                "Cannot invoke Maven properly!",
-                "Directory: $dir",
-                "Args: ${clArgs.joinToString(" ")}",
-                "Cause: ${e.message}"
-            ).joinToString("\n"), e)
+            throw MvnException(
+                listOf(
+                    "Cannot invoke Maven properly!",
+                    "Directory: $dir",
+                    "Args: ${clArgs.joinToString(" ")}",
+                    "Cause: ${e.message}"
+                ).joinToString("\n"),
+                e
+            )
         }
     }
 }

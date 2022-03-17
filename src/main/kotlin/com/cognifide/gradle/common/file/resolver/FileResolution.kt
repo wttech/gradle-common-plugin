@@ -1,7 +1,7 @@
 package com.cognifide.gradle.common.file.resolver
 
-import java.io.File
 import org.gradle.api.file.FileTree
+import java.io.File
 
 open class FileResolution(val group: FileGroup, val id: String, private val resolver: (FileResolution) -> File) {
 
@@ -67,13 +67,13 @@ open class FileResolution(val group: FileGroup, val id: String, private val reso
      * Read single file from ZIP/TAR archive.
      */
     fun archiveFile(archive: File, entryPattern: String): File = archiveTree(archive)
-            .matching { it.include(entryPattern) }.singleFile
+        .matching { it.include(entryPattern) }.singleFile
 
     /**
      * Read files from ZIP/TAR archive.
      */
     fun archiveFiles(archive: File, entriesPattern: String): Sequence<File> = archiveTree(archive)
-            .matching { it.include(entriesPattern) }.asSequence()
+        .matching { it.include(entriesPattern) }.asSequence()
 
     /**
      * Extract & copy single archive file and copy it to target location only if it does not exist.

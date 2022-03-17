@@ -1,8 +1,8 @@
 package com.cognifide.gradle.common.utils
 
-import java.io.File
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.IOCase
+import java.io.File
 
 object Patterns {
 
@@ -21,11 +21,14 @@ object Patterns {
     }
 
     fun wildcard(path: String, matcher: String): Boolean {
-        return wildcard(path, if (matcher.contains(WILDCARD_SEPARATOR)) {
-            matcher.split(WILDCARD_SEPARATOR)
-        } else {
-            listOf(matcher)
-        })
+        return wildcard(
+            path,
+            if (matcher.contains(WILDCARD_SEPARATOR)) {
+                matcher.split(WILDCARD_SEPARATOR)
+            } else {
+                listOf(matcher)
+            }
+        )
     }
 
     fun wildcard(path: String, matchers: Iterable<String>): Boolean {

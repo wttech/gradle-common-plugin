@@ -63,11 +63,14 @@ class NotifierFacade private constructor(val common: CommonExtension) {
     }
 
     fun log(title: String, message: String, level: LogLevel) {
-        common.logger.log(level, if (message.isNotBlank()) {
-            "$title\n$message"
-        } else {
-            title
-        })
+        common.logger.log(
+            level,
+            if (message.isNotBlank()) {
+                "$title\n$message"
+            } else {
+                title
+            }
+        )
     }
 
     fun notify(title: String) {

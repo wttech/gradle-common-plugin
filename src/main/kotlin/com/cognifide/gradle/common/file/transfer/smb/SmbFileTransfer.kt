@@ -3,10 +3,10 @@ package com.cognifide.gradle.common.file.transfer.smb
 import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.file.transfer.FileEntry
 import com.cognifide.gradle.common.file.transfer.ProtocolFileTransfer
-import java.io.File
 import jcifs.smb.NtlmPasswordAuthentication
 import jcifs.smb.SmbFile
 import org.apache.commons.lang3.StringUtils
+import java.io.File
 
 @Suppress("TooGenericExceptionCaught")
 class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
@@ -92,8 +92,8 @@ class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
         logger.info("Checking file status at URL '$fileUrl'")
         try {
             return file(dirUrl, fileName)
-                    .takeIf { it.isFile }
-                    ?.run { FileEntry(fileName, length(), lastModified()) }
+                .takeIf { it.isFile }
+                ?.run { FileEntry(fileName, length(), lastModified()) }
         } catch (e: Exception) {
             throw SmbFileException("Cannot check file status at URL '$fileUrl'. Cause: '${e.message}", e)
         }

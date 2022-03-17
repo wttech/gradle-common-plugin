@@ -27,8 +27,8 @@ class DependencyFile(private val project: Project, notation: Any) {
     companion object {
 
         private val NOTATION_PATTERNS = listOf(
-                "*:*:*@*", // TODO regex [\w-_.]+
-                "*:*:*"
+            "*:*:*@*", // TODO regex [\w-_.]+
+            "*:*:*"
         )
 
         fun isNotation(text: String) = Patterns.wildcard(text, NOTATION_PATTERNS)

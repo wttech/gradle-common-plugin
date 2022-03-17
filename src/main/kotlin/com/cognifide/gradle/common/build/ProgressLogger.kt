@@ -1,10 +1,10 @@
 package com.cognifide.gradle.common.build
 
+import org.gradle.api.Project
+import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import java.util.*
 import java.util.concurrent.TimeUnit
-import org.gradle.api.Project
 import org.gradle.internal.logging.progress.ProgressLogger as BaseLogger
-import org.gradle.internal.logging.progress.ProgressLoggerFactory
 
 @Suppress("SpreadOperator")
 open class ProgressLogger private constructor(private val project: Project) {
@@ -23,8 +23,8 @@ open class ProgressLogger private constructor(private val project: Project) {
     private var progressTime = 0L
 
     private fun create(): BaseLogger = ServiceAccessor(project)
-            .get<ProgressLoggerFactory>()
-            .newOperation(javaClass, baseParents.peek())
+        .get<ProgressLoggerFactory>()
+        .newOperation(javaClass, baseParents.peek())
 
     fun <T> launch(block: ProgressLogger.() -> T): T {
         base = create()

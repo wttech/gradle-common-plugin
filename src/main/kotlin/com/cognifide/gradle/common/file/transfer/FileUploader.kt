@@ -50,8 +50,8 @@ class FileUploader(private val common: CommonExtension) {
     private fun currentProgress(file: File): String {
         return if (size > 0) {
             "Uploading: ${file.name} | ${Formats.fileSizeBytesToHuman(processedBytes)}/${Formats.fileSizeBytesToHuman(size)}" +
-                    " (${Formats.percent(processedBytes, size)}," +
-                    " time left: ${Formats.duration(remainingTime())})"
+                " (${Formats.percent(processedBytes, size)}," +
+                " time left: ${Formats.duration(remainingTime())})"
         } else {
             "Uploading: ${file.name} | ${Formats.fileSizeBytesToHuman(processedBytes)}"
         }

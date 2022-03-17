@@ -1,9 +1,9 @@
 package com.cognifide.gradle.common.build
 
 import com.cognifide.gradle.common.utils.Formats
-import java.util.*
 import kotlinx.coroutines.*
 import org.gradle.api.Project
+import java.util.*
 
 class ProgressIndicator(private val project: Project) {
 

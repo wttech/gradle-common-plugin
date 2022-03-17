@@ -1,7 +1,7 @@
 package com.cognifide.gradle.common.file.transfer
 
-import com.cognifide.gradle.common.utils.Formats
 import com.cognifide.gradle.common.CommonExtension
+import com.cognifide.gradle.common.utils.Formats
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -52,8 +52,8 @@ class FileDownloader(private val common: CommonExtension) {
         val fileName = file.name.removeSuffix(FileTransferManager.TMP_SUFFIX)
         return if (size > 0) {
             "Downloading: $fileName | ${Formats.fileSizeBytesToHuman(processedBytes)}/${Formats.fileSizeBytesToHuman(size)}" +
-                    " (${Formats.percent(processedBytes, size)}," +
-                    " time left: ${Formats.duration(remainingTime())})"
+                " (${Formats.percent(processedBytes, size)}," +
+                " time left: ${Formats.duration(remainingTime())})"
         } else {
             "Downloading: $fileName | ${Formats.fileSizeBytesToHuman(processedBytes)}"
         }

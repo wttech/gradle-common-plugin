@@ -3,15 +3,15 @@ package com.cognifide.gradle.common.tasks
 import com.cognifide.gradle.common.CommonDefaultTask
 import com.cognifide.gradle.common.CommonException
 import com.cognifide.gradle.common.CommonTask
+import com.cognifide.gradle.common.utils.capitalizeChar
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.testing.Test
 import org.gradle.language.base.plugins.LifecycleBasePlugin
-import java.io.Serializable
 
-class TaskFacade(val project: Project) : Serializable {
+class TaskFacade(val project: Project) {
 
     val tests get() = getAll<Test>()
 
@@ -137,9 +137,9 @@ class TaskFacade(val project: Project) : Serializable {
         project: Project = this.project
     ): CommonException {
         val msg = if (type != null) {
-            "${project.displayName.capitalize()} does not have task '$taskName' of type '$type'. Ensure correct plugins applied."
+            "${project.displayName.capitalizeChar()} does not have task '$taskName' of type '$type'. Ensure correct plugins applied."
         } else {
-            "${project.displayName.capitalize()} does not have task '$taskName'. Ensure correct plugins applied."
+            "${project.displayName.capitalizeChar()} does not have task '$taskName'. Ensure correct plugins applied."
         }
 
         return if (cause != null) {

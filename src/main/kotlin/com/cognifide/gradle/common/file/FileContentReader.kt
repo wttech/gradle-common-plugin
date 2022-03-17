@@ -1,9 +1,9 @@
 package com.cognifide.gradle.common.file
 
-import java.io.Reader
 import org.apache.tools.ant.filters.BaseFilterReader
 import org.apache.tools.ant.filters.ChainableReader
 import org.gradle.api.file.ContentFilterable
+import java.io.Reader
 
 class FileContentReader(input: Reader) : BaseFilterReader(input), ChainableReader {
 
@@ -18,7 +18,7 @@ class FileContentReader(input: Reader) : BaseFilterReader(input), ChainableReade
     override fun read(): Int {
         if (index > -1) {
             if (index < buffer.size) {
-                return buffer[index++].toInt()
+                return buffer[index++].code
             }
 
             index = -1

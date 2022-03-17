@@ -69,13 +69,13 @@ class DorkboxNotifier(val facade: NotifierFacade, val configurer: Notify.() -> U
         const val DORKBOX_HIDE_AFTER_SECONDS = 5L
 
         val DORKBOX_DARK_LIGHT_THEME = Theme(
-                Notify.TITLE_TEXT_FONT,
-                Notify.MAIN_TEXT_FONT,
-                Color.DARK_GRAY,
-                Color(168, 168, 168),
-                Color(220, 220, 220),
-                Color(220, 220, 220),
-                Color.GRAY
+            Notify.TITLE_TEXT_FONT,
+            Notify.MAIN_TEXT_FONT,
+            Color.DARK_GRAY,
+            Color(168, 168, 168),
+            Color(220, 220, 220),
+            Color(220, 220, 220),
+            Color.GRAY
         )
     }
 }

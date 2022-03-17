@@ -1,10 +1,9 @@
 package com.cognifide.gradle.common.build
 
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.*
-import java.util.*
+import java.util.concurrent.Executors
+import kotlin.coroutines.*
 
-@OptIn(ObsoleteCoroutinesApi::class)
 object Parallel {
 
     fun <A, B : Any> map(iterable: Iterable<A>, mapper: CoroutineScope.(A) -> B): Collection<B> {
@@ -31,19 +30,17 @@ object Parallel {
         map(iterable) { it.apply(callback); Unit }
     }
 
-    fun <A, B : Any> poolMap(iterable: Iterable<A>, mapper: CoroutineScope.(A) -> B) = poolMap(poolThreads, poolName, iterable, mapper)
+    fun <A, B : Any> poolMap(iterable: Iterable<A>, mapper: CoroutineScope.(A) -> B) = poolMap(poolThreads, iterable, mapper)
 
-    fun <A, B : Any> poolMap(threads: Int, name: String, iterable: Iterable<A>, mapper: CoroutineScope.(A) -> B): List<B> {
-        return map(newFixedThreadPoolContext(threads, name), iterable, mapper)
+    fun <A, B : Any> poolMap(threads: Int, iterable: Iterable<A>, mapper: CoroutineScope.(A) -> B): List<B> {
+        return map(Executors.newFixedThreadPool(threads).asCoroutineDispatcher(), iterable, mapper)
     }
 
-    fun <A> poolEach(iterable: Iterable<A>, callback: CoroutineScope.(A) -> Unit) = poolEach(poolThreads, poolName, iterable, callback)
+    fun <A> poolEach(iterable: Iterable<A>, callback: CoroutineScope.(A) -> Unit) = poolEach(poolThreads, iterable, callback)
 
-    fun <A> poolEach(threads: Int, name: String, iterable: Iterable<A>, callback: CoroutineScope.(A) -> Unit) {
-        poolMap(threads, name, iterable) { callback(it); Unit }
+    fun <A> poolEach(threads: Int, iterable: Iterable<A>, callback: CoroutineScope.(A) -> Unit) {
+        poolMap(threads, iterable) { callback(it); Unit }
     }
 
     val poolThreads: Int get() = Runtime.getRuntime().availableProcessors()
-
-    val poolName: String get() = "pool-${UUID.randomUUID()}"
 }

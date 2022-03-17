@@ -32,8 +32,8 @@ class CommonPlugin : Plugin<Project> {
         if (sanitizedPath != rootPath) {
             throw CommonException(
                 "Project path contains problematic characters!\n" +
-                        "Shell scripts could run improperly with such paths.\n" +
-                        "Consider relocating project - updating the path from '$rootPath' to '$sanitizedPath'."
+                    "Shell scripts could run improperly with such paths.\n" +
+                    "Consider relocating project - updating the path from '$rootPath' to '$sanitizedPath'."
             )
         }
     }

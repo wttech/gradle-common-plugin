@@ -58,14 +58,16 @@ object Formats {
     // JSON
 
     private fun jsonMapper() = ObjectMapper(JsonFactory()).apply {
-        registerModule(KotlinModule())
+        registerModule(KotlinModule.Builder().build())
     }
 
     private fun jsonWriter(pretty: Boolean) = jsonMapper().run {
         when {
-            pretty -> writer(DefaultPrettyPrinter().apply {
-                indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE)
-            })
+            pretty -> writer(
+                DefaultPrettyPrinter().apply {
+                    indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE)
+                }
+            )
             else -> writer()
         }
     }
@@ -92,9 +94,11 @@ object Formats {
     fun toMapFromJson(jsonNode: JsonNode): Map<String, Any?> {
         if (jsonNode.isMissingNode) return mapOf()
         if (jsonNode.nodeType != JsonNodeType.OBJECT) {
-            throw FormatException("Only JSON node of type '${JsonNodeType.OBJECT}' " +
+            throw FormatException(
+                "Only JSON node of type '${JsonNodeType.OBJECT}' " +
                     "can be converted to map but type '${jsonNode.nodeType}' detected!\n" +
-                    "Ensure that JSON to be converted is not blank.")
+                    "Ensure that JSON to be converted is not blank."
+            )
         }
         return jsonMapper().run { convertValue<Map<String, Any?>>(jsonNode, mapType(Any::class.java)) } ?: mapOf()
     }
@@ -102,9 +106,11 @@ object Formats {
     fun toListFromJson(jsonNode: JsonNode): List<Any?> {
         if (jsonNode.isMissingNode) return listOf()
         if (jsonNode.nodeType != JsonNodeType.ARRAY) {
-            throw FormatException("Only JSON node of type '${JsonNodeType.ARRAY}' " +
+            throw FormatException(
+                "Only JSON node of type '${JsonNodeType.ARRAY}' " +
                     "can be converted to list but type '${jsonNode.nodeType}' detected!\n" +
-                    "Ensure that JSON to be converted is not blank.")
+                    "Ensure that JSON to be converted is not blank."
+            )
         }
         return jsonMapper().run { convertValue<List<Any?>>(jsonNode, listType(Any::class.java)) } ?: listOf()
     }
@@ -126,7 +132,7 @@ object Formats {
     // YML
 
     private fun ymlMapper() = ObjectMapper(YAMLFactory()).apply {
-        registerModule(KotlinModule())
+        registerModule(KotlinModule.Builder().build())
     }
 
     private fun ymlWriter() = ymlMapper().writer()
@@ -186,7 +192,7 @@ object Formats {
         val data = text.toByteArray()
         messageDigest.update(data, 0, data.size)
         val result = BigInteger(1, messageDigest.digest())
-        return String.format("%1$032x", result)
+        return String.format(Locale.ENGLISH, "%1$032x", result)
     }
 
     fun toHashCodeHex(value: Any) = Integer.toHexString(HashCodeBuilder().append(value).toHashCode())
@@ -204,16 +210,18 @@ object Formats {
         }
     }
 
-    fun fileSize(file: File): String = fileSizeBytesToHuman(when {
-        file.exists() -> FileUtils.sizeOf(file)
-        else -> 0L
-    })
+    fun fileSize(file: File): String = fileSizeBytesToHuman(
+        when {
+            file.exists() -> FileUtils.sizeOf(file)
+            else -> 0L
+        }
+    )
 
     fun fileSizeBytesToHuman(bytes: Long): String = when {
         bytes < 1024 -> "$bytes B"
         bytes < 1024 * 1024 -> (bytes / 1024).toString() + " KB"
-        bytes < 1024 * 1024 * 1024 -> String.format("%.2f MB", bytes / (1024.0 * 1024.0))
-        else -> String.format("%.2f GB", bytes / (1024.0 * 1024.0 * 1024.0))
+        bytes < 1024 * 1024 * 1024 -> String.format(Locale.ENGLISH, "%.2f MB", bytes / (1024.0 * 1024.0))
+        else -> String.format(Locale.ENGLISH, "%.2f GB", bytes / (1024.0 * 1024.0 * 1024.0))
     }
 
     fun percent(current: Int, total: Int): String = percent(current.toLong(), total.toLong())
