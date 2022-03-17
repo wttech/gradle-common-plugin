@@ -68,11 +68,6 @@ dependencies {
     implementation("net.lingala.zip4j:zip4j:2.9.1")
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
 val functionalTestSourceSet = sourceSets.create("functionalTest")
 gradlePlugin.testSourceSets(functionalTestSourceSet)
 configurations.getByName("functionalTestImplementation").extendsFrom(configurations.getByName("testImplementation"))
