@@ -257,10 +257,10 @@ object Formats {
 
     fun durationWordsSince(millis: Long) = durationWords(System.currentTimeMillis() - millis)
 
-    fun durationFit(thenMillis: Long, thenZoneId: ZoneId, durationMillis: Long): Boolean {
-        val nowTimestamp = LocalDateTime.now().atZone(ZoneId.systemDefault())
-        val thenTimestamp = localDateTimeAt(thenMillis, thenZoneId)
-        val diffMillis = ChronoUnit.MILLIS.between(thenTimestamp, nowTimestamp)
+    fun durationFit(timestamp: Long, timestampZoneId: ZoneId, durationMillis: Long): Boolean {
+        val nowDate = LocalDateTime.now().atZone(timestampZoneId)
+        val timestampDate = localDateTimeAt(timestamp, timestampZoneId)
+        val diffMillis = ChronoUnit.MILLIS.between(timestampDate, nowDate)
 
         return diffMillis < durationMillis
     }
