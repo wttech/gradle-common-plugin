@@ -27,6 +27,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.*
+import kotlin.math.abs
 
 @Suppress("MagicNumber", "TooManyFunctions")
 object Formats {
@@ -260,7 +261,7 @@ object Formats {
     fun durationFit(timestamp: Long, timestampZoneId: ZoneId, durationMillis: Long): Boolean {
         val nowDate = LocalDateTime.now().atZone(timestampZoneId)
         val timestampDate = localDateTimeAt(timestamp, timestampZoneId)
-        val diffMillis = ChronoUnit.MILLIS.between(timestampDate, nowDate)
+        val diffMillis = abs(ChronoUnit.MILLIS.between(timestampDate, nowDate))
 
         return diffMillis < durationMillis
     }
