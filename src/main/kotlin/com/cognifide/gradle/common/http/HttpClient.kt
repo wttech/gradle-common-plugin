@@ -80,9 +80,9 @@ open class HttpClient(private val common: CommonExtension) {
     var basicCredentials: Pair<String, String>?
         get() = if (basicUser.isPresent && basicPassword.isPresent) (basicUser.get() to basicPassword.get()) else null
         set(value) {
-            value?.let { (user, password) ->
-                basicUser.set(user)
-                basicPassword.set(password)
+            value?.let {
+                basicUser.set(value.first)
+                basicPassword.set(value.second)
             }
         }
 
