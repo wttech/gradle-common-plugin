@@ -86,13 +86,13 @@ open class HttpClient(private val common: CommonExtension) {
             }
         }
 
-    fun fileTransferCredentials() {
+    val fileTransferCredentials = {
         basicCredentials = common.fileTransfer.credentials
     }
 
-    var bearerToken: String? = null
+    var bearerToken = common.obj.string {}
 
-    fun fileTransferBearerToken() {
+    val fileTransferBearerToken = {
         bearerToken = common.fileTransfer.bearerToken
     }
 
@@ -134,7 +134,7 @@ open class HttpClient(private val common: CommonExtension) {
         useDefaults()
     }
 
-    fun HttpClientBuilder.useDefaults() {
+    private fun HttpClientBuilder.useDefaults() {
         if (!basicUser.orNull.isNullOrBlank() && !basicPassword.orNull.isNullOrBlank()) {
             if (authorizationPreemptive.get()) {
                 addInterceptorFirst(PreemptiveAuthInterceptor())
@@ -147,10 +147,10 @@ open class HttpClient(private val common: CommonExtension) {
             )
         }
 
-        if (!bearerToken.isNullOrBlank()) {
+        if (bearerToken.isPresent && bearerToken.get().isNotBlank()) {
             val headers = listOf(
                 BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json"),
-                BasicHeader(HttpHeaders.AUTHORIZATION, "Bearer $bearerToken")
+                BasicHeader(HttpHeaders.AUTHORIZATION, "Bearer ${bearerToken.get()}")
             )
             setDefaultHeaders(headers)
         }

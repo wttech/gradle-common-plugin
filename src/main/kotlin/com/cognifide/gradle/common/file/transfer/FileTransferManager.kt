@@ -32,7 +32,7 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
         common.prop.string("fileTransfer.password")?.let { set(it) }
     }
 
-    var bearerToken: String? = null
+    var bearerToken = common.obj.string {}
 
     val domain = common.obj.string {
         common.prop.string("fileTransfer.domain")?.let { set(it) }
@@ -41,7 +41,7 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
     val credentials: Pair<String, String>?
         get() = if (user.isPresent && password.isPresent) user.get() to password.get() else null
 
-    val credentialsString get() = credentials?.run { "$first:$second" } ?: ""
+    val credentialsString get() = credentials?.run { "$first:$second" }
 
     /**
      * Shorthand method to enforce credentials for all protocols requiring it.
@@ -70,7 +70,7 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
     val http = HttpFileTransfer(common).apply {
         client.basicUser.convention(user)
         client.basicPassword.convention(password)
-        client.bearerToken = bearerToken
+        client.bearerToken.convention(bearerToken)
     }
 
     fun http(options: HttpFileTransfer.() -> Unit) = http.using(options)
