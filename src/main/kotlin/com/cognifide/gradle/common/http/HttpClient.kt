@@ -147,7 +147,7 @@ open class HttpClient(private val common: CommonExtension) {
             )
         }
 
-        if (bearerToken.isPresent && bearerToken.get().isNotBlank()) {
+        if (!bearerToken.orNull.isNullOrBlank()) {
             val headers = listOf(
                 BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json"),
                 BasicHeader(HttpHeaders.AUTHORIZATION, "Bearer ${bearerToken.get()}")
