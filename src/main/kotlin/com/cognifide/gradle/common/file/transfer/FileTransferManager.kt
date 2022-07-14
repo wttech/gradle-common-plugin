@@ -39,7 +39,10 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
     }
 
     val credentials: Pair<String, String>?
-        get() = if (user.isPresent && password.isPresent) user.get() to password.get() else null
+        get() = if (user.orNull.isNullOrBlank() && password.orNull.isNullOrBlank())
+            user.get() to password.get()
+        else
+            null
 
     val credentialsString get() = credentials?.run { "$first:$second" }
 

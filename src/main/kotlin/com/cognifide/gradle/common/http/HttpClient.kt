@@ -134,7 +134,7 @@ open class HttpClient(private val common: CommonExtension) {
         useDefaults()
     }
 
-    private fun HttpClientBuilder.useDefaults() {
+    fun HttpClientBuilder.useDefaults() {
         if (!basicUser.orNull.isNullOrBlank() && !basicPassword.orNull.isNullOrBlank()) {
             if (authorizationPreemptive.get()) {
                 addInterceptorFirst(PreemptiveAuthInterceptor())
@@ -149,7 +149,6 @@ open class HttpClient(private val common: CommonExtension) {
 
         if (!bearerToken.orNull.isNullOrBlank()) {
             val headers = listOf(
-                BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json"),
                 BasicHeader(HttpHeaders.AUTHORIZATION, "Bearer ${bearerToken.get()}")
             )
             setDefaultHeaders(headers)
