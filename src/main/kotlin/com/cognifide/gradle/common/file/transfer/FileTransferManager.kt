@@ -38,13 +38,13 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
         common.prop.string("fileTransfer.domain")?.let { set(it) }
     }
 
-    val credentials: Pair<String, String>?
+    val credentials: Pair<String, String>
         get() = if (user.orNull.isNullOrBlank() && password.orNull.isNullOrBlank())
             user.get() to password.get()
         else
-            null
+            throw FileTransferException("File transfer credentials are missing!")
 
-    val credentialsString get() = credentials?.run { "$first:$second" }
+    val credentialsString get() = credentials.run { "$first:$second" }
 
     /**
      * Shorthand method to enforce credentials for all protocols requiring it.
