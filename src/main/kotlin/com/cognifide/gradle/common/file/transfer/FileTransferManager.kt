@@ -32,21 +32,24 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
         common.prop.string("fileTransfer.password")?.let { set(it) }
     }
 
+    var bearerToken = common.obj.string {}
+
     val domain = common.obj.string {
         common.prop.string("fileTransfer.domain")?.let { set(it) }
     }
 
-    val credentials: Pair<String, String> get() = when {
-        user.isPresent && password.isPresent -> (user.get() to password.get())
-        else -> throw FileTransferException("File transfer credentials are missing!")
-    }
+    val credentials: Pair<String, String>
+        get() = if (user.orNull.isNullOrBlank() && password.orNull.isNullOrBlank())
+            user.get() to password.get()
+        else
+            throw FileTransferException("File transfer credentials are missing!")
 
     val credentialsString get() = credentials.run { "$first:$second" }
 
     /**
      * Shorthand method to enforce credentials for all protocols requiring it.
      *
-     * Useful only in specific cases, when e.g company storage offers accessing files via multiple protocols
+     * Useful only in specific cases, when e.g. company storage offers accessing files via multiple protocols
      * using same AD credentials.
      */
     fun credentials(user: String?, password: String?, domain: String? = null) {
@@ -70,6 +73,7 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
     val http = HttpFileTransfer(common).apply {
         client.basicUser.convention(user)
         client.basicPassword.convention(password)
+        client.bearerToken.convention(bearerToken)
     }
 
     fun http(options: HttpFileTransfer.() -> Unit) = http.using(options)

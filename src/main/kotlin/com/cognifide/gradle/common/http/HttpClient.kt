@@ -9,6 +9,7 @@ import com.cognifide.gradle.common.utils.asMap
 import com.fasterxml.jackson.databind.JsonNode
 import org.apache.commons.io.IOUtils
 import org.apache.http.HttpEntity
+import org.apache.http.HttpHeaders
 import org.apache.http.HttpHost
 import org.apache.http.HttpResponse
 import org.apache.http.NameValuePair
@@ -28,6 +29,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.ssl.SSLContextBuilder
 import org.jsoup.Jsoup
@@ -75,18 +77,23 @@ open class HttpClient(private val common: CommonExtension) {
         common.prop.string("httpClient.basicPassword")?.let { set(it) }
     }
 
-    var basicCredentials: Pair<String?, String?>
-        get() = when {
-            basicUser.isPresent && basicPassword.isPresent -> (basicUser.get() to basicPassword.get())
-            else -> throw HttpException("HTTP client basic credentials are missing!")
-        }
+    var basicCredentials: Pair<String, String>?
+        get() = if (basicUser.isPresent && basicPassword.isPresent) (basicUser.get() to basicPassword.get()) else null
         set(value) {
-            basicUser.set(value.first)
-            basicPassword.set(value.second)
+            value?.let {
+                basicUser.set(value.first)
+                basicPassword.set(value.second)
+            }
         }
 
-    fun fileTransferCredentials() {
+    val fileTransferCredentials = {
         basicCredentials = common.fileTransfer.credentials
+    }
+
+    var bearerToken = common.obj.string {}
+
+    val fileTransferBearerToken = {
+        bearerToken = common.fileTransfer.bearerToken
     }
 
     val multipartTextType = common.obj.typed<ContentType> {
@@ -140,6 +147,13 @@ open class HttpClient(private val common: CommonExtension) {
             )
         }
 
+        if (!bearerToken.orNull.isNullOrBlank()) {
+            val headers = listOf(
+                BasicHeader(HttpHeaders.AUTHORIZATION, "Bearer ${bearerToken.get()}")
+            )
+            setDefaultHeaders(headers)
+        }
+
         setDefaultRequestConfig(
             RequestConfig.custom().apply {
                 setCookieSpec(CookieSpecs.STANDARD)
@@ -166,6 +180,7 @@ open class HttpClient(private val common: CommonExtension) {
                 )
             )
         }
+
         if (!connectionRetries.get()) {
             disableAutomaticRetries()
         }
