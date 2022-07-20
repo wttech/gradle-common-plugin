@@ -1,6 +1,7 @@
 package com.cognifide.gradle.common.build
 
 import com.cognifide.gradle.common.utils.Formats
+import com.cognifide.gradle.common.utils.toUpperSnakeCase
 import com.mitchellbosecke.pebble.PebbleEngine
 import com.mitchellbosecke.pebble.lexer.Syntax
 import com.mitchellbosecke.pebble.loader.StringLoader
@@ -23,7 +24,7 @@ class PropertyParser(anyProject: Project) {
             return systemValue
         }
 
-        val envValue: String? = System.getenv(name)
+        val envValue: String? = System.getenv(name.toUpperSnakeCase())
         if (envValue != null) {
             return envValue
         }
