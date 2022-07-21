@@ -66,6 +66,7 @@ dependencies {
     implementation("io.pebbletemplates:pebble:3.1.5")
     implementation("com.dorkbox:Notify:3.7")
     implementation("net.lingala.zip4j:zip4j:2.9.1")
+    implementation("org.buildobjects:jproc:2.8.0")
 }
 
 val functionalTestSourceSet = sourceSets.create("functionalTest")

@@ -1,27 +1,20 @@
 package com.cognifide.gradle.common.os
 
+import org.buildobjects.process.ProcBuilder
 import org.gradle.internal.os.OperatingSystem
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 object OS {
 
-    /**
-     * Checks if OS architecture is ARM64.
-     */
-    fun isArm64() = System.getProperty("os.arch") == "arm64" || isRosetta()
+    fun arch() = System.getProperty("os.arch")
 
-    /**
-     * Checks if OS architecture is emulated as AMD64 but hosted on ARM64
-     */
-    fun isRosetta(): Boolean = OperatingSystem.current().isMacOsX
-            && execAsString("sysctl", "systctl.proc_translated") == "sysctl.proc_translated: 1"
+    fun archOfHost() = if (detectRosetta()) "arm64" else arch()
 
-    fun execAsString(vararg command: String) = execAsString(command.toList())
+    fun detectRosetta(): Boolean = OperatingSystem.current().isMacOsX &&
+        exec("sysctl", "-n", "sysctl.proc_translated").trim() == "1"
 
-    fun execAsString(command: List<String>): String {
-        val process = ProcessBuilder(command).start()
-        val input = BufferedReader(InputStreamReader(process.inputStream))
-        return input.use { it.readText() }
-    }
+    @Suppress("SpreadOperator")
+    fun exec(command: String, vararg args: String) = ProcBuilder(command)
+        .withArgs(*args)
+        .ignoreExitStatus()
+        .run().outputString
 }
