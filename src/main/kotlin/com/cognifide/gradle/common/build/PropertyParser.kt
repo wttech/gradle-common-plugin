@@ -41,6 +41,8 @@ class PropertyParser(anyProject: Project) {
         return if (!value.isBlank()) value.toBoolean() else true
     }
 
+    fun strings(name: String, delimiter: String = ",") = list(name, delimiter)
+
     fun list(name: String, delimiter: String = ","): List<String>? = when (val value = prop(name)) {
         null -> group(name)?.values?.toList()
         EMPTY_LIST -> listOf()
