@@ -3,7 +3,7 @@ package com.cognifide.gradle.common.os
 import org.buildobjects.process.ProcBuilder
 import org.gradle.internal.os.OperatingSystem
 
-object OS {
+object OSUtil {
 
     fun arch() = System.getProperty("os.arch")
 
