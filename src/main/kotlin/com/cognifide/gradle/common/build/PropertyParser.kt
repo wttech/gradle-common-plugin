@@ -14,9 +14,13 @@ class PropertyParser(anyProject: Project) {
 
     private val project = anyProject.rootProject
 
+    /**
+     * @see <https://stackoverflow.com/a/11077282>
+     */
     private fun find(name: String): String? {
-        if (project.hasProperty(name)) {
-            return project.property(name).toString()
+        val envValue: String? = System.getenv(name.toUpperSnakeCase())
+        if (envValue != null) {
+            return envValue
         }
 
         val systemValue: String? = System.getProperty(name)
@@ -24,9 +28,8 @@ class PropertyParser(anyProject: Project) {
             return systemValue
         }
 
-        val envValue: String? = System.getenv(name.toUpperSnakeCase())
-        if (envValue != null) {
-            return envValue
+        if (project.hasProperty(name)) {
+            return project.property(name).toString()
         }
 
         return null
