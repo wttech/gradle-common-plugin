@@ -3,11 +3,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("java-gradle-plugin")
     id("maven-publish")
-    id("org.jetbrains.kotlin.jvm") version "1.5.31"
-    id("com.gradle.plugin-publish") version "0.20.0"
-    id("io.gitlab.arturbosch.detekt") version "1.20.0-RC1"
-    id("net.researchgate.release") version "2.8.1"
-    id("com.github.breadmoirai.github-release") version "2.2.12"
+    id("org.jetbrains.kotlin.jvm") version "1.6.21"
+    id("com.gradle.plugin-publish") version "1.0.0"
+    id("io.gitlab.arturbosch.detekt") version "1.21.0"
+    id("net.researchgate.release") version "3.0.2"
+    id("com.github.breadmoirai.github-release") version "2.4.1"
 }
 
 defaultTasks("build", "publishToMavenLocal")
@@ -49,7 +49,7 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.20.0-RC1")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.21.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
 
     // External dependencies
@@ -125,16 +125,14 @@ gradlePlugin {
     }
 }
 
-val pluginTags = listOf(
-    "sftp", "smb", "ssh", "progress", "file watcher", "file download", "file upload",
-    "gui notification", "gradle-plugin", "gradle plugin development"
-)
-
 pluginBundle {
     website = "https://github.com/wttech/gradle-common-plugin"
     vcsUrl = "https://github.com/wttech/gradle-common-plugin.git"
     description = "Gradle Common Plugin"
-    tags = pluginTags
+    tags = listOf(
+        "sftp", "smb", "ssh", "progress", "file watcher", "file download", "file upload",
+        "gui notification", "gradle-plugin", "gradle plugin development"
+    )
 }
 
 githubRelease {

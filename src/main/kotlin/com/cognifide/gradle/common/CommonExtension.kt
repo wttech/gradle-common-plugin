@@ -173,6 +173,7 @@ open class CommonExtension(val project: Project) {
     /**
      * Get recent file from directory
      */
+    @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     fun recentFileProvider(dir: File, filePatterns: Iterable<String> = RECENT_FILE_PATTERNS): Provider<File> = project.fileTree(dir)
         .matching { it.include(filePatterns) }.elements
         .map { files -> files.map { it.asFile } }

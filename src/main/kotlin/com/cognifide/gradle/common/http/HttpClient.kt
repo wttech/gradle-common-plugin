@@ -430,15 +430,19 @@ open class HttpClient(private val common: CommonExtension) {
     }
 
     @Suppress("TooGenericExceptionCaught")
-    open fun <T> execute(method: HttpRequestBase, handler: HttpClient.(HttpResponse) -> T) = try {
-        client {
-            requestConfigurer(method)
-            val response = execute(method)
+    open fun <T> execute(method: HttpRequestBase, handler: HttpClient.(HttpResponse) -> T) = client {
+        requestConfigurer(method)
+        val response = try {
+            execute(method)
+        } catch (e: Exception) {
+            throw RequestException("Failed request to $method! Cause: ${e.message}", e)
+        }
+        try {
             responseHandler(response)
             this@HttpClient.handler(response)
+        } catch (e: Exception) {
+            throw ResponseException("Failed response handling of $method! Cause: ${e.message}", e)
         }
-    } catch (e: Exception) {
-        throw RequestException("Failed request to $method! Cause: ${e.message}", e)
     }
 
     fun execute(method: HttpRequestBase) = execute(method) { checkStatus(it) }
