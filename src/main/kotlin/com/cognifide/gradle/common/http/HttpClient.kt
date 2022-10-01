@@ -130,11 +130,15 @@ open class HttpClient(private val common: CommonExtension) {
     }
 
     private var clientBuilder: HttpClientBuilder.() -> Unit = {
-        useSystemProperties()
-        useDefaults()
+        allDefaults(this)
     }
 
-    fun HttpClientBuilder.useDefaults() {
+    fun allDefaults(builder: HttpClientBuilder) = builder.apply {
+        useSystemProperties()
+        customDefaults(this)
+    }
+
+    fun customDefaults(builder: HttpClientBuilder) = builder.apply {
         if (!basicUser.orNull.isNullOrBlank() && !basicPassword.orNull.isNullOrBlank()) {
             if (authorizationPreemptive.get()) {
                 addInterceptorFirst(PreemptiveAuthInterceptor())

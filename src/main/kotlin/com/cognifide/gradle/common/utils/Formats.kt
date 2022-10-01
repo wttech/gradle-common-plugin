@@ -225,17 +225,19 @@ object Formats {
         else -> String.format(Locale.ENGLISH, "%.2f GB", bytes / (1024.0 * 1024.0 * 1024.0))
     }
 
-    fun percent(current: Int, total: Int): String = percent(current.toLong(), total.toLong())
+    fun percent(current: Int, total: Int, digits: Int = 0): String = percent(current.toLong(), total.toLong(), digits)
 
-    fun percentExplained(current: Int, total: Int): String = "$current/$total=${percent(current, total)}"
+    fun percentExplained(current: Int, total: Int, digits: Int = 0): String = "$current/$total=${percent(current, total, digits)}"
 
-    fun percent(current: Long, total: Long): String {
+    fun percent(current: Long, total: Long, digits: Int = 0): String {
         val value: Double = when (total) {
             0L -> 0.0
             else -> current.toDouble() / total.toDouble()
         }
-
-        return "${"%.2f".format(value * 100.0)}%"
+        return when {
+            digits <= 0 -> "${(value * 100.0).toInt()}%"
+            else -> "${"%.${digits}f".format(value * 100.0)}%"
+        }
     }
 
     fun percentExplained(current: Long, total: Long) = "$current/$total=${percent(current, total)}"
