@@ -28,6 +28,7 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.*
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @Suppress("MagicNumber", "TooManyFunctions")
 object Formats {
@@ -235,7 +236,7 @@ object Formats {
             else -> current.toDouble() / total.toDouble()
         }
         return when {
-            digits <= 0 -> "${(value * 100.0).toInt()}%"
+            digits <= 0 -> "${(value * 100.0).roundToInt()}%"
             else -> "${"%.${digits}f".format(value * 100.0)}%"
         }
     }
