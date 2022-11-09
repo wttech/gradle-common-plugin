@@ -2,7 +2,6 @@ package com.cognifide.gradle.common.health
 
 import com.cognifide.gradle.common.CommonException
 import com.cognifide.gradle.common.CommonExtension
-import com.cognifide.gradle.common.build.ProgressIndicator
 import com.cognifide.gradle.common.build.Retry
 import com.cognifide.gradle.common.http.HttpClient
 import com.cognifide.gradle.common.net.NetUtils
@@ -88,7 +87,7 @@ class HealthChecker(val common: CommonExtension) {
 
     var failed = listOf<HealthStatus>()
 
-    @Suppress("ComplexMethod")
+    @Suppress("ComplexMethod", "LongMethod")
     fun start(verbose: Boolean = this.verbose.get(), retry: Retry = this.retry): List<HealthStatus> {
         if (checks.isEmpty()) {
             logger.info("Health checking skipped as no checks defined.")
@@ -103,17 +102,53 @@ class HealthChecker(val common: CommonExtension) {
                 common.progressCountdown(waitBefore.get())
             }
 
-            try {
-                assuranceRetry.withSleepTillEnd { no ->
-                    start(retry, verbose)
-                    increment()
-                    logger.info("Health checking passed ($no/${assuranceRetry.times})")
+            var assuranceNo = 1L
+            while (assuranceNo <= assuranceRetry.times) {
+                var attemptSuccess = false
+                var attemptExceeded = false
+
+                for (attemptNo in 1..retry.times) {
+                    message = when {
+                        failed.isNotEmpty() -> "Attempt $attemptNo/${retry.times}, Check(s) succeeded ${passed.size}/${all.size}"
+                        else -> "Attempt $attemptNo/${retry.times}"
+                    }
+                    count = assuranceNo
+
+                    all = common.parallel.map(checks) { it.perform() }.toList()
+                    passed = all.filter { it.succeed }
+                    failed = all - passed.toSet()
+
+                    if (failed.isEmpty()) {
+                        attemptSuccess = true
+                        break
+                    }
+
+                    assuranceNo = 1
+                    if (verbose) {
+                        logger.info(failed.sortedBy { it.check.name }.joinToString("\n"))
+                    }
+
+                    if (attemptNo < retry.times) {
+                        Thread.sleep(retry.delay(attemptNo))
+                    } else if (attemptNo == retry.times) {
+                        attemptExceeded = true
+                    }
                 }
-            } catch (e: HealthException) {
-                val message = "Health checking failed. Success ratio: $passedRatio:\n$allStatuses"
-                when {
-                    verbose -> throw HealthException(message)
-                    else -> logger.error(message)
+
+                if (attemptSuccess) {
+                    logger.info("Health checking passed ($assuranceNo/${assuranceRetry.times})")
+                    if (assuranceNo <= assuranceRetry.times) {
+                        Thread.sleep(assuranceRetry.delay(assuranceNo))
+                    }
+                    assuranceNo++
+                }
+                if (attemptExceeded) {
+                    val message = "Health checking failed. Success ratio: $passedRatio:\n$allStatuses"
+                    when {
+                        verbose -> throw HealthException(message)
+                        else -> logger.error(message)
+                    }
+                    break
                 }
             }
 
@@ -126,27 +161,6 @@ class HealthChecker(val common: CommonExtension) {
         }
 
         return all
-    }
-
-    private fun ProgressIndicator.start(retry: Retry, verbose: Boolean) = retry.withSleep<Unit, HealthException> { no ->
-        message = when {
-            failed.isNotEmpty() -> "Attempt $no/${retry.times}, Check(s) succeeded ${passed.size}/${all.size}"
-            else -> "Attempt $no/${retry.times}"
-        }
-
-        all = common.parallel.map(checks) { check ->
-            check.perform()
-        }.toList()
-        passed = all.filter { it.succeed }
-        failed = all - passed
-
-        if (verbose) {
-            logger.info(failed.sortedBy { it.check.name }.joinToString("\n"))
-        }
-
-        if (failed.isNotEmpty()) {
-            throw HealthException("Health checks failed. Retrying...")
-        }
     }
 
     // Shorthand methods for defining health checks
