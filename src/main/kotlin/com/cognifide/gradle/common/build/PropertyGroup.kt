@@ -14,6 +14,8 @@ class PropertyGroup(val parser: PropertyParser, val group: String, val member: S
 
     fun file(prop: String) = parser.file("$group.$member.$prop") ?: parser.file("$group.$member.$DEFAULT")
 
+    fun map(prop: String) = parser.map("$group.$member.$prop") ?: parser.map("$group.$DEFAULT.$prop")
+
     companion object {
         const val DEFAULT = "default"
     }
