@@ -5,7 +5,7 @@ import org.gradle.internal.os.OperatingSystem
 
 object OSUtil {
 
-    fun arch() = System.getProperty("os.arch")
+    fun arch() = System.getProperty("os.arch").replace("aarch64", "arm64")
 
     fun archOfHost() = if (detectRosetta()) "arm64" else arch()
 
