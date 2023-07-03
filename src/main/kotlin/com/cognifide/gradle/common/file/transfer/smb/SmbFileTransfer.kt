@@ -3,10 +3,13 @@ package com.cognifide.gradle.common.file.transfer.smb
 import com.cognifide.gradle.common.CommonExtension
 import com.cognifide.gradle.common.file.transfer.FileEntry
 import com.cognifide.gradle.common.file.transfer.ProtocolFileTransfer
-import jcifs.smb.NtlmPasswordAuthentication
+import jcifs.config.PropertyConfiguration
+import jcifs.context.BaseContext
+import jcifs.smb.NtlmPasswordAuthenticator
 import jcifs.smb.SmbFile
 import org.apache.commons.lang3.StringUtils
 import java.io.File
+import java.util.Properties
 
 @Suppress("TooGenericExceptionCaught")
 class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
@@ -101,12 +104,15 @@ class SmbFileTransfer(common: CommonExtension) : ProtocolFileTransfer(common) {
 
     fun file(dirUrl: String, fileName: String): SmbFile {
         val dirUrlNormalized = StringUtils.appendIfMissing(dirUrl, "/")
+        val properties = Properties()
+        val configuration = PropertyConfiguration(properties)
+        val context =
+            if (!user.orNull.isNullOrBlank() && !password.orNull.isNullOrBlank())
+                BaseContext(configuration).withCredentials(NtlmPasswordAuthenticator(domain.orNull, user.get(), password.get()))
+            else
+                BaseContext(configuration).withAnonymousCredentials()
 
-        return if (!user.orNull.isNullOrBlank() && !password.orNull.isNullOrBlank()) {
-            SmbFile(dirUrlNormalized, fileName, NtlmPasswordAuthentication(domain.orNull, user.get(), password.get()))
-        } else {
-            SmbFile(dirUrlNormalized, fileName)
-        }.apply { useCaches = false }
+        return SmbFile(context.get(dirUrlNormalized), fileName).apply { useCaches = false }
     }
 
     fun dir(dirUrl: String): SmbFile = file(dirUrl, "").apply {
