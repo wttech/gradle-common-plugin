@@ -60,7 +60,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.1")
 
-    implementation("org.codelibs:jcifs:1.3.18.3")
+    implementation("org.codelibs:jcifs:2.1.35")
     implementation("org.jsoup:jsoup:1.14.3")
     implementation("commons-io:commons-io:2.11.0")
     implementation("io.pebbletemplates:pebble:3.1.5")
