@@ -38,6 +38,16 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
         common.prop.string("fileTransfer.domain")?.let { set(it) }
     }
 
+    val downloadOverwrite = common.obj.boolean {
+        convention(false)
+        common.prop.boolean("fileTransfer.downloadOverwrite")?.let { set(it) }
+    }
+
+    val uploadOverwrite = common.obj.boolean {
+        convention(false)
+        common.prop.boolean("fileTransfer.uploadOverwrite")?.let { set(it) }
+    }
+
     val credentials: Pair<String, String>
         get() = if (user.orNull.isNullOrBlank() && password.orNull.isNullOrBlank())
             user.get() to password.get()
@@ -133,8 +143,11 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
      */
     fun downloadUsing(transfer: FileTransfer, dirUrl: String, fileName: String, target: File) {
         if (target.exists()) {
-            logger.info("Skipping downloading file from URL '$dirUrl/$fileName' to '$target' as of it already exists.")
-            return
+            if (!downloadOverwrite.get()) {
+                logger.info("Skipping downloading file from URL '$dirUrl/$fileName' to '$target' as of it already exists.")
+                return
+            }
+            logger.info("Downloading file from URL '$dirUrl/$fileName' overwrites existing file '$target'.")
         }
 
         target.parentFile.mkdirs()
@@ -172,8 +185,11 @@ class FileTransferManager(private val common: CommonExtension) : FileTransfer {
 
         try {
             if (stat(dirUrl, fileName) != null) { // 'stat' may be unsupported
-                logger.info("Skipping uploading file to URL '$fileUrl' as of it already exists on server.")
-                return
+                if (!uploadOverwrite.get()) {
+                    logger.info("Skipping uploading file to URL '$fileUrl' as of it already exists on server.")
+                    return
+                }
+                logger.info("Uploading file from '$source' overwrites existing file at URL '$fileUrl'.")
             }
         } catch (e: FileException) {
             logger.debug("Cannot check status of uploaded file at URL '$fileUrl'", e)
